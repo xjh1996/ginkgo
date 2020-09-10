@@ -118,7 +118,7 @@ func (reporter *JUnitReporter) SpecDidComplete(specSummary *types.SpecSummary) {
 			Message: specSummary.CapturedOutput,
 		}
 	}
-	if specSummary.State == types.SpecStateFailed || specSummary.State == types.SpecStateTimedOut || specSummary.State == types.SpecStatePanicked {
+	if specSummary.State.IsFailure() {
 		testCase.FailureMessage = &JUnitFailureMessage{
 			Type:    reporter.failureTypeForState(specSummary.State),
 			Message: failureMessage(specSummary.Failure),
@@ -167,7 +167,7 @@ func (reporter *JUnitReporter) SpecSuiteDidEnd(summary *types.SuiteSummary) {
 	if err == nil {
 		fmt.Fprintf(os.Stdout, "\nJUnit report was created: %s\n", filePath)
 	} else {
-		fmt.Fprintf(os.Stderr,"\nFailed to generate JUnit report data:\n\t%s", err.Error())
+		fmt.Fprintf(os.Stderr, "\nFailed to generate JUnit report data:\n\t%s", err.Error())
 	}
 }
 
@@ -175,8 +175,6 @@ func (reporter *JUnitReporter) failureTypeForState(state types.SpecState) string
 	switch state {
 	case types.SpecStateFailed:
 		return "Failure"
-	case types.SpecStateTimedOut:
-		return "Timeout"
 	case types.SpecStatePanicked:
 		return "Panic"
 	default:

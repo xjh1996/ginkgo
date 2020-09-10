@@ -196,9 +196,7 @@ func (aggregator *Aggregator) announceSpec(specSummary *types.SpecSummary) {
 
 	switch specSummary.State {
 	case types.SpecStatePassed:
-		if specSummary.IsMeasurement {
-			aggregator.stenographer.AnnounceSuccessfulMeasurement(specSummary, aggregator.config.Succinct)
-		} else if specSummary.RunTime.Seconds() >= aggregator.config.SlowSpecThreshold {
+		if specSummary.RunTime.Seconds() >= aggregator.config.SlowSpecThreshold {
 			aggregator.stenographer.AnnounceSuccessfulSlowSpec(specSummary, aggregator.config.Succinct)
 		} else {
 			aggregator.stenographer.AnnounceSuccessfulSpec(specSummary)
@@ -208,8 +206,6 @@ func (aggregator *Aggregator) announceSpec(specSummary *types.SpecSummary) {
 		aggregator.stenographer.AnnouncePendingSpec(specSummary, aggregator.config.NoisyPendings && !aggregator.config.Succinct)
 	case types.SpecStateSkipped:
 		aggregator.stenographer.AnnounceSkippedSpec(specSummary, aggregator.config.Succinct || !aggregator.config.NoisySkippings, aggregator.config.FullTrace)
-	case types.SpecStateTimedOut:
-		aggregator.stenographer.AnnounceSpecTimedOut(specSummary, aggregator.config.Succinct, aggregator.config.FullTrace)
 	case types.SpecStatePanicked:
 		aggregator.stenographer.AnnounceSpecPanicked(specSummary, aggregator.config.Succinct, aggregator.config.FullTrace)
 	case types.SpecStateFailed:

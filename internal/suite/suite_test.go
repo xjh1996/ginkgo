@@ -7,9 +7,6 @@ import (
 	. "github.com/onsi/ginkgo/internal/suite"
 	. "github.com/onsi/gomega"
 
-	"math/rand"
-	"time"
-
 	"github.com/onsi/ginkgo/config"
 	"github.com/onsi/ginkgo/internal/codelocation"
 	Failer "github.com/onsi/ginkgo/internal/failer"
@@ -61,30 +58,30 @@ var _ = Describe("Suite", func() {
 			focusString = ""
 
 			runOrder = make([]string, 0)
-			specSuite.SetBeforeSuiteNode(f("BeforeSuite"), codelocation.New(0), 0)
-			specSuite.PushBeforeEachNode(f("top BE"), codelocation.New(0), 0)
-			specSuite.PushJustBeforeEachNode(f("top JBE"), codelocation.New(0), 0)
-			specSuite.PushAfterEachNode(f("top AE"), codelocation.New(0), 0)
+			specSuite.SetBeforeSuiteNode(f("BeforeSuite"), codelocation.New(0))
+			specSuite.PushBeforeEachNode(f("top BE"), codelocation.New(0))
+			specSuite.PushJustBeforeEachNode(f("top JBE"), codelocation.New(0))
+			specSuite.PushAfterEachNode(f("top AE"), codelocation.New(0))
 
 			specSuite.PushContainerNode("container", func() {
-				specSuite.PushBeforeEachNode(f("BE"), codelocation.New(0), 0)
-				specSuite.PushJustBeforeEachNode(f("JBE"), codelocation.New(0), 0)
-				specSuite.PushAfterEachNode(f("AE"), codelocation.New(0), 0)
-				specSuite.PushItNode("it", f("IT"), types.FlagTypeNone, codelocation.New(0), 0)
+				specSuite.PushBeforeEachNode(f("BE"), codelocation.New(0))
+				specSuite.PushJustBeforeEachNode(f("JBE"), codelocation.New(0))
+				specSuite.PushAfterEachNode(f("AE"), codelocation.New(0))
+				specSuite.PushItNode("it", f("IT"), types.FlagTypeNone, codelocation.New(0))
 
 				specSuite.PushContainerNode("inner container", func() {
-					specSuite.PushItNode("inner it", f("inner IT"), types.FlagTypeNone, codelocation.New(0), 0)
+					specSuite.PushItNode("inner it", f("inner IT"), types.FlagTypeNone, codelocation.New(0))
 				}, types.FlagTypeNone, codelocation.New(0))
 			}, types.FlagTypeNone, codelocation.New(0))
 
 			specSuite.PushContainerNode("container 2", func() {
-				specSuite.PushBeforeEachNode(f("BE 2"), codelocation.New(0), 0)
-				specSuite.PushItNode("it 2", f("IT 2"), types.FlagTypeNone, codelocation.New(0), 0)
+				specSuite.PushBeforeEachNode(f("BE 2"), codelocation.New(0))
+				specSuite.PushItNode("it 2", f("IT 2"), types.FlagTypeNone, codelocation.New(0))
 			}, types.FlagTypeNone, codelocation.New(0))
 
-			specSuite.PushItNode("top level it", f("top IT"), types.FlagTypeNone, codelocation.New(0), 0)
+			specSuite.PushItNode("top level it", f("top IT"), types.FlagTypeNone, codelocation.New(0))
 
-			specSuite.SetAfterSuiteNode(f("AfterSuite"), codelocation.New(0), 0)
+			specSuite.SetAfterSuiteNode(f("AfterSuite"), codelocation.New(0))
 		})
 
 		JustBeforeEach(func() {
@@ -116,32 +113,12 @@ var _ = Describe("Suite", func() {
 			Ω(description.ComponentTexts).Should(Equal([]string{"Suite", "running a suite", "provides information about the current test"}))
 			Ω(description.FullTestText).Should(Equal("Suite running a suite provides information about the current test"))
 			Ω(description.TestText).Should(Equal("provides information about the current test"))
-			Ω(description.IsMeasurement).Should(BeFalse())
 			Ω(description.FileName).Should(ContainSubstring("suite_test.go"))
 			Ω(description.LineNumber).Should(BeNumerically(">", 50))
 			Ω(description.LineNumber).Should(BeNumerically("<", 150))
 			Ω(description.Failed).Should(BeFalse())
 			Ω(description.Duration).Should(BeNumerically(">", 0))
 		})
-
-		Measure("should run measurements", func(b Benchmarker) {
-			r := rand.New(rand.NewSource(time.Now().UnixNano()))
-
-			runtime := b.Time("sleeping", func() {
-				sleepTime := time.Duration(r.Float64() * 0.01 * float64(time.Second))
-				time.Sleep(sleepTime)
-			})
-			Ω(runtime.Seconds()).Should(BeNumerically("<=", 1))
-			Ω(runtime.Seconds()).Should(BeNumerically(">=", 0))
-
-			randomValue := r.Float64() * 10.0
-			b.RecordValue("random value", randomValue)
-			Ω(randomValue).Should(BeNumerically("<=", 10.0))
-			Ω(randomValue).Should(BeNumerically(">=", 0.0))
-
-			b.RecordValueWithPrecision("specific value", 123.4567, "ms", 2)
-			b.RecordValueWithPrecision("specific value", 234.5678, "ms", 2)
-		}, 10)
 
 		It("creates a node hierarchy, converts it to a spec collection, and runs it", func() {
 			Ω(runOrder).Should(Equal([]string{
@@ -156,7 +133,6 @@ var _ = Describe("Suite", func() {
 		Context("when in an AfterEach block", func() {
 			AfterEach(func() {
 				description := CurrentGinkgoTestDescription()
-				Ω(description.IsMeasurement).Should(BeFalse())
 				Ω(description.FileName).Should(ContainSubstring("suite_test.go"))
 				Ω(description.Failed).Should(BeFalse())
 				Ω(description.Duration).Should(BeNumerically(">", 0))
@@ -205,11 +181,11 @@ var _ = Describe("Suite", func() {
 
 		Context("with a programatically focused spec", func() {
 			BeforeEach(func() {
-				specSuite.PushItNode("focused it", f("focused it"), types.FlagTypeFocused, codelocation.New(0), 0)
+				specSuite.PushItNode("focused it", f("focused it"), types.FlagTypeFocused, codelocation.New(0))
 
 				specSuite.PushContainerNode("focused container", func() {
-					specSuite.PushItNode("inner focused it", f("inner focused it"), types.FlagTypeFocused, codelocation.New(0), 0)
-					specSuite.PushItNode("inner unfocused it", f("inner unfocused it"), types.FlagTypeNone, codelocation.New(0), 0)
+					specSuite.PushItNode("inner focused it", f("inner focused it"), types.FlagTypeFocused, codelocation.New(0))
+					specSuite.PushItNode("inner unfocused it", f("inner unfocused it"), types.FlagTypeNone, codelocation.New(0))
 				}, types.FlagTypeFocused, codelocation.New(0))
 
 			})
@@ -244,7 +220,7 @@ var _ = Describe("Suite", func() {
 				specSuite.PushItNode("top level it", func() {
 					location = codelocation.New(0)
 					failer.Fail("oops!", location)
-				}, types.FlagTypeNone, codelocation.New(0), 0)
+				}, types.FlagTypeNone, codelocation.New(0))
 			})
 
 			It("should return false", func() {
@@ -265,20 +241,8 @@ var _ = Describe("Suite", func() {
 			Context("when an It is nested", func() {
 				BeforeEach(func() {
 					specSuite.PushItNode("top level it", func() {
-						specSuite.PushItNode("nested it", f("oops"), types.FlagTypeNone, codelocation.New(0), 0)
-					}, types.FlagTypeNone, codelocation.New(0), 0)
-				})
-
-				It("should fail", func() {
-					Ω(fakeT.didFail).Should(BeTrue())
-				})
-			})
-
-			Context("when a Measure is nested", func() {
-				BeforeEach(func() {
-					specSuite.PushItNode("top level it", func() {
-						specSuite.PushMeasureNode("nested measure", func(Benchmarker) {}, types.FlagTypeNone, codelocation.New(0), 10)
-					}, types.FlagTypeNone, codelocation.New(0), 0)
+						specSuite.PushItNode("nested it", f("oops"), types.FlagTypeNone, codelocation.New(0))
+					}, types.FlagTypeNone, codelocation.New(0))
 				})
 
 				It("should fail", func() {
@@ -289,8 +253,8 @@ var _ = Describe("Suite", func() {
 			Context("when a BeforeEach is nested", func() {
 				BeforeEach(func() {
 					specSuite.PushItNode("top level it", func() {
-						specSuite.PushBeforeEachNode(f("nested bef"), codelocation.New(0), 0)
-					}, types.FlagTypeNone, codelocation.New(0), 0)
+						specSuite.PushBeforeEachNode(f("nested bef"), codelocation.New(0))
+					}, types.FlagTypeNone, codelocation.New(0))
 				})
 
 				It("should fail", func() {
@@ -301,8 +265,8 @@ var _ = Describe("Suite", func() {
 			Context("when a JustBeforeEach is nested", func() {
 				BeforeEach(func() {
 					specSuite.PushItNode("top level it", func() {
-						specSuite.PushJustBeforeEachNode(f("nested jbef"), codelocation.New(0), 0)
-					}, types.FlagTypeNone, codelocation.New(0), 0)
+						specSuite.PushJustBeforeEachNode(f("nested jbef"), codelocation.New(0))
+					}, types.FlagTypeNone, codelocation.New(0))
 				})
 
 				It("should fail", func() {
@@ -313,8 +277,8 @@ var _ = Describe("Suite", func() {
 			Context("when a AfterEach is nested", func() {
 				BeforeEach(func() {
 					specSuite.PushItNode("top level it", func() {
-						specSuite.PushAfterEachNode(f("nested aft"), codelocation.New(0), 0)
-					}, types.FlagTypeNone, codelocation.New(0), 0)
+						specSuite.PushAfterEachNode(f("nested aft"), codelocation.New(0))
+					}, types.FlagTypeNone, codelocation.New(0))
 				})
 
 				It("should fail", func() {
@@ -327,10 +291,10 @@ var _ = Describe("Suite", func() {
 	Describe("BeforeSuite", func() {
 		Context("when setting BeforeSuite more than once", func() {
 			It("should panic", func() {
-				specSuite.SetBeforeSuiteNode(func() {}, codelocation.New(0), 0)
+				specSuite.SetBeforeSuiteNode(func() {}, codelocation.New(0))
 
 				Ω(func() {
-					specSuite.SetBeforeSuiteNode(func() {}, codelocation.New(0), 0)
+					specSuite.SetBeforeSuiteNode(func() {}, codelocation.New(0))
 				}).Should(Panic())
 
 			})
@@ -340,10 +304,10 @@ var _ = Describe("Suite", func() {
 	Describe("AfterSuite", func() {
 		Context("when setting AfterSuite more than once", func() {
 			It("should panic", func() {
-				specSuite.SetAfterSuiteNode(func() {}, codelocation.New(0), 0)
+				specSuite.SetAfterSuiteNode(func() {}, codelocation.New(0))
 
 				Ω(func() {
-					specSuite.SetAfterSuiteNode(func() {}, codelocation.New(0), 0)
+					specSuite.SetAfterSuiteNode(func() {}, codelocation.New(0))
 				}).Should(Panic())
 			})
 		})

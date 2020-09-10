@@ -9,8 +9,6 @@ import (
 
 	"github.com/onsi/gomega/ghttp"
 
-	"time"
-
 	"github.com/onsi/ginkgo/internal/codelocation"
 	Failer "github.com/onsi/ginkgo/internal/failer"
 	"github.com/onsi/ginkgo/types"
@@ -35,8 +33,8 @@ var _ = Describe("SynchronizedBeforeSuiteNode", func() {
 		server.Close()
 	})
 
-	newNode := func(bodyA interface{}, bodyB interface{}) SuiteNode {
-		return NewSynchronizedBeforeSuiteNode(bodyA, bodyB, codeLocation, time.Millisecond, failer)
+	newNode := func(node1Body func() []byte, allNodesBody func([]byte)) SuiteNode {
+		return NewSynchronizedBeforeSuiteNode(node1Body, allNodesBody, codeLocation, failer)
 	}
 
 	Describe("when not running in parallel", func() {
@@ -105,49 +103,6 @@ var _ = Describe("SynchronizedBeforeSuiteNode", func() {
 				Ω(outcome).Should(BeFalse())
 				Ω(node.Passed()).Should(BeFalse())
 				Ω(node.Summary().State).Should(Equal(types.SpecStateFailed))
-			})
-		})
-
-		Context("when A times out", func() {
-			var ranB bool
-			BeforeEach(func() {
-				ranB = false
-				node = newNode(func(Done) []byte {
-					time.Sleep(time.Second)
-					return nil
-				}, func([]byte) {
-					ranB = true
-				})
-
-				outcome = node.Run(1, 1, server.URL())
-			})
-
-			It("should not run B", func() {
-				Ω(ranB).Should(BeFalse())
-			})
-
-			It("should report failure", func() {
-				Ω(outcome).Should(BeFalse())
-				Ω(node.Passed()).Should(BeFalse())
-				Ω(node.Summary().State).Should(Equal(types.SpecStateTimedOut))
-			})
-		})
-
-		Context("when B times out", func() {
-			BeforeEach(func() {
-				node = newNode(func() []byte {
-					return nil
-				}, func([]byte, Done) {
-					time.Sleep(time.Second)
-				})
-
-				outcome = node.Run(1, 1, server.URL())
-			})
-
-			It("should report failure", func() {
-				Ω(outcome).Should(BeFalse())
-				Ω(node.Passed()).Should(BeFalse())
-				Ω(node.Summary().State).Should(Equal(types.SpecStateTimedOut))
 			})
 		})
 	})
@@ -343,102 +298,6 @@ var _ = Describe("SynchronizedBeforeSuiteNode", func() {
 					Ω(summary.Failure.ComponentType).Should(Equal(types.SpecComponentTypeBeforeSuite))
 					Ω(summary.Failure.ComponentIndex).Should(Equal(0))
 					Ω(summary.Failure.ComponentCodeLocation).Should(Equal(codeLocation))
-				})
-			})
-		})
-	})
-
-	Describe("construction", func() {
-		Describe("the first function", func() {
-			Context("when the first function returns a byte array", func() {
-				Context("and takes nothing", func() {
-					It("should be fine", func() {
-						Ω(func() {
-							newNode(func() []byte { return nil }, func([]byte) {})
-						}).ShouldNot(Panic())
-					})
-				})
-
-				Context("and takes a done function", func() {
-					It("should be fine", func() {
-						Ω(func() {
-							newNode(func(Done) []byte { return nil }, func([]byte) {})
-						}).ShouldNot(Panic())
-					})
-				})
-
-				Context("and takes more than one thing", func() {
-					It("should panic", func() {
-						Ω(func() {
-							newNode(func(Done, Done) []byte { return nil }, func([]byte) {})
-						}).Should(Panic())
-					})
-				})
-
-				Context("and takes something else", func() {
-					It("should panic", func() {
-						Ω(func() {
-							newNode(func(bool) []byte { return nil }, func([]byte) {})
-						}).Should(Panic())
-					})
-				})
-			})
-
-			Context("when the first function does not return a byte array", func() {
-				It("should panic", func() {
-					Ω(func() {
-						newNode(func() {}, func([]byte) {})
-					}).Should(Panic())
-
-					Ω(func() {
-						newNode(func() []int { return nil }, func([]byte) {})
-					}).Should(Panic())
-				})
-			})
-		})
-
-		Describe("the second function", func() {
-			Context("when the second function takes a byte array", func() {
-				It("should be fine", func() {
-					Ω(func() {
-						newNode(func() []byte { return nil }, func([]byte) {})
-					}).ShouldNot(Panic())
-				})
-			})
-
-			Context("when it also takes a done channel", func() {
-				It("should be fine", func() {
-					Ω(func() {
-						newNode(func() []byte { return nil }, func([]byte, Done) {})
-					}).ShouldNot(Panic())
-				})
-			})
-
-			Context("if it takes anything else", func() {
-				It("should panic", func() {
-					Ω(func() {
-						newNode(func() []byte { return nil }, func([]byte, chan bool) {})
-					}).Should(Panic())
-
-					Ω(func() {
-						newNode(func() []byte { return nil }, func(string) {})
-					}).Should(Panic())
-				})
-			})
-
-			Context("if it takes nothing at all", func() {
-				It("should panic", func() {
-					Ω(func() {
-						newNode(func() []byte { return nil }, func() {})
-					}).Should(Panic())
-				})
-			})
-
-			Context("if it returns something", func() {
-				It("should panic", func() {
-					Ω(func() {
-						newNode(func() []byte { return nil }, func([]byte) []byte { return nil })
-					}).Should(Panic())
 				})
 			})
 		})

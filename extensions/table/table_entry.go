@@ -41,7 +41,7 @@ func (t TableEntry) generateIt(itBody reflect.Value) {
 	}
 
 	if t.Pending {
-		global.Suite.PushItNode(description, func() {}, types.FlagTypePending, t.codeLocation, 0)
+		global.Suite.PushItNode(description, func() {}, types.FlagTypePending, t.codeLocation)
 		return
 	}
 
@@ -51,9 +51,9 @@ func (t TableEntry) generateIt(itBody reflect.Value) {
 	}
 
 	if t.Focused {
-		global.Suite.PushItNode(description, body, types.FlagTypeFocused, t.codeLocation, global.DefaultTimeout)
+		global.Suite.PushItNode(description, body, types.FlagTypeFocused, t.codeLocation)
 	} else {
-		global.Suite.PushItNode(description, body, types.FlagTypeNone, t.codeLocation, global.DefaultTimeout)
+		global.Suite.PushItNode(description, body, types.FlagTypeNone, t.codeLocation)
 	}
 }
 

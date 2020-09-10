@@ -149,7 +149,6 @@ var _ = Describe("TeamCity Reporter", func() {
 		message string
 	}{
 		{types.SpecStateFailed, "Failure"},
-		{types.SpecStateTimedOut, "Timeout"},
 		{types.SpecStatePanicked, "Panic"},
 	}
 

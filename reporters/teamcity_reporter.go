@@ -70,7 +70,7 @@ func (reporter *TeamCityReporter) SpecDidComplete(specSummary *types.SpecSummary
 		details := escape(specSummary.CapturedOutput)
 		fmt.Fprintf(reporter.writer, "%s[testPassed name='%s' details='%s']\n", messageId, testName, details)
 	}
-	if specSummary.State == types.SpecStateFailed || specSummary.State == types.SpecStateTimedOut || specSummary.State == types.SpecStatePanicked {
+	if specSummary.State.IsFailure() {
 		message := reporter.failureMessage(specSummary.Failure)
 		details := reporter.failureDetails(specSummary.Failure)
 		fmt.Fprintf(reporter.writer, "%s[testFailed name='%s' message='%s' details='%s']\n", messageId, testName, message, details)

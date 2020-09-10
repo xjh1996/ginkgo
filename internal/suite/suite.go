@@ -3,7 +3,6 @@ package suite
 import (
 	"math/rand"
 	"net/http"
-	"time"
 
 	"github.com/onsi/ginkgo/internal/spec_iterator"
 
@@ -99,10 +98,6 @@ func (suite *Suite) generateSpecsIterator(description string, config config.Gink
 
 	specs.ApplyFocus(description, config.FocusString, config.SkipString)
 
-	if config.SkipMeasurements {
-		specs.SkipMeasurements()
-	}
-
 	var iterator spec_iterator.SpecIterator
 
 	if config.ParallelTotal > 1 {
@@ -125,32 +120,32 @@ func (suite *Suite) CurrentRunningSpecSummary() (*types.SpecSummary, bool) {
 	return suite.runner.CurrentSpecSummary()
 }
 
-func (suite *Suite) SetBeforeSuiteNode(body interface{}, codeLocation types.CodeLocation, timeout time.Duration) {
+func (suite *Suite) SetBeforeSuiteNode(body func(), codeLocation types.CodeLocation) {
 	if suite.beforeSuiteNode != nil {
 		panic("You may only call BeforeSuite once!")
 	}
-	suite.beforeSuiteNode = leafnodes.NewBeforeSuiteNode(body, codeLocation, timeout, suite.failer)
+	suite.beforeSuiteNode = leafnodes.NewBeforeSuiteNode(body, codeLocation, suite.failer)
 }
 
-func (suite *Suite) SetAfterSuiteNode(body interface{}, codeLocation types.CodeLocation, timeout time.Duration) {
+func (suite *Suite) SetAfterSuiteNode(body func(), codeLocation types.CodeLocation) {
 	if suite.afterSuiteNode != nil {
 		panic("You may only call AfterSuite once!")
 	}
-	suite.afterSuiteNode = leafnodes.NewAfterSuiteNode(body, codeLocation, timeout, suite.failer)
+	suite.afterSuiteNode = leafnodes.NewAfterSuiteNode(body, codeLocation, suite.failer)
 }
 
-func (suite *Suite) SetSynchronizedBeforeSuiteNode(bodyA interface{}, bodyB interface{}, codeLocation types.CodeLocation, timeout time.Duration) {
+func (suite *Suite) SetSynchronizedBeforeSuiteNode(node1Body func() []byte, allNodesBody func([]byte), codeLocation types.CodeLocation) {
 	if suite.beforeSuiteNode != nil {
 		panic("You may only call BeforeSuite once!")
 	}
-	suite.beforeSuiteNode = leafnodes.NewSynchronizedBeforeSuiteNode(bodyA, bodyB, codeLocation, timeout, suite.failer)
+	suite.beforeSuiteNode = leafnodes.NewSynchronizedBeforeSuiteNode(node1Body, allNodesBody, codeLocation, suite.failer)
 }
 
-func (suite *Suite) SetSynchronizedAfterSuiteNode(bodyA interface{}, bodyB interface{}, codeLocation types.CodeLocation, timeout time.Duration) {
+func (suite *Suite) SetSynchronizedAfterSuiteNode(allNodesBody func(), node1Body func(), codeLocation types.CodeLocation) {
 	if suite.afterSuiteNode != nil {
 		panic("You may only call AfterSuite once!")
 	}
-	suite.afterSuiteNode = leafnodes.NewSynchronizedAfterSuiteNode(bodyA, bodyB, codeLocation, timeout, suite.failer)
+	suite.afterSuiteNode = leafnodes.NewSynchronizedAfterSuiteNode(allNodesBody, node1Body, codeLocation, suite.failer)
 }
 
 func (suite *Suite) PushContainerNode(text string, body func(), flag types.FlagType, codeLocation types.CodeLocation) {
@@ -184,44 +179,37 @@ func (suite *Suite) PushContainerNode(text string, body func(), flag types.FlagT
 	suite.currentContainer = previousContainer
 }
 
-func (suite *Suite) PushItNode(text string, body interface{}, flag types.FlagType, codeLocation types.CodeLocation, timeout time.Duration) {
+func (suite *Suite) PushItNode(text string, body func(), flag types.FlagType, codeLocation types.CodeLocation) {
 	if suite.running {
 		suite.failer.Fail("You may only call It from within a Describe, Context or When", codeLocation)
 	}
-	suite.currentContainer.PushSubjectNode(leafnodes.NewItNode(text, body, flag, codeLocation, timeout, suite.failer, suite.containerIndex))
+	suite.currentContainer.PushSubjectNode(leafnodes.NewItNode(text, body, flag, codeLocation, suite.failer, suite.containerIndex))
 }
 
-func (suite *Suite) PushMeasureNode(text string, body interface{}, flag types.FlagType, codeLocation types.CodeLocation, samples int) {
-	if suite.running {
-		suite.failer.Fail("You may only call Measure from within a Describe, Context or When", codeLocation)
-	}
-	suite.currentContainer.PushSubjectNode(leafnodes.NewMeasureNode(text, body, flag, codeLocation, samples, suite.failer, suite.containerIndex))
-}
-
-func (suite *Suite) PushBeforeEachNode(body interface{}, codeLocation types.CodeLocation, timeout time.Duration) {
+func (suite *Suite) PushBeforeEachNode(body func(), codeLocation types.CodeLocation) {
 	if suite.running {
 		suite.failer.Fail("You may only call BeforeEach from within a Describe, Context or When", codeLocation)
 	}
-	suite.currentContainer.PushSetupNode(leafnodes.NewBeforeEachNode(body, codeLocation, timeout, suite.failer, suite.containerIndex))
+	suite.currentContainer.PushSetupNode(leafnodes.NewBeforeEachNode(body, codeLocation, suite.failer, suite.containerIndex))
 }
 
-func (suite *Suite) PushJustBeforeEachNode(body interface{}, codeLocation types.CodeLocation, timeout time.Duration) {
+func (suite *Suite) PushJustBeforeEachNode(body func(), codeLocation types.CodeLocation) {
 	if suite.running {
 		suite.failer.Fail("You may only call JustBeforeEach from within a Describe, Context or When", codeLocation)
 	}
-	suite.currentContainer.PushSetupNode(leafnodes.NewJustBeforeEachNode(body, codeLocation, timeout, suite.failer, suite.containerIndex))
+	suite.currentContainer.PushSetupNode(leafnodes.NewJustBeforeEachNode(body, codeLocation, suite.failer, suite.containerIndex))
 }
 
-func (suite *Suite) PushJustAfterEachNode(body interface{}, codeLocation types.CodeLocation, timeout time.Duration) {
+func (suite *Suite) PushJustAfterEachNode(body func(), codeLocation types.CodeLocation) {
 	if suite.running {
 		suite.failer.Fail("You may only call JustAfterEach from within a Describe or Context", codeLocation)
 	}
-	suite.currentContainer.PushSetupNode(leafnodes.NewJustAfterEachNode(body, codeLocation, timeout, suite.failer, suite.containerIndex))
+	suite.currentContainer.PushSetupNode(leafnodes.NewJustAfterEachNode(body, codeLocation, suite.failer, suite.containerIndex))
 }
 
-func (suite *Suite) PushAfterEachNode(body interface{}, codeLocation types.CodeLocation, timeout time.Duration) {
+func (suite *Suite) PushAfterEachNode(body func(), codeLocation types.CodeLocation) {
 	if suite.running {
 		suite.failer.Fail("You may only call AfterEach from within a Describe, Context or When", codeLocation)
 	}
-	suite.currentContainer.PushSetupNode(leafnodes.NewAfterEachNode(body, codeLocation, timeout, suite.failer, suite.containerIndex))
+	suite.currentContainer.PushSetupNode(leafnodes.NewAfterEachNode(body, codeLocation, suite.failer, suite.containerIndex))
 }

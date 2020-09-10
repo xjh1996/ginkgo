@@ -39,7 +39,7 @@ var _ = Describe("Spec Runner", func() {
 			if fail {
 				failer.Fail(text, codelocation.New(0))
 			}
-		}, codelocation.New(0), 0, failer)
+		}, codelocation.New(0), failer)
 	}
 
 	newAftSuite := func(text string, fail bool) leafnodes.SuiteNode {
@@ -49,7 +49,7 @@ var _ = Describe("Spec Runner", func() {
 			if fail {
 				failer.Fail(text, codelocation.New(0))
 			}
-		}, codelocation.New(0), 0, failer)
+		}, codelocation.New(0), failer)
 	}
 
 	newSpec := func(text string, flag types.FlagType, fail bool) *spec.Spec {
@@ -59,7 +59,7 @@ var _ = Describe("Spec Runner", func() {
 			if fail {
 				failer.Fail(text, codelocation.New(0))
 			}
-		}, flag, codelocation.New(0), 0, failer, 0)
+		}, flag, codelocation.New(0), failer, 0)
 
 		return spec.New(subject, []*containernode.ContainerNode{}, false)
 	}
@@ -73,13 +73,13 @@ var _ = Describe("Spec Runner", func() {
 			if runs < failures {
 				failer.Fail(text, codelocation.New(0))
 			}
-		}, flag, codelocation.New(0), 0, failer, 0)
+		}, flag, codelocation.New(0), failer, 0)
 
 		return spec.New(subject, []*containernode.ContainerNode{}, false)
 	}
 
-	newSpecWithBody := func(text string, body interface{}) *spec.Spec {
-		subject := leafnodes.NewItNode(text, body, noneFlag, codelocation.New(0), 0, failer, 0)
+	newSpecWithBody := func(text string, body func()) *spec.Spec {
+		subject := leafnodes.NewItNode(text, body, noneFlag, codelocation.New(0), failer, 0)
 
 		return spec.New(subject, []*containernode.ContainerNode{}, false)
 	}

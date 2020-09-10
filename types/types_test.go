@@ -9,7 +9,6 @@ import (
 
 var specStates = []SpecState{
 	SpecStatePassed,
-	SpecStateTimedOut,
 	SpecStatePanicked,
 	SpecStateFailed,
 	SpecStatePending,
@@ -39,7 +38,7 @@ var _ = Describe("Types", func() {
 		It("knows when it is in a failure-like state", func() {
 			verifySpecSummary(func(summary SpecSummary) bool {
 				return summary.State.IsFailure()
-			}, SpecStateTimedOut, SpecStatePanicked, SpecStateFailed)
+			}, SpecStatePanicked, SpecStateFailed)
 		})
 	})
 
@@ -47,7 +46,7 @@ var _ = Describe("Types", func() {
 		It("knows when it is in a failure-like state", func() {
 			verifySpecSummary(func(summary SpecSummary) bool {
 				return summary.HasFailureState()
-			}, SpecStateTimedOut, SpecStatePanicked, SpecStateFailed)
+			}, SpecStatePanicked, SpecStateFailed)
 		})
 
 		It("knows when it passed", func() {
@@ -68,12 +67,6 @@ var _ = Describe("Types", func() {
 			}, SpecStatePanicked)
 		})
 
-		It("knows when it has timed out", func() {
-			verifySpecSummary(func(summary SpecSummary) bool {
-				return summary.TimedOut()
-			}, SpecStateTimedOut)
-		})
-
 		It("knows when it is pending", func() {
 			verifySpecSummary(func(summary SpecSummary) bool {
 				return summary.Pending()
@@ -84,16 +77,6 @@ var _ = Describe("Types", func() {
 			verifySpecSummary(func(summary SpecSummary) bool {
 				return summary.Skipped()
 			}, SpecStateSkipped)
-		})
-	})
-
-	Describe("SpecMeasurement", func() {
-		It("knows how to format values when the precision is 0", func() {
-			Ω(SpecMeasurement{}.PrecisionFmt()).Should(Equal("%f"))
-		})
-
-		It("knows how to format the values when the precision is 3", func() {
-			Ω(SpecMeasurement{Precision: 3}.PrecisionFmt()).Should(Equal("%.3f"))
 		})
 	})
 })

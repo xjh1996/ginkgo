@@ -24,13 +24,12 @@ var _ = Describe("Flags Specs", func() {
 		return []int{strings.Index(output, "RANDOM_A"), strings.Index(output, "RANDOM_B"), strings.Index(output, "RANDOM_C")}
 	}
 
-	It("normally passes, runs measurements, prints out noisy pendings, does not randomize tests, and honors the programmatic focus", func() {
+	It("normally passes, prints out noisy pendings, does not randomize tests, and honors the programmatic focus", func() {
 		session := startGinkgo(pathToTest, "--noColor")
 		Eventually(session).Should(gexec.Exit(types.GINKGO_FOCUS_EXIT_CODE))
 		output := string(session.Out.Contents())
 
-		Ω(output).Should(ContainSubstring("Ran 3 samples:"), "has a measurement")
-		Ω(output).Should(ContainSubstring("11 Passed"))
+		Ω(output).Should(ContainSubstring("10 Passed"))
 		Ω(output).Should(ContainSubstring("0 Failed"))
 		Ω(output).Should(ContainSubstring("1 Pending"))
 		Ω(output).Should(ContainSubstring("3 Skipped"))
@@ -88,7 +87,7 @@ var _ = Describe("Flags Specs", func() {
 		Ω(output).Should(ContainSubstring("3 Passed"))
 		Ω(output).Should(ContainSubstring("0 Failed"))
 		Ω(output).Should(ContainSubstring("0 Pending"))
-		Ω(output).Should(ContainSubstring("12 Skipped"))
+		Ω(output).Should(ContainSubstring("11 Skipped"))
 	})
 
 	It("should override the programmatic focus when told to skip", func() {
@@ -99,7 +98,7 @@ var _ = Describe("Flags Specs", func() {
 		Ω(output).ShouldNot(ContainSubstring("marshmallow"))
 		Ω(output).Should(ContainSubstring("chocolate"))
 		Ω(output).Should(ContainSubstring("smores"))
-		Ω(output).Should(ContainSubstring("11 Passed"))
+		Ω(output).Should(ContainSubstring("10 Passed"))
 		Ω(output).Should(ContainSubstring("0 Failed"))
 		Ω(output).Should(ContainSubstring("1 Pending"))
 		Ω(output).Should(ContainSubstring("3 Skipped"))
@@ -123,15 +122,6 @@ var _ = Describe("Flags Specs", func() {
 
 		orders := getRandomOrders(output)
 		Ω(orders[0]).ShouldNot(BeNumerically("<", orders[1]))
-	})
-
-	It("should skip measurements when told to", func() {
-		session := startGinkgo(pathToTest, "--skipMeasurements")
-		Eventually(session).Should(gexec.Exit(types.GINKGO_FOCUS_EXIT_CODE))
-		output := string(session.Out.Contents())
-
-		Ω(output).ShouldNot(ContainSubstring("Ran 3 samples:"), "has a measurement")
-		Ω(output).Should(ContainSubstring("4 Skipped"))
 	})
 
 	It("should watch for slow specs", func() {
@@ -167,7 +157,7 @@ var _ = Describe("Flags Specs", func() {
 		output := string(session.Out.Contents())
 
 		Ω(output).Should(ContainSubstring("1 Failed"))
-		Ω(output).Should(ContainSubstring("18 Skipped"))
+		Ω(output).Should(ContainSubstring("6 Skipped"))
 	})
 
 	Context("with a flaky test", func() {
@@ -190,7 +180,7 @@ var _ = Describe("Flags Specs", func() {
 		output := string(session.Out.Contents())
 
 		Ω(output).Should(ContainSubstring("synchronous failures"))
-		Ω(output).Should(ContainSubstring("19 Specs"))
+		Ω(output).Should(ContainSubstring("7 Specs"))
 		Ω(output).Should(ContainSubstring("0 Passed"))
 		Ω(output).Should(ContainSubstring("0 Failed"))
 	})

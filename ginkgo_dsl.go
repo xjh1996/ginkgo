@@ -131,15 +131,10 @@ type GinkgoTInterface interface {
 //and a SpecSummary just before a spec begins and just after a spec ends
 type Reporter reporters.Reporter
 
-//Asynchronous specs are given a channel of the Done type.  You must close or write to the channel
-//to tell Ginkgo that your async test is done.
-type Done chan<- interface{}
-
 //GinkgoTestDescription represents the information about the current running test returned by CurrentGinkgoTestDescription
 //	FullTestText: a concatenation of ComponentTexts and the TestText
 //	ComponentTexts: a list of all texts for the Describes & Contexts leading up to the current test
-//	TestText: the text in the actual It or Measure node
-//	IsMeasurement: true if the current test is a measurement
+//	TestText: the text in the It node
 //	FileName: the name of the file containing the current test
 //	LineNumber: the line number for the current test
 //	Failed: if the current test has failed, this will be true (useful in an AfterEach)
@@ -147,8 +142,6 @@ type GinkgoTestDescription struct {
 	FullTestText   string
 	ComponentTexts []string
 	TestText       string
-
-	IsMeasurement bool
 
 	FileName   string
 	LineNumber int
@@ -170,28 +163,11 @@ func CurrentGinkgoTestDescription() GinkgoTestDescription {
 		ComponentTexts: summary.ComponentTexts[1:],
 		FullTestText:   strings.Join(summary.ComponentTexts[1:], " "),
 		TestText:       summary.ComponentTexts[len(summary.ComponentTexts)-1],
-		IsMeasurement:  summary.IsMeasurement,
 		FileName:       subjectCodeLocation.FileName,
 		LineNumber:     subjectCodeLocation.LineNumber,
 		Failed:         summary.HasFailureState(),
 		Duration:       summary.RunTime,
 	}
-}
-
-//Measurement tests receive a Benchmarker.
-//
-//You use the Time() function to time how long the passed in body function takes to run
-//You use the RecordValue() function to track arbitrary numerical measurements.
-//The RecordValueWithPrecision() function can be used alternatively to provide the unit
-//and resolution of the numeric measurement.
-//The optional info argument is passed to the test reporter and can be used to
-// provide the measurement data to a custom reporter with context.
-//
-//See http://onsi.github.io/ginkgo/#benchmark_tests for more details
-type Benchmarker interface {
-	Time(name string, body func(), info ...interface{}) (elapsedTime time.Duration)
-	RecordValue(name string, value float64, info ...interface{})
-	RecordValueWithPrecision(name string, value float64, units string, precision int, info ...interface{})
 }
 
 //RunSpecs is the entry point for the Ginkgo test runner.
@@ -288,7 +264,7 @@ func GinkgoRecover() {
 }
 
 //Describe blocks allow you to organize your specs.  A Describe block can contain any number of
-//BeforeEach, AfterEach, JustBeforeEach, It, and Measurement blocks.
+//BeforeEach, AfterEach, JustBeforeEach, and It blocks.
 //
 //In addition you can nest Describe, Context and When blocks.  Describe, Context and When blocks are functionally
 //equivalent.  The difference is purely semantic -- you typically Describe the behavior of an object
@@ -317,7 +293,7 @@ func XDescribe(text string, body func()) bool {
 }
 
 //Context blocks allow you to organize your specs.  A Context block can contain any number of
-//BeforeEach, AfterEach, JustBeforeEach, It, and Measurement blocks.
+//BeforeEach, AfterEach, JustBeforeEach, and It blocks.
 //
 //In addition you can nest Describe, Context and When blocks.  Describe, Context and When blocks are functionally
 //equivalent.  The difference is purely semantic -- you typical Describe the behavior of an object
@@ -346,7 +322,7 @@ func XContext(text string, body func()) bool {
 }
 
 //When blocks allow you to organize your specs.  A When block can contain any number of
-//BeforeEach, AfterEach, JustBeforeEach, It, and Measurement blocks.
+//BeforeEach, AfterEach, JustBeforeEach, and It blocks.
 //
 //In addition you can nest Describe, Context and When blocks.  Describe, Context and When blocks are functionally
 //equivalent.  The difference is purely semantic -- you typical Describe the behavior of an object
@@ -376,55 +352,52 @@ func XWhen(text string, body func()) bool {
 
 //It blocks contain your test code and assertions.  You cannot nest any other Ginkgo blocks
 //within an It block.
-//
-//Ginkgo will normally run It blocks synchronously.  To perform asynchronous tests, pass a
-//function that accepts a Done channel.  When you do this, you can also provide an optional timeout.
-func It(text string, body interface{}, timeout ...float64) bool {
-	global.Suite.PushItNode(text, body, types.FlagTypeNone, codelocation.New(1), parseTimeout(timeout...))
+func It(text string, body func()) bool {
+	global.Suite.PushItNode(text, body, types.FlagTypeNone, codelocation.New(1))
 	return true
 }
 
 //You can focus individual Its using FIt
-func FIt(text string, body interface{}, timeout ...float64) bool {
-	global.Suite.PushItNode(text, body, types.FlagTypeFocused, codelocation.New(1), parseTimeout(timeout...))
+func FIt(text string, body func()) bool {
+	global.Suite.PushItNode(text, body, types.FlagTypeFocused, codelocation.New(1))
 	return true
 }
 
 //You can mark Its as pending using PIt
 func PIt(text string, _ ...interface{}) bool {
-	global.Suite.PushItNode(text, func() {}, types.FlagTypePending, codelocation.New(1), 0)
+	global.Suite.PushItNode(text, func() {}, types.FlagTypePending, codelocation.New(1))
 	return true
 }
 
 //You can mark Its as pending using XIt
 func XIt(text string, _ ...interface{}) bool {
-	global.Suite.PushItNode(text, func() {}, types.FlagTypePending, codelocation.New(1), 0)
+	global.Suite.PushItNode(text, func() {}, types.FlagTypePending, codelocation.New(1))
 	return true
 }
 
 //Specify blocks are aliases for It blocks and allow for more natural wording in situations
 //which "It" does not fit into a natural sentence flow. All the same protocols apply for Specify blocks
 //which apply to It blocks.
-func Specify(text string, body interface{}, timeout ...float64) bool {
-	global.Suite.PushItNode(text, body, types.FlagTypeNone, codelocation.New(1), parseTimeout(timeout...))
+func Specify(text string, body func()) bool {
+	global.Suite.PushItNode(text, body, types.FlagTypeNone, codelocation.New(1))
 	return true
 }
 
 //You can focus individual Specifys using FSpecify
-func FSpecify(text string, body interface{}, timeout ...float64) bool {
-	global.Suite.PushItNode(text, body, types.FlagTypeFocused, codelocation.New(1), parseTimeout(timeout...))
+func FSpecify(text string, body func()) bool {
+	global.Suite.PushItNode(text, body, types.FlagTypeFocused, codelocation.New(1))
 	return true
 }
 
 //You can mark Specifys as pending using PSpecify
-func PSpecify(text string, is ...interface{}) bool {
-	global.Suite.PushItNode(text, func() {}, types.FlagTypePending, codelocation.New(1), 0)
+func PSpecify(text string, _ ...interface{}) bool {
+	global.Suite.PushItNode(text, func() {}, types.FlagTypePending, codelocation.New(1))
 	return true
 }
 
 //You can mark Specifys as pending using XSpecify
-func XSpecify(text string, is ...interface{}) bool {
-	global.Suite.PushItNode(text, func() {}, types.FlagTypePending, codelocation.New(1), 0)
+func XSpecify(text string, _ ...interface{}) bool {
+	global.Suite.PushItNode(text, func() {}, types.FlagTypePending, codelocation.New(1))
 	return true
 }
 
@@ -433,7 +406,7 @@ func XSpecify(text string, is ...interface{}) bool {
 //Generally you should try to keep your Its short and to the point.  This is not always possible, however,
 //especially in the context of integration tests that capture a particular workflow.
 //
-//By allows you to document such flows.  By must be called within a runnable node (It, BeforeEach, Measure, etc...)
+//By allows you to document such flows.  By must be called within a runnable node (It, BeforeEach, etc...)
 //By will simply log the passed in text to the GinkgoWriter.  If By is handed a function it will immediately run the function.
 func By(text string, callbacks ...func()) {
 	preamble := "\x1b[1mSTEP\x1b[0m"
@@ -449,42 +422,12 @@ func By(text string, callbacks ...func()) {
 	}
 }
 
-//Measure blocks run the passed in body function repeatedly (determined by the samples argument)
-//and accumulate metrics provided to the Benchmarker by the body function.
-//
-//The body function must have the signature:
-//	func(b Benchmarker)
-func Measure(text string, body interface{}, samples int) bool {
-	global.Suite.PushMeasureNode(text, body, types.FlagTypeNone, codelocation.New(1), samples)
-	return true
-}
-
-//You can focus individual Measures using FMeasure
-func FMeasure(text string, body interface{}, samples int) bool {
-	global.Suite.PushMeasureNode(text, body, types.FlagTypeFocused, codelocation.New(1), samples)
-	return true
-}
-
-//You can mark Measurements as pending using PMeasure
-func PMeasure(text string, _ ...interface{}) bool {
-	global.Suite.PushMeasureNode(text, func(b Benchmarker) {}, types.FlagTypePending, codelocation.New(1), 0)
-	return true
-}
-
-//You can mark Measurements as pending using XMeasure
-func XMeasure(text string, _ ...interface{}) bool {
-	global.Suite.PushMeasureNode(text, func(b Benchmarker) {}, types.FlagTypePending, codelocation.New(1), 0)
-	return true
-}
-
 //BeforeSuite blocks are run just once before any specs are run.  When running in parallel, each
 //parallel node process will call BeforeSuite.
 //
-//BeforeSuite blocks can be made asynchronous by providing a body function that accepts a Done channel
-//
 //You may only register *one* BeforeSuite handler per test suite.  You typically do so in your bootstrap file at the top level.
-func BeforeSuite(body interface{}, timeout ...float64) bool {
-	global.Suite.SetBeforeSuiteNode(body, codelocation.New(1), parseTimeout(timeout...))
+func BeforeSuite(body func()) bool {
+	global.Suite.SetBeforeSuiteNode(body, codelocation.New(1))
 	return true
 }
 
@@ -493,11 +436,9 @@ func BeforeSuite(body interface{}, timeout ...float64) bool {
 //
 //When running in parallel, each parallel node process will call AfterSuite.
 //
-//AfterSuite blocks can be made asynchronous by providing a body function that accepts a Done channel
-//
 //You may only register *one* AfterSuite handler per test suite.  You typically do so in your bootstrap file at the top level.
-func AfterSuite(body interface{}, timeout ...float64) bool {
-	global.Suite.SetAfterSuiteNode(body, codelocation.New(1), parseTimeout(timeout...))
+func AfterSuite(body func()) bool {
+	global.Suite.SetAfterSuiteNode(body, codelocation.New(1))
 	return true
 }
 
@@ -514,17 +455,9 @@ func AfterSuite(body interface{}, timeout ...float64) bool {
 //
 //	func() []byte
 //
-//or, to run asynchronously:
-//
-//	func(done Done) []byte
-//
 //The byte array returned by the first function is then passed to the second function, which has the signature:
 //
 //	func(data []byte)
-//
-//or, to run asynchronously:
-//
-//	func(data []byte, done Done)
 //
 //Here's a simple pseudo-code example that starts a shared database on Node 1 and shares the database's address with the other nodes:
 //
@@ -541,12 +474,11 @@ func AfterSuite(body interface{}, timeout ...float64) bool {
 //		err := dbClient.Connect(string(data))
 //		Ω(err).ShouldNot(HaveOccurred())
 //	})
-func SynchronizedBeforeSuite(node1Body interface{}, allNodesBody interface{}, timeout ...float64) bool {
+func SynchronizedBeforeSuite(node1Body func() []byte, allNodesBody func([]byte)) bool {
 	global.Suite.SetSynchronizedBeforeSuiteNode(
 		node1Body,
 		allNodesBody,
 		codelocation.New(1),
-		parseTimeout(timeout...),
 	)
 	return true
 }
@@ -558,8 +490,6 @@ func SynchronizedBeforeSuite(node1Body interface{}, allNodesBody interface{}, ti
 //and *only* after all other nodes have finished and exited.  This ensures that node 1, and any resources it is running, remain alive until
 //all other nodes are finished.
 //
-//Both functions have the same signature: either func() or func(done Done) to run asynchronously.
-//
 //Here's a pseudo-code example that complements that given in SynchronizedBeforeSuite.  Here, SynchronizedAfterSuite is used to tear down the shared database
 //only after all nodes have finished:
 //
@@ -568,60 +498,39 @@ func SynchronizedBeforeSuite(node1Body interface{}, allNodesBody interface{}, ti
 //	}, func() {
 //		dbRunner.Stop()
 //	})
-func SynchronizedAfterSuite(allNodesBody interface{}, node1Body interface{}, timeout ...float64) bool {
+func SynchronizedAfterSuite(allNodesBody func(), node1Body func()) bool {
 	global.Suite.SetSynchronizedAfterSuiteNode(
 		allNodesBody,
 		node1Body,
 		codelocation.New(1),
-		parseTimeout(timeout...),
 	)
 	return true
 }
 
 //BeforeEach blocks are run before It blocks.  When multiple BeforeEach blocks are defined in nested
 //Describe and Context blocks the outermost BeforeEach blocks are run first.
-//
-//Like It blocks, BeforeEach blocks can be made asynchronous by providing a body function that accepts
-//a Done channel
-func BeforeEach(body interface{}, timeout ...float64) bool {
-	global.Suite.PushBeforeEachNode(body, codelocation.New(1), parseTimeout(timeout...))
+func BeforeEach(body func()) bool {
+	global.Suite.PushBeforeEachNode(body, codelocation.New(1))
 	return true
 }
 
 //JustBeforeEach blocks are run before It blocks but *after* all BeforeEach blocks.  For more details,
 //read the [documentation](http://onsi.github.io/ginkgo/#separating_creation_and_configuration_)
-//
-//Like It blocks, BeforeEach blocks can be made asynchronous by providing a body function that accepts
-//a Done channel
-func JustBeforeEach(body interface{}, timeout ...float64) bool {
-	global.Suite.PushJustBeforeEachNode(body, codelocation.New(1), parseTimeout(timeout...))
+func JustBeforeEach(body func()) bool {
+	global.Suite.PushJustBeforeEachNode(body, codelocation.New(1))
 	return true
 }
 
 //JustAfterEach blocks are run after It blocks but *before* all AfterEach blocks.  For more details,
 //read the [documentation](http://onsi.github.io/ginkgo/#separating_creation_and_configuration_)
-//
-//Like It blocks, JustAfterEach blocks can be made asynchronous by providing a body function that accepts
-//a Done channel
-func JustAfterEach(body interface{}, timeout ...float64) bool {
-	global.Suite.PushJustAfterEachNode(body, codelocation.New(1), parseTimeout(timeout...))
+func JustAfterEach(body func()) bool {
+	global.Suite.PushJustAfterEachNode(body, codelocation.New(1))
 	return true
 }
 
 //AfterEach blocks are run after It blocks.   When multiple AfterEach blocks are defined in nested
 //Describe and Context blocks the innermost AfterEach blocks are run first.
-//
-//Like It blocks, AfterEach blocks can be made asynchronous by providing a body function that accepts
-//a Done channel
-func AfterEach(body interface{}, timeout ...float64) bool {
-	global.Suite.PushAfterEachNode(body, codelocation.New(1), parseTimeout(timeout...))
+func AfterEach(body func()) bool {
+	global.Suite.PushAfterEachNode(body, codelocation.New(1))
 	return true
-}
-
-func parseTimeout(timeout ...float64) time.Duration {
-	if len(timeout) == 0 {
-		return global.DefaultTimeout
-	} else {
-		return time.Duration(timeout[0] * float64(time.Second))
-	}
 }

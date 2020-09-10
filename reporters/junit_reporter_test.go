@@ -246,7 +246,6 @@ var _ = Describe("JUnit Reporter", func() {
 		forwardedPanic string
 	}{
 		{types.SpecStateFailed, "Failure", ""},
-		{types.SpecStateTimedOut, "Timeout", ""},
 		{types.SpecStatePanicked, "Panic", "artifical panic"},
 	}
 
