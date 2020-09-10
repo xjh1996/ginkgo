@@ -11,30 +11,30 @@ import (
 )
 
 type synchronizedAfterSuiteNode struct {
-	runnerA *runner
-	runnerB *runner
+	allNodesRunner *runner
+	node1Runner    *runner
 
 	outcome types.SpecState
 	failure types.SpecFailure
 	runTime time.Duration
 }
 
-func NewSynchronizedAfterSuiteNode(bodyA interface{}, bodyB interface{}, codeLocation types.CodeLocation, timeout time.Duration, failer *failer.Failer) SuiteNode {
+func NewSynchronizedAfterSuiteNode(allNodesBody func(), node1Body func(), codeLocation types.CodeLocation, failer *failer.Failer) SuiteNode {
 	return &synchronizedAfterSuiteNode{
-		runnerA: newRunner(bodyA, codeLocation, timeout, failer, types.SpecComponentTypeAfterSuite, 0),
-		runnerB: newRunner(bodyB, codeLocation, timeout, failer, types.SpecComponentTypeAfterSuite, 0),
+		allNodesRunner: newRunner(allNodesBody, codeLocation, failer, types.SpecComponentTypeAfterSuite, 0),
+		node1Runner:    newRunner(node1Body, codeLocation, failer, types.SpecComponentTypeAfterSuite, 0),
 	}
 }
 
 func (node *synchronizedAfterSuiteNode) Run(parallelNode int, parallelTotal int, syncHost string) bool {
-	node.outcome, node.failure = node.runnerA.run()
+	node.outcome, node.failure = node.allNodesRunner.run()
 
 	if parallelNode == 1 {
 		if parallelTotal > 1 {
 			node.waitUntilOtherNodesAreDone(syncHost)
 		}
 
-		outcome, failure := node.runnerB.run()
+		outcome, failure := node.node1Runner.run()
 
 		if node.outcome == types.SpecStatePassed {
 			node.outcome, node.failure = outcome, failure
@@ -50,8 +50,8 @@ func (node *synchronizedAfterSuiteNode) Passed() bool {
 
 func (node *synchronizedAfterSuiteNode) Summary() *types.SetupSummary {
 	return &types.SetupSummary{
-		ComponentType: node.runnerA.nodeType,
-		CodeLocation:  node.runnerA.codeLocation,
+		ComponentType: node.allNodesRunner.nodeType,
+		CodeLocation:  node.allNodesRunner.codeLocation,
 		State:         node.outcome,
 		RunTime:       node.runTime,
 		Failure:       node.failure,

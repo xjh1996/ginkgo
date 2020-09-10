@@ -17,12 +17,7 @@ var _ = Describe("Specs", func() {
 	var specs *Specs
 
 	newSpec := func(text string, flag types.FlagType) *Spec {
-		subject := leafnodes.NewItNode(text, func() {}, flag, codelocation.New(0), 0, nil, 0)
-		return New(subject, []*containernode.ContainerNode{}, false)
-	}
-
-	newMeasureSpec := func(text string, flag types.FlagType) *Spec {
-		subject := leafnodes.NewMeasureNode(text, func(Benchmarker) {}, flag, codelocation.New(0), 0, nil, 0)
+		subject := leafnodes.NewItNode(text, func() {}, flag, codelocation.New(0), nil, 0)
 		return New(subject, []*containernode.ContainerNode{}, false)
 	}
 
@@ -234,13 +229,13 @@ var _ = Describe("Specs", func() {
 	Describe("With a focused spec within a pending context and a pending spec within a focused context", func() {
 		BeforeEach(func() {
 			pendingInFocused := New(
-				leafnodes.NewItNode("PendingInFocused", func() {}, pendingFlag, codelocation.New(0), 0, nil, 0),
+				leafnodes.NewItNode("PendingInFocused", func() {}, pendingFlag, codelocation.New(0), nil, 0),
 				[]*containernode.ContainerNode{
 					containernode.New("", focusedFlag, codelocation.New(0)),
 				}, false)
 
 			focusedInPending := New(
-				leafnodes.NewItNode("FocusedInPending", func() {}, focusedFlag, codelocation.New(0), 0, nil, 0),
+				leafnodes.NewItNode("FocusedInPending", func() {}, focusedFlag, codelocation.New(0), nil, 0),
 				[]*containernode.ContainerNode{
 					containernode.New("", pendingFlag, codelocation.New(0)),
 				}, false)
@@ -258,30 +253,6 @@ var _ = Describe("Specs", func() {
 			Ω(willRunTexts(specs)).Should(Equal([]string{"A", "B"}))
 			Ω(skippedTexts(specs)).Should(BeEmpty())
 			Ω(pendingTexts(specs)).Should(ConsistOf(ContainSubstring("PendingInFocused"), ContainSubstring("FocusedInPending")))
-		})
-	})
-
-	Describe("skipping measurements", func() {
-		BeforeEach(func() {
-			specs = NewSpecs([]*Spec{
-				newSpec("A", noneFlag),
-				newSpec("B", noneFlag),
-				newSpec("C", pendingFlag),
-				newMeasureSpec("measurementA", noneFlag),
-				newMeasureSpec("measurementB", pendingFlag),
-			})
-		})
-
-		It("should skip measurements", func() {
-			Ω(willRunTexts(specs)).Should(Equal([]string{"A", "B", "measurementA"}))
-			Ω(skippedTexts(specs)).Should(BeEmpty())
-			Ω(pendingTexts(specs)).Should(Equal([]string{"C", "measurementB"}))
-
-			specs.SkipMeasurements()
-
-			Ω(willRunTexts(specs)).Should(Equal([]string{"A", "B"}))
-			Ω(skippedTexts(specs)).Should(Equal([]string{"measurementA", "measurementB"}))
-			Ω(pendingTexts(specs)).Should(Equal([]string{"C"}))
 		})
 	})
 })

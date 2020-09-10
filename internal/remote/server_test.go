@@ -68,13 +68,12 @@ var _ = Describe("Server", func() {
 		})
 
 		Describe("/SpecSuiteWillBegin", func() {
-			It("should decode and forward the Ginkgo config and suite summary", func(done Done) {
+			It("should decode and forward the Ginkgo config and suite summary", func() {
 				forwardingReporter.SpecSuiteWillBegin(config.GinkgoConfig, suiteSummary)
 				Ω(reporterA.Config).Should(Equal(config.GinkgoConfig))
 				Ω(reporterB.Config).Should(Equal(config.GinkgoConfig))
 				Ω(reporterA.BeginSummary).Should(Equal(suiteSummary))
 				Ω(reporterB.BeginSummary).Should(Equal(suiteSummary))
-				close(done)
 			})
 		})
 
@@ -95,29 +94,26 @@ var _ = Describe("Server", func() {
 		})
 
 		Describe("/SpecWillRun", func() {
-			It("should decode and forward the spec summary", func(done Done) {
+			It("should decode and forward the spec summary", func() {
 				forwardingReporter.SpecWillRun(specSummary)
 				Ω(reporterA.SpecWillRunSummaries[0]).Should(Equal(specSummary))
 				Ω(reporterB.SpecWillRunSummaries[0]).Should(Equal(specSummary))
-				close(done)
 			})
 		})
 
 		Describe("/SpecDidComplete", func() {
-			It("should decode and forward the spec summary", func(done Done) {
+			It("should decode and forward the spec summary", func() {
 				forwardingReporter.SpecDidComplete(specSummary)
 				Ω(reporterA.SpecSummaries[0]).Should(Equal(specSummary))
 				Ω(reporterB.SpecSummaries[0]).Should(Equal(specSummary))
-				close(done)
 			})
 		})
 
 		Describe("/SpecSuiteDidEnd", func() {
-			It("should decode and forward the suite summary", func(done Done) {
+			It("should decode and forward the suite summary", func() {
 				forwardingReporter.SpecSuiteDidEnd(suiteSummary)
 				Ω(reporterA.EndSummary).Should(Equal(suiteSummary))
 				Ω(reporterB.EndSummary).Should(Equal(suiteSummary))
-				close(done)
 			})
 		})
 	})

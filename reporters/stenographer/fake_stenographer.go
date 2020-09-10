@@ -113,20 +113,12 @@ func (stenographer *FakeStenographer) AnnounceSuccessfulSlowSpec(spec *types.Spe
 	stenographer.registerCall("AnnounceSuccessfulSlowSpec", spec, succinct)
 }
 
-func (stenographer *FakeStenographer) AnnounceSuccessfulMeasurement(spec *types.SpecSummary, succinct bool) {
-	stenographer.registerCall("AnnounceSuccessfulMeasurement", spec, succinct)
-}
-
 func (stenographer *FakeStenographer) AnnouncePendingSpec(spec *types.SpecSummary, noisy bool) {
 	stenographer.registerCall("AnnouncePendingSpec", spec, noisy)
 }
 
 func (stenographer *FakeStenographer) AnnounceSkippedSpec(spec *types.SpecSummary, succinct bool, fullTrace bool) {
 	stenographer.registerCall("AnnounceSkippedSpec", spec, succinct, fullTrace)
-}
-
-func (stenographer *FakeStenographer) AnnounceSpecTimedOut(spec *types.SpecSummary, succinct bool, fullTrace bool) {
-	stenographer.registerCall("AnnounceSpecTimedOut", spec, succinct, fullTrace)
 }
 
 func (stenographer *FakeStenographer) AnnounceSpecPanicked(spec *types.SpecSummary, succinct bool, fullTrace bool) {

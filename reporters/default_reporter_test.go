@@ -215,16 +215,6 @@ var _ = Describe("DefaultReporter", func() {
 				spec.State = types.SpecStatePassed
 			})
 
-			Context("When the spec was a measurement", func() {
-				BeforeEach(func() {
-					spec.IsMeasurement = true
-				})
-
-				It("should announce the measurement", func() {
-					Ω(stenographer.Calls()[0]).Should(Equal(call("AnnounceSuccessfulMeasurement", spec, false)))
-				})
-			})
-
 			Context("When the spec is slow", func() {
 				BeforeEach(func() {
 					spec.RunTime = time.Second
@@ -271,16 +261,6 @@ var _ = Describe("DefaultReporter", func() {
 
 			It("should announce the skipped spec, succinctly", func() {
 				Ω(stenographer.Calls()[0]).Should(Equal(call("AnnounceSkippedSpec", spec, true, true)))
-			})
-		})
-
-		Context("When the spec timed out", func() {
-			BeforeEach(func() {
-				spec.State = types.SpecStateTimedOut
-			})
-
-			It("should announce the timedout spec", func() {
-				Ω(stenographer.Calls()[0]).Should(Equal(call("AnnounceSpecTimedOut", spec, false, true)))
 			})
 		})
 
@@ -351,16 +331,6 @@ var _ = Describe("DefaultReporter", func() {
 					spec.State = types.SpecStatePassed
 				})
 
-				Context("When the spec was a measurement", func() {
-					BeforeEach(func() {
-						spec.IsMeasurement = true
-					})
-
-					It("should announce the measurement", func() {
-						Ω(stenographer.Calls()[0]).Should(Equal(call("AnnounceSuccessfulMeasurement", spec, true)))
-					})
-				})
-
 				Context("When the spec is slow", func() {
 					BeforeEach(func() {
 						spec.RunTime = time.Second
@@ -407,16 +377,6 @@ var _ = Describe("DefaultReporter", func() {
 
 				It("should announce the skipped spec", func() {
 					Ω(stenographer.Calls()[0]).Should(Equal(call("AnnounceSkippedSpec", spec, true, true)))
-				})
-			})
-
-			Context("When the spec timed out", func() {
-				BeforeEach(func() {
-					spec.State = types.SpecStateTimedOut
-				})
-
-				It("should announce the timedout spec", func() {
-					Ω(stenographer.Calls()[0]).Should(Equal(call("AnnounceSpecTimedOut", spec, true, true)))
 				})
 			})
 

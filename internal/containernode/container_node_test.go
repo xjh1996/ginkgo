@@ -34,12 +34,12 @@ var _ = Describe("Container Node", func() {
 
 	Describe("pushing setup nodes", func() {
 		It("can append setup nodes of various types and fetch them by type", func() {
-			befA := leafnodes.NewBeforeEachNode(func() {}, codelocation.New(0), 0, nil, 0)
-			befB := leafnodes.NewBeforeEachNode(func() {}, codelocation.New(0), 0, nil, 0)
-			aftA := leafnodes.NewAfterEachNode(func() {}, codelocation.New(0), 0, nil, 0)
-			aftB := leafnodes.NewAfterEachNode(func() {}, codelocation.New(0), 0, nil, 0)
-			jusBefA := leafnodes.NewJustBeforeEachNode(func() {}, codelocation.New(0), 0, nil, 0)
-			jusBefB := leafnodes.NewJustBeforeEachNode(func() {}, codelocation.New(0), 0, nil, 0)
+			befA := leafnodes.NewBeforeEachNode(func() {}, codelocation.New(0), nil, 0)
+			befB := leafnodes.NewBeforeEachNode(func() {}, codelocation.New(0), nil, 0)
+			aftA := leafnodes.NewAfterEachNode(func() {}, codelocation.New(0), nil, 0)
+			aftB := leafnodes.NewAfterEachNode(func() {}, codelocation.New(0), nil, 0)
+			jusBefA := leafnodes.NewJustBeforeEachNode(func() {}, codelocation.New(0), nil, 0)
+			jusBefB := leafnodes.NewJustBeforeEachNode(func() {}, codelocation.New(0), nil, 0)
 
 			container.PushSetupNode(befA)
 			container.PushSetupNode(befB)
@@ -48,7 +48,7 @@ var _ = Describe("Container Node", func() {
 			container.PushSetupNode(jusBefA)
 			container.PushSetupNode(jusBefB)
 
-			subject := leafnodes.NewItNode("subject", func() {}, types.FlagTypeNone, codelocation.New(0), 0, nil, 0)
+			subject := leafnodes.NewItNode("subject", func() {}, types.FlagTypeNone, codelocation.New(0), nil, 0)
 			container.PushSubjectNode(subject)
 
 			Ω(container.SetupNodesOfType(types.SpecComponentTypeBeforeEach)).Should(Equal([]leafnodes.BasicNode{befA, befB}))
@@ -65,11 +65,11 @@ var _ = Describe("Container Node", func() {
 		)
 
 		BeforeEach(func() {
-			itA = leafnodes.NewItNode("Banana", func() {}, types.FlagTypeNone, codelocation.New(0), 0, nil, 0)
-			itB = leafnodes.NewItNode("Apple", func() {}, types.FlagTypeNone, codelocation.New(0), 0, nil, 0)
+			itA = leafnodes.NewItNode("Banana", func() {}, types.FlagTypeNone, codelocation.New(0), nil, 0)
+			itB = leafnodes.NewItNode("Apple", func() {}, types.FlagTypeNone, codelocation.New(0), nil, 0)
 
-			innerItA = leafnodes.NewItNode("inner A", func() {}, types.FlagTypeNone, codelocation.New(0), 0, nil, 0)
-			innerItB = leafnodes.NewItNode("inner B", func() {}, types.FlagTypeNone, codelocation.New(0), 0, nil, 0)
+			innerItA = leafnodes.NewItNode("inner A", func() {}, types.FlagTypeNone, codelocation.New(0), nil, 0)
+			innerItB = leafnodes.NewItNode("inner B", func() {}, types.FlagTypeNone, codelocation.New(0), nil, 0)
 
 			innerContainer = New("Orange", types.FlagTypeNone, codelocation.New(0))
 
@@ -115,12 +115,12 @@ var _ = Describe("Container Node", func() {
 			Context("when a parent is focused *and* an inner subject is focused", func() {
 				BeforeEach(func() {
 					container = New("description text", types.FlagTypeFocused, codeLocation)
-					itA = leafnodes.NewItNode("A", func() {}, types.FlagTypeNone, codelocation.New(0), 0, nil, 0)
+					itA = leafnodes.NewItNode("A", func() {}, types.FlagTypeNone, codelocation.New(0), nil, 0)
 					container.PushSubjectNode(itA)
 
 					innerContainer = New("Orange", types.FlagTypeNone, codelocation.New(0))
 					container.PushContainerNode(innerContainer)
-					innerItA = leafnodes.NewItNode("inner A", func() {}, types.FlagTypeFocused, codelocation.New(0), 0, nil, 0)
+					innerItA = leafnodes.NewItNode("inner A", func() {}, types.FlagTypeFocused, codelocation.New(0), nil, 0)
 					innerContainer.PushSubjectNode(innerItA)
 				})
 
@@ -137,12 +137,12 @@ var _ = Describe("Container Node", func() {
 			Context("when a parent is focused *and* an inner container is focused", func() {
 				BeforeEach(func() {
 					container = New("description text", types.FlagTypeFocused, codeLocation)
-					itA = leafnodes.NewItNode("A", func() {}, types.FlagTypeNone, codelocation.New(0), 0, nil, 0)
+					itA = leafnodes.NewItNode("A", func() {}, types.FlagTypeNone, codelocation.New(0), nil, 0)
 					container.PushSubjectNode(itA)
 
 					innerContainer = New("Orange", types.FlagTypeFocused, codelocation.New(0))
 					container.PushContainerNode(innerContainer)
-					innerItA = leafnodes.NewItNode("inner A", func() {}, types.FlagTypeNone, codelocation.New(0), 0, nil, 0)
+					innerItA = leafnodes.NewItNode("inner A", func() {}, types.FlagTypeNone, codelocation.New(0), nil, 0)
 					innerContainer.PushSubjectNode(innerItA)
 				})
 
@@ -159,12 +159,12 @@ var _ = Describe("Container Node", func() {
 			Context("when a parent is pending and a child is focused", func() {
 				BeforeEach(func() {
 					container = New("description text", types.FlagTypeFocused, codeLocation)
-					itA = leafnodes.NewItNode("A", func() {}, types.FlagTypeNone, codelocation.New(0), 0, nil, 0)
+					itA = leafnodes.NewItNode("A", func() {}, types.FlagTypeNone, codelocation.New(0), nil, 0)
 					container.PushSubjectNode(itA)
 
 					innerContainer = New("Orange", types.FlagTypePending, codelocation.New(0))
 					container.PushContainerNode(innerContainer)
-					innerItA = leafnodes.NewItNode("inner A", func() {}, types.FlagTypeFocused, codelocation.New(0), 0, nil, 0)
+					innerItA = leafnodes.NewItNode("inner A", func() {}, types.FlagTypeFocused, codelocation.New(0), nil, 0)
 					innerContainer.PushSubjectNode(innerItA)
 				})
 

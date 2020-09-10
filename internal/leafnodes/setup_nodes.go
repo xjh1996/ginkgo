@@ -1,8 +1,6 @@
 package leafnodes
 
 import (
-	"time"
-
 	"github.com/onsi/ginkgo/internal/failer"
 	"github.com/onsi/ginkgo/types"
 )
@@ -23,26 +21,26 @@ func (node *SetupNode) CodeLocation() types.CodeLocation {
 	return node.runner.codeLocation
 }
 
-func NewBeforeEachNode(body interface{}, codeLocation types.CodeLocation, timeout time.Duration, failer *failer.Failer, componentIndex int) *SetupNode {
+func NewBeforeEachNode(body func(), codeLocation types.CodeLocation, failer *failer.Failer, componentIndex int) *SetupNode {
 	return &SetupNode{
-		runner: newRunner(body, codeLocation, timeout, failer, types.SpecComponentTypeBeforeEach, componentIndex),
+		runner: newRunner(body, codeLocation, failer, types.SpecComponentTypeBeforeEach, componentIndex),
 	}
 }
 
-func NewAfterEachNode(body interface{}, codeLocation types.CodeLocation, timeout time.Duration, failer *failer.Failer, componentIndex int) *SetupNode {
+func NewAfterEachNode(body func(), codeLocation types.CodeLocation, failer *failer.Failer, componentIndex int) *SetupNode {
 	return &SetupNode{
-		runner: newRunner(body, codeLocation, timeout, failer, types.SpecComponentTypeAfterEach, componentIndex),
+		runner: newRunner(body, codeLocation, failer, types.SpecComponentTypeAfterEach, componentIndex),
 	}
 }
 
-func NewJustBeforeEachNode(body interface{}, codeLocation types.CodeLocation, timeout time.Duration, failer *failer.Failer, componentIndex int) *SetupNode {
+func NewJustBeforeEachNode(body func(), codeLocation types.CodeLocation, failer *failer.Failer, componentIndex int) *SetupNode {
 	return &SetupNode{
-		runner: newRunner(body, codeLocation, timeout, failer, types.SpecComponentTypeJustBeforeEach, componentIndex),
+		runner: newRunner(body, codeLocation, failer, types.SpecComponentTypeJustBeforeEach, componentIndex),
 	}
 }
 
-func NewJustAfterEachNode(body interface{}, codeLocation types.CodeLocation, timeout time.Duration, failer *failer.Failer, componentIndex int) *SetupNode {
+func NewJustAfterEachNode(body func(), codeLocation types.CodeLocation, failer *failer.Failer, componentIndex int) *SetupNode {
 	return &SetupNode{
-		runner: newRunner(body, codeLocation, timeout, failer, types.SpecComponentTypeJustAfterEach, componentIndex),
+		runner: newRunner(body, codeLocation, failer, types.SpecComponentTypeJustAfterEach, componentIndex),
 	}
 }

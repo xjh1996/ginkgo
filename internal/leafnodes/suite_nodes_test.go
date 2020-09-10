@@ -31,7 +31,7 @@ var _ = Describe("SuiteNodes", func() {
 			BeforeEach(func() {
 				befSuite = NewBeforeSuiteNode(func() {
 					time.Sleep(10 * time.Millisecond)
-				}, codeLocation, 0, failer)
+				}, codeLocation, failer)
 				outcome = befSuite.Run(0, 0, "")
 			})
 
@@ -54,7 +54,7 @@ var _ = Describe("SuiteNodes", func() {
 			BeforeEach(func() {
 				befSuite = NewBeforeSuiteNode(func() {
 					failer.Fail("oops", innerCodeLocation)
-				}, codeLocation, 0, failer)
+				}, codeLocation, failer)
 				outcome = befSuite.Run(0, 0, "")
 			})
 
@@ -75,33 +75,11 @@ var _ = Describe("SuiteNodes", func() {
 			})
 		})
 
-		Context("when the body times out", func() {
-			BeforeEach(func() {
-				befSuite = NewBeforeSuiteNode(func(done Done) {
-				}, codeLocation, time.Millisecond, failer)
-				outcome = befSuite.Run(0, 0, "")
-			})
-
-			It("should return false when run and report as failed", func() {
-				Ω(outcome).Should(BeFalse())
-				Ω(befSuite.Passed()).Should(BeFalse())
-			})
-
-			It("should have the correct summary", func() {
-				summary := befSuite.Summary()
-				Ω(summary.State).Should(Equal(types.SpecStateTimedOut))
-				Ω(summary.Failure.ForwardedPanic).Should(BeEmpty())
-				Ω(summary.Failure.ComponentIndex).Should(Equal(0))
-				Ω(summary.Failure.ComponentType).Should(Equal(types.SpecComponentTypeBeforeSuite))
-				Ω(summary.Failure.ComponentCodeLocation).Should(Equal(codeLocation))
-			})
-		})
-
 		Context("when the body panics", func() {
 			BeforeEach(func() {
 				befSuite = NewBeforeSuiteNode(func() {
 					panic("bam")
-				}, codeLocation, 0, failer)
+				}, codeLocation, failer)
 				outcome = befSuite.Run(0, 0, "")
 			})
 
@@ -138,7 +116,7 @@ var _ = Describe("SuiteNodes", func() {
 			BeforeEach(func() {
 				aftSuite = NewAfterSuiteNode(func() {
 					time.Sleep(10 * time.Millisecond)
-				}, codeLocation, 0, failer)
+				}, codeLocation, failer)
 				outcome = aftSuite.Run(0, 0, "")
 			})
 
@@ -161,7 +139,7 @@ var _ = Describe("SuiteNodes", func() {
 			BeforeEach(func() {
 				aftSuite = NewAfterSuiteNode(func() {
 					failer.Fail("oops", innerCodeLocation)
-				}, codeLocation, 0, failer)
+				}, codeLocation, failer)
 				outcome = aftSuite.Run(0, 0, "")
 			})
 
@@ -182,33 +160,11 @@ var _ = Describe("SuiteNodes", func() {
 			})
 		})
 
-		Context("when the body times out", func() {
-			BeforeEach(func() {
-				aftSuite = NewAfterSuiteNode(func(done Done) {
-				}, codeLocation, time.Millisecond, failer)
-				outcome = aftSuite.Run(0, 0, "")
-			})
-
-			It("should return false when run and report as failed", func() {
-				Ω(outcome).Should(BeFalse())
-				Ω(aftSuite.Passed()).Should(BeFalse())
-			})
-
-			It("should have the correct summary", func() {
-				summary := aftSuite.Summary()
-				Ω(summary.State).Should(Equal(types.SpecStateTimedOut))
-				Ω(summary.Failure.ForwardedPanic).Should(BeEmpty())
-				Ω(summary.Failure.ComponentIndex).Should(Equal(0))
-				Ω(summary.Failure.ComponentType).Should(Equal(types.SpecComponentTypeAfterSuite))
-				Ω(summary.Failure.ComponentCodeLocation).Should(Equal(codeLocation))
-			})
-		})
-
 		Context("when the body panics", func() {
 			BeforeEach(func() {
 				aftSuite = NewAfterSuiteNode(func() {
 					panic("bam")
-				}, codeLocation, 0, failer)
+				}, codeLocation, failer)
 				outcome = aftSuite.Run(0, 0, "")
 			})
 

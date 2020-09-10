@@ -20,10 +20,6 @@ func init() {
 
 var _ = Describe("Testing various flags", func() {
 	FDescribe("the focused set", func() {
-		Measure("a measurement", func(b Benchmarker) {
-			b.RecordValue("a value", 3)
-		}, 3)
-
 		It("should honor -cover", func() {
 			Ω(Tested()).Should(Equal("tested"))
 		})
@@ -44,14 +40,16 @@ var _ = Describe("Testing various flags", func() {
 			})
 		})
 
-		It("should detect races", func(done Done) {
+		It("should detect races", func() {
 			var a string
+			c := make(chan interface{}, 0)
 			go func() {
 				a = "now you don't"
-				close(done)
+				close(c)
 			}()
 			a = "now you see me"
 			println(a)
+			Eventually(c).Should(BeClosed())
 		})
 
 		It("should randomize A", func() {

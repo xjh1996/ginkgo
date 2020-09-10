@@ -280,9 +280,8 @@ var _ = Describe("Aggregator", func() {
 				Ω(compositeSummary.SuiteSucceeded).Should(BeTrue())
 			})
 
-			It("should notify the channel that it succeded", func(done Done) {
-				Ω(<-result).Should(BeTrue())
-				close(done)
+			It("should notify the channel that it succeded", func() {
+				Eventually(result).Should(Receive(BeTrue()))
 			})
 		})
 
@@ -304,9 +303,8 @@ var _ = Describe("Aggregator", func() {
 				Ω(compositeSummary.SuiteSucceeded).Should(BeFalse())
 			})
 
-			It("should notify the channel that it failed", func(done Done) {
-				Ω(<-result).Should(BeFalse())
-				close(done)
+			It("should notify the channel that it failed", func() {
+				Eventually(result).Should(Receive(BeFalse()))
 			})
 		})
 	})

@@ -20,7 +20,7 @@ import (
 	"fmt"
 )
 
-const VERSION = "1.14.2"
+const VERSION = "2.0.0"
 
 type GinkgoConfigType struct {
 	RandomSeed         int64
@@ -28,7 +28,6 @@ type GinkgoConfigType struct {
 	RegexScansFilePath bool
 	FocusString        string
 	SkipString         string
-	SkipMeasurements   bool
 	FailOnPending      bool
 	FailFast           bool
 	FlakeAttempts      int
@@ -69,7 +68,6 @@ func Flags(flagSet *flag.FlagSet, prefix string, includeParallelFlags bool) {
 	prefix = processPrefix(prefix)
 	flagSet.Int64Var(&(GinkgoConfig.RandomSeed), prefix+"seed", time.Now().Unix(), "The seed used to randomize the spec suite.")
 	flagSet.BoolVar(&(GinkgoConfig.RandomizeAllSpecs), prefix+"randomizeAllSpecs", false, "If set, ginkgo will randomize all specs together.  By default, ginkgo only randomizes the top level Describe, Context and When groups.")
-	flagSet.BoolVar(&(GinkgoConfig.SkipMeasurements), prefix+"skipMeasurements", false, "If set, ginkgo will skip any measurement specs.")
 	flagSet.BoolVar(&(GinkgoConfig.FailOnPending), prefix+"failOnPending", false, "If set, ginkgo will mark the test suite as failed if any specs are pending.")
 	flagSet.BoolVar(&(GinkgoConfig.FailFast), prefix+"failFast", false, "If set, ginkgo will stop running a test suite after a failure occurs.")
 
@@ -115,10 +113,6 @@ func BuildFlagArgs(prefix string, ginkgo GinkgoConfigType, reporter DefaultRepor
 
 	if ginkgo.RandomizeAllSpecs {
 		result = append(result, fmt.Sprintf("--%srandomizeAllSpecs", prefix))
-	}
-
-	if ginkgo.SkipMeasurements {
-		result = append(result, fmt.Sprintf("--%sskipMeasurements", prefix))
 	}
 
 	if ginkgo.FailOnPending {

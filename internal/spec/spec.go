@@ -58,7 +58,7 @@ func (spec *Spec) Skip() {
 }
 
 func (spec *Spec) Failed() bool {
-	return spec.getState() == types.SpecStateFailed || spec.getState() == types.SpecStatePanicked || spec.getState() == types.SpecStateTimedOut
+	return spec.getState().IsFailure()
 }
 
 func (spec *Spec) Passed() bool {
@@ -81,10 +81,6 @@ func (spec *Spec) Focused() bool {
 	return spec.focused
 }
 
-func (spec *Spec) IsMeasurement() bool {
-	return spec.subject.Type() == types.SpecComponentTypeMeasure
-}
-
 func (spec *Spec) Summary(suiteID string) *types.SpecSummary {
 	componentTexts := make([]string, len(spec.containers)+1)
 	componentCodeLocations := make([]types.CodeLocation, len(spec.containers)+1)
@@ -103,14 +99,11 @@ func (spec *Spec) Summary(suiteID string) *types.SpecSummary {
 	}
 
 	return &types.SpecSummary{
-		IsMeasurement:          spec.IsMeasurement(),
-		NumberOfSamples:        spec.subject.Samples(),
 		ComponentTexts:         componentTexts,
 		ComponentCodeLocations: componentCodeLocations,
 		State:                  spec.getState(),
 		RunTime:                runTime,
 		Failure:                spec.failure,
-		Measurements:           spec.measurementsReport(),
 		SuiteID:                suiteID,
 	}
 }
@@ -230,18 +223,8 @@ func (spec *Spec) announceSubject(writer io.Writer, subject leafnodes.SubjectNod
 		switch subject.Type() {
 		case types.SpecComponentTypeIt:
 			nodeType = "It"
-		case types.SpecComponentTypeMeasure:
-			nodeType = "Measure"
 		}
 		s := fmt.Sprintf("[%s] %s\n  %s\n", nodeType, subject.Text(), subject.CodeLocation().String())
 		writer.Write([]byte(s))
 	}
-}
-
-func (spec *Spec) measurementsReport() map[string]*types.SpecMeasurement {
-	if !spec.IsMeasurement() || spec.Failed() {
-		return map[string]*types.SpecMeasurement{}
-	}
-
-	return spec.subject.(*leafnodes.MeasureNode).MeasurementsReport()
 }

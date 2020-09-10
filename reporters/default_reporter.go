@@ -56,9 +56,7 @@ func (reporter *DefaultReporter) SpecWillRun(specSummary *types.SpecSummary) {
 func (reporter *DefaultReporter) SpecDidComplete(specSummary *types.SpecSummary) {
 	switch specSummary.State {
 	case types.SpecStatePassed:
-		if specSummary.IsMeasurement {
-			reporter.stenographer.AnnounceSuccessfulMeasurement(specSummary, reporter.config.Succinct)
-		} else if specSummary.RunTime.Seconds() >= reporter.config.SlowSpecThreshold {
+		if specSummary.RunTime.Seconds() >= reporter.config.SlowSpecThreshold {
 			reporter.stenographer.AnnounceSuccessfulSlowSpec(specSummary, reporter.config.Succinct)
 		} else {
 			reporter.stenographer.AnnounceSuccessfulSpec(specSummary)
@@ -70,8 +68,6 @@ func (reporter *DefaultReporter) SpecDidComplete(specSummary *types.SpecSummary)
 		reporter.stenographer.AnnouncePendingSpec(specSummary, reporter.config.NoisyPendings && !reporter.config.Succinct)
 	case types.SpecStateSkipped:
 		reporter.stenographer.AnnounceSkippedSpec(specSummary, reporter.config.Succinct || !reporter.config.NoisySkippings, reporter.config.FullTrace)
-	case types.SpecStateTimedOut:
-		reporter.stenographer.AnnounceSpecTimedOut(specSummary, reporter.config.Succinct, reporter.config.FullTrace)
 	case types.SpecStatePanicked:
 		reporter.stenographer.AnnounceSpecPanicked(specSummary, reporter.config.Succinct, reporter.config.FullTrace)
 	case types.SpecStateFailed:

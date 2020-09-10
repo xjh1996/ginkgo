@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"io"
 	"runtime"
-	"strings"
 
 	"github.com/onsi/ginkgo/types"
 )
@@ -49,12 +48,10 @@ type Stenographer interface {
 
 	AnnounceSuccessfulSpec(spec *types.SpecSummary)
 	AnnounceSuccessfulSlowSpec(spec *types.SpecSummary, succinct bool)
-	AnnounceSuccessfulMeasurement(spec *types.SpecSummary, succinct bool)
 
 	AnnouncePendingSpec(spec *types.SpecSummary, noisy bool)
 	AnnounceSkippedSpec(spec *types.SpecSummary, succinct bool, fullTrace bool)
 
-	AnnounceSpecTimedOut(spec *types.SpecSummary, succinct bool, fullTrace bool)
 	AnnounceSpecPanicked(spec *types.SpecSummary, succinct bool, fullTrace bool)
 	AnnounceSpecFailed(spec *types.SpecSummary, succinct bool, fullTrace bool)
 
@@ -221,8 +218,6 @@ func (s *consoleStenographer) announceSetupFailure(name string, summary *types.S
 		message = "Failure"
 	case types.SpecStatePanicked:
 		message = "Panic"
-	case types.SpecStateTimedOut:
-		message = "Timeout"
 	}
 
 	s.println(0, s.colorize(redColor+boldStyle, "%s [%.3f seconds]", message, summary.RunTime.Seconds()))
@@ -259,15 +254,6 @@ func (s *consoleStenographer) AnnounceSuccessfulSlowSpec(spec *types.SpecSummary
 	)
 }
 
-func (s *consoleStenographer) AnnounceSuccessfulMeasurement(spec *types.SpecSummary, succinct bool) {
-	s.printBlockWithMessage(
-		s.colorize(greenColor, "%s [MEASUREMENT]", s.denoter),
-		s.measurementReport(spec, succinct),
-		spec,
-		succinct,
-	)
-}
-
 func (s *consoleStenographer) AnnouncePendingSpec(spec *types.SpecSummary, noisy bool) {
 	if noisy {
 		s.printBlockWithMessage(
@@ -297,10 +283,6 @@ func (s *consoleStenographer) AnnounceSkippedSpec(spec *types.SpecSummary, succi
 		s.printSkip(indentation, spec.Failure)
 		s.endBlock()
 	}
-}
-
-func (s *consoleStenographer) AnnounceSpecTimedOut(spec *types.SpecSummary, succinct bool, fullTrace bool) {
-	s.printSpecFailure(fmt.Sprintf("%s... Timeout", s.denoter), spec, succinct, fullTrace)
 }
 
 func (s *consoleStenographer) AnnounceSpecPanicked(spec *types.SpecSummary, succinct bool, fullTrace bool) {
@@ -334,9 +316,7 @@ func (s *consoleStenographer) SummarizeFailures(summaries []*types.SpecSummary) 
 	for _, summary := range failingSpecs {
 		s.printNewLine()
 		if summary.HasFailureState() {
-			if summary.TimedOut() {
-				s.print(0, s.colorize(redColor+boldStyle, "[Timeout...] "))
-			} else if summary.Panicked() {
+			if summary.Panicked() {
 				s.print(0, s.colorize(redColor+boldStyle, "[Panic!] "))
 			} else if summary.Failed() {
 				s.print(0, s.colorize(redColor+boldStyle, "[Fail] "))
@@ -466,8 +446,6 @@ func (s *consoleStenographer) printSpecContext(componentTexts []string, componen
 				blockType = "AfterEach"
 			case types.SpecComponentTypeIt:
 				blockType = "It"
-			case types.SpecComponentTypeMeasure:
-				blockType = "Measurement"
 			}
 			if succinct {
 				s.print(0, s.colorize(color+boldStyle, "[%s] %s ", blockType, componentTexts[i]))
@@ -504,69 +482,4 @@ func (s *consoleStenographer) printCodeLocationBlock(componentTexts []string, co
 	}
 
 	return indentation
-}
-
-func (s *consoleStenographer) orderedMeasurementKeys(measurements map[string]*types.SpecMeasurement) []string {
-	orderedKeys := make([]string, len(measurements))
-	for key, measurement := range measurements {
-		orderedKeys[measurement.Order] = key
-	}
-	return orderedKeys
-}
-
-func (s *consoleStenographer) measurementReport(spec *types.SpecSummary, succinct bool) string {
-	if len(spec.Measurements) == 0 {
-		return "Found no measurements"
-	}
-
-	message := []string{}
-	orderedKeys := s.orderedMeasurementKeys(spec.Measurements)
-
-	if succinct {
-		message = append(message, fmt.Sprintf("%s samples:", s.colorize(boldStyle, "%d", spec.NumberOfSamples)))
-		for _, key := range orderedKeys {
-			measurement := spec.Measurements[key]
-			message = append(message, fmt.Sprintf("  %s - %s: %s%s, %s: %s%s ± %s%s, %s: %s%s",
-				s.colorize(boldStyle, "%s", measurement.Name),
-				measurement.SmallestLabel,
-				s.colorize(greenColor, measurement.PrecisionFmt(), measurement.Smallest),
-				measurement.Units,
-				measurement.AverageLabel,
-				s.colorize(cyanColor, measurement.PrecisionFmt(), measurement.Average),
-				measurement.Units,
-				s.colorize(cyanColor, measurement.PrecisionFmt(), measurement.StdDeviation),
-				measurement.Units,
-				measurement.LargestLabel,
-				s.colorize(redColor, measurement.PrecisionFmt(), measurement.Largest),
-				measurement.Units,
-			))
-		}
-	} else {
-		message = append(message, fmt.Sprintf("Ran %s samples:", s.colorize(boldStyle, "%d", spec.NumberOfSamples)))
-		for _, key := range orderedKeys {
-			measurement := spec.Measurements[key]
-			info := ""
-			if measurement.Info != nil {
-				message = append(message, fmt.Sprintf("%v", measurement.Info))
-			}
-
-			message = append(message, fmt.Sprintf("%s:\n%s  %s: %s%s\n  %s: %s%s\n  %s: %s%s ± %s%s",
-				s.colorize(boldStyle, "%s", measurement.Name),
-				info,
-				measurement.SmallestLabel,
-				s.colorize(greenColor, measurement.PrecisionFmt(), measurement.Smallest),
-				measurement.Units,
-				measurement.LargestLabel,
-				s.colorize(redColor, measurement.PrecisionFmt(), measurement.Largest),
-				measurement.Units,
-				measurement.AverageLabel,
-				s.colorize(cyanColor, measurement.PrecisionFmt(), measurement.Average),
-				measurement.Units,
-				s.colorize(cyanColor, measurement.PrecisionFmt(), measurement.StdDeviation),
-				measurement.Units,
-			))
-		}
-	}
-
-	return strings.Join(message, "\n")
 }

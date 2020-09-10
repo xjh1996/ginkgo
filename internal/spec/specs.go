@@ -120,14 +120,6 @@ func (e *Specs) applyRegExpFocusAndSkip(description string, focusString string, 
 	}
 }
 
-func (e *Specs) SkipMeasurements() {
-	for _, spec := range e.specs {
-		if spec.IsMeasurement() {
-			spec.Skip()
-		}
-	}
-}
-
 //sort.Interface
 
 func (e *Specs) Len() int {

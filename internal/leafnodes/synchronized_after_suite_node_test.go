@@ -12,8 +12,6 @@ import (
 
 	"github.com/onsi/gomega/ghttp"
 
-	"time"
-
 	"github.com/onsi/ginkgo/internal/codelocation"
 	Failer "github.com/onsi/ginkgo/internal/failer"
 )
@@ -41,8 +39,8 @@ var _ = Describe("SynchronizedAfterSuiteNode", func() {
 		server.Close()
 	})
 
-	newNode := func(bodyA interface{}, bodyB interface{}) SuiteNode {
-		return NewSynchronizedAfterSuiteNode(bodyA, bodyB, codeLocation, time.Millisecond, failer)
+	newNode := func(allNodesBody func(), node1Body func()) SuiteNode {
+		return NewSynchronizedAfterSuiteNode(allNodesBody, node1Body, codeLocation, failer)
 	}
 
 	ranThing := func(thing string) {

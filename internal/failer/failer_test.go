@@ -78,22 +78,6 @@ var _ = Describe("Failer", func() {
 		})
 	})
 
-	Describe("Timeout", func() {
-		It("should handle timeouts", func() {
-			failer.Timeout(codeLocationA)
-			failure, state := failer.Drain(types.SpecComponentTypeIt, 3, codeLocationB)
-			Ω(failure).Should(Equal(types.SpecFailure{
-				Message:               "Timed out",
-				Location:              codeLocationA,
-				ForwardedPanic:        "",
-				ComponentType:         types.SpecComponentTypeIt,
-				ComponentIndex:        3,
-				ComponentCodeLocation: codeLocationB,
-			}))
-			Ω(state).Should(Equal(types.SpecStateTimedOut))
-		})
-	})
-
 	Context("when multiple failures are registered", func() {
 		BeforeEach(func() {
 			failer.Fail("something failed", codeLocationA)

@@ -18,7 +18,7 @@ var _ = Describe("SerialSpecIterator", func() {
 	var iterator *SerialIterator
 
 	newSpec := func(text string, flag types.FlagType) *spec.Spec {
-		subject := leafnodes.NewItNode(text, func() {}, flag, codelocation.New(0), 0, nil, 0)
+		subject := leafnodes.NewItNode(text, func() {}, flag, codelocation.New(0), nil, 0)
 		return spec.New(subject, []*containernode.ContainerNode{}, false)
 	}
 
