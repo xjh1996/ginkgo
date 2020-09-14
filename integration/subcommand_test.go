@@ -64,25 +64,6 @@ var _ = Describe("Subcommand", func() {
 			Ω(content).Should(ContainSubstring("\t" + `"github.com/onsi/gomega"`))
 		})
 
-		It("should generate an agouti bootstrap file when told to", func() {
-			session := startGinkgo(pkgPath, "bootstrap", "--agouti")
-			Eventually(session).Should(gexec.Exit(0))
-			output := session.Out.Contents()
-
-			Ω(output).Should(ContainSubstring("foo_suite_test.go"))
-
-			content, err := ioutil.ReadFile(filepath.Join(pkgPath, "foo_suite_test.go"))
-			Ω(err).ShouldNot(HaveOccurred())
-			Ω(content).Should(ContainSubstring("package foo_test"))
-			Ω(content).Should(ContainSubstring("func TestFoo(t *testing.T) {"))
-			Ω(content).Should(ContainSubstring("RegisterFailHandler"))
-			Ω(content).Should(ContainSubstring("RunSpecs"))
-
-			Ω(content).Should(ContainSubstring("\t" + `. "github.com/onsi/ginkgo"`))
-			Ω(content).Should(ContainSubstring("\t" + `. "github.com/onsi/gomega"`))
-			Ω(content).Should(ContainSubstring("\t" + `"github.com/sclevine/agouti"`))
-		})
-
 		It("should generate a bootstrap file using a template when told to", func() {
 			templateFile := filepath.Join(pkgPath, ".bootstrap")
 			ioutil.WriteFile(templateFile, []byte(`package {{.Package}}
@@ -285,25 +266,6 @@ var _ = Describe("Subcommand", func() {
 				Ω(content).Should(ContainSubstring("package foo_bar_test"))
 				Ω(content).ShouldNot(ContainSubstring("\t" + `. "github.com/onsi/ginkgo"`))
 				Ω(content).ShouldNot(ContainSubstring("\t" + `. "github.com/onsi/gomega"`))
-			})
-		})
-
-		Context("with agouti", func() {
-			It("should generate an agouti test file", func() {
-				session := startGinkgo(pkgPath, "generate", "--agouti")
-				Eventually(session).Should(gexec.Exit(0))
-				output := session.Out.Contents()
-
-				Ω(output).Should(ContainSubstring("foo_bar_test.go"))
-
-				content, err := ioutil.ReadFile(filepath.Join(pkgPath, "foo_bar_test.go"))
-				Ω(err).ShouldNot(HaveOccurred())
-				Ω(content).Should(ContainSubstring("package foo_bar_test"))
-				Ω(content).Should(ContainSubstring("\t" + `. "github.com/onsi/ginkgo"`))
-				Ω(content).Should(ContainSubstring("\t" + `. "github.com/onsi/gomega"`))
-				Ω(content).Should(ContainSubstring("\t" + `. "github.com/sclevine/agouti/matchers"`))
-				Ω(content).Should(ContainSubstring("\t" + `"github.com/sclevine/agouti"`))
-				Ω(content).Should(ContainSubstring("page, err = agoutiDriver.NewPage()"))
 			})
 		})
 	})
