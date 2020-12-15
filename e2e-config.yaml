@@ -1,0 +1,40 @@
+# Path to the kubeconfig file that connects to k8s apiserver.
+kube-config: "~/.kube/config"
+
+# The address of a test cluster, it always like 192.168.129.30:6060.
+baseurl: 172.0.0.1:6060
+shceme: http
+# The ID of test cluster.
+cluster: compass-stack
+
+# preset resource
+# If admin-tenant, admin-user and admin-password are not right, testcases will be fail in prepare phase.
+# If tenant, password and password are not right, test framework will create right ones.
+tenant: test
+user: admin
+password: Pwd123456
+admin-tenant: sys-tenant
+admin-user: admin
+admin-password: Pwd123456
+
+# storage
+# If set true, must input a existed storageclass or storage-info. Storage-info is used to
+# create a stroage service in the plateform.
+storage-enable: false
+storageclass:
+storage-info:
+
+# cargo
+# If set true, must input a available cargo-host service or cargo-info.
+cargo-enable: false
+cargo-host:
+
+# cicd
+# If set true, the namespace of CICD will be created. If there is no existing cyclone
+# namespace, a specified namespace will be created.
+cicd-enable: false
+
+# elastic
+# If set true, must input elastic info.
+elastic-enable: false
+elastic-address:
