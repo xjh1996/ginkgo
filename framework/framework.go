@@ -32,10 +32,10 @@ type Framework struct {
 	ClientSet                *client.BaseClientType // return backend clientset
 
 	// cluster info
-	RestClient      client.User
-	AdminRestClient client.User
-	ClusterID       string
-	PresetResource  e2econfig.PresetCompassResource
+	APIClient      client.User
+	AdminAPIClient client.User
+	ClusterID      string
+	PresetResource e2econfig.PresetCompassResource
 
 	skipNamespaceCreation    bool            // Whether to skip creating a namespace
 	Namespace                *v1.Namespace   // Every test has at least one namespace unless creation is skipped
@@ -66,8 +66,8 @@ func NewFramework(baseName string, skipK8sClientsetCreation, skipNamespaceCreati
 func (f *Framework) BeforeEach() {
 	f.ClusterID = e2econfig.Context.ClusterID
 	f.PresetResource = e2econfig.Context.PresetCompassResource
-	f.RestClient = client.NewAPIClient(f.PresetResource.Auth.User, f.PresetResource.Auth.Password)
-	f.AdminRestClient = client.NewAPIClient(f.PresetResource.Auth.AdminUser, f.PresetResource.Auth.Password)
+	f.APIClient = client.NewAPIClient(f.PresetResource.Auth.User, f.PresetResource.Auth.Password)
+	f.AdminAPIClient = client.NewAPIClient(f.PresetResource.Auth.AdminUser, f.PresetResource.Auth.Password)
 	f.ClientSet = client.BaseClient
 
 	if !f.skipNamespaceCreation {
@@ -85,7 +85,7 @@ func (f *Framework) BeforeEach() {
 
 // CreateNamespace creates a namespace for e2e testing.
 func (f *Framework) CreateNamespace(metadate *auth.NamespceMetadate) (*v1.Namespace, error) {
-	ns, err := util.CreateTestingNS(f.BaseName, f.ClusterID, f.PresetResource.Auth.TenantID, metadate, f.RestClient)
+	ns, err := util.CreateTestingNS(f.BaseName, f.ClusterID, f.PresetResource.Auth.TenantID, metadate, f.APIClient)
 	f.AddNamespacesToDelete(ns)
 	return ns, err
 }
@@ -114,7 +114,7 @@ func (f *Framework) AfterEach() {
 			for _, ns := range f.namespacesToDelete {
 				ginkgo.By(fmt.Sprintf("Destroying namespace %q for this suite.", ns.Name))
 				// TODO 删除分区
-				if _, err := f.RestClient.Auth(); err != nil {
+				if _, err := f.APIClient.Auth(); err != nil {
 					//if !apierrors.IsNotFound(err) {
 					//	nsDeletionErrors[ns.Name] = err
 					//} else {
