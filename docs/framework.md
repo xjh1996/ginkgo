@@ -36,8 +36,8 @@ type Framework struct {
 	UniqueName string
 
 	ClientSet         *client.BaseClientType          // 后端所有可用 client，含有 kubernetes 和 containeros clientset
-	RestClient        Client.User                     // 平台测试账户 api client
-	AdminRestClient   Client.User                     // 平台管理员账户 api client
+	APIClient        Client.User                      // 平台测试账户 api client
+	AdminAPIClient   Client.User                      // 平台管理员账户 api client
 	ClusterID         string                          // 测试集群 ID
 	PresetResource    e2econfig.PresetCompassResource // 平台预置资源
 	Namespace         *v1.Namespace                   // 框架预置的分区资源，不创建时为 nil
