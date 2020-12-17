@@ -39,19 +39,10 @@ type BitPRCommit struct {
 	ToRef   BitbucketRef `json:"toRef"`
 }
 
-const (
-	BitbucketServer = "http://192.168.130.29:7990"
-	BitbucketToken  = "Mjg2MDE3NDIzMzI3OuCRJ/bgsVe6pVmKXHrXCHZXA3HK"
-	projectKey      = "CPPDEM"
-	initName        = "cntest"
-	commitID        = "e1c2bdbb1f152b33c65805df84a8976890e2e5ed"
-	repo            = "cppdemo"
-)
-
 //TODO 完成 Bitbucket Branch Push 触发
 
 //完成 Bitbucket Tag 触发
-func BitbucketTag() {
+func BitbucketTag(commitID, BitbucketToken, BitbucketServer, projectKey, repo, initName string) error {
 	url := fmt.Sprintf("%s/rest/api/1.0/projects/%s/repos/%s/tags", BitbucketServer, projectKey, repo)
 	method := "POST"
 	nameNew := fmt.Sprintf("%s%d", initName, random())
@@ -66,24 +57,25 @@ func BitbucketTag() {
 	req, err := http.NewRequest(method, url, bytes.NewReader(bodyJson))
 
 	if err != nil {
-		logger.Failf("%v", err)
+		return err
 	}
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Authorization", "Bearer "+BitbucketToken)
 
 	res, err := client.Do(req)
 	if err != nil {
-		logger.Failf("%v", err)
+		return err
 	}
 	defer res.Body.Close()
 	body, _ := ioutil.ReadAll(res.Body)
 	if body != nil {
 		logger.Infof("创建Tag成功")
 	}
+	return nil
 }
 
 //完成 Bitbucket PR Commit 触发
-func BitbucketPRCommit() {
+func BitbucketPRCommit(repo, projectKey, BitbucketToken, BitbucketServer, initName string) error {
 	url := fmt.Sprintf("%s/rest/api/1.0/projects/%s/repos/%s/pull-requests/", BitbucketServer, projectKey, repo)
 	method := "POST"
 	nameNew := fmt.Sprintf("%s%d", initName, random())
@@ -119,25 +111,29 @@ func BitbucketPRCommit() {
 	req, err := http.NewRequest(method, url, bytes.NewReader(bodyJson))
 
 	if err != nil {
-		logger.Failf("%v", err)
+		return err
 	}
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Authorization", "Bearer "+BitbucketToken)
 
 	res, err := client.Do(req)
 	if err != nil {
-		logger.Failf("%v", err)
+		return err
 	}
 	defer res.Body.Close()
 	body, _ := ioutil.ReadAll(res.Body)
 	if body != nil {
 		logger.Infof("创建PR成功")
 	}
-	BitbucketDelPR(string(body)[6:8]) //TODO 后续优化成正则匹配
+	err = BitbucketDelPR(string(body)[6:8], BitbucketToken, BitbucketServer, projectKey, repo) //TODO 后续优化成正则匹配
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 //完成 Bitbucket PR Comment 触发
-func BitbucketPRComment() {
+func BitbucketPRComment(BitbucketToken, BitbucketServer, projectKey, repo string) error {
 	url := fmt.Sprintf("%s/rest/api/1.0/projects/%s/repos/%s/pull-requests/23/comments", BitbucketServer, projectKey, repo)
 	method := "POST"
 
@@ -147,24 +143,25 @@ func BitbucketPRComment() {
 	req, err := http.NewRequest(method, url, payload)
 
 	if err != nil {
-		logger.Failf("%v", err)
+		return err
 	}
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Authorization", "Bearer "+BitbucketToken)
 
 	res, err := client.Do(req)
 	if err != nil {
-		logger.Failf("%v", err)
+		return err
 	}
 	defer res.Body.Close()
 	body, _ := ioutil.ReadAll(res.Body)
 	if body != nil {
 		logger.Infof("创建PR Comment成功")
 	}
+	return nil
 }
 
 //完成 Bitbucket PR 的删除
-func BitbucketDelPR(id string) {
+func BitbucketDelPR(id, BitbucketToken, BitbucketServer, projectKey, repo string) error {
 	url := fmt.Sprintf("%s/rest/api/1.0/projects/%s/repos/%s/pull-requests/%s", BitbucketServer, projectKey, repo, id)
 	method := "DELETE"
 
@@ -174,18 +171,20 @@ func BitbucketDelPR(id string) {
 	req, err := http.NewRequest(method, url, payload)
 
 	if err != nil {
-		logger.Failf("%v", err)
+		return err
 	}
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Authorization", "Bearer "+BitbucketToken)
 
 	res, err := client.Do(req)
 	if err != nil {
-		logger.Failf("%v", err)
+		return err
 	}
 	defer res.Body.Close()
 	body, _ := ioutil.ReadAll(res.Body)
 	if body != nil {
 		logger.Infof("删除PR成功")
 	}
+
+	return nil
 }

@@ -3,23 +3,11 @@ package devops
 import (
 	"crypto/rand"
 
-	"github.com/caicloud/nubela/logger"
-
 	"github.com/xanzy/go-gitlab"
 
 	"math/big"
 	"net/http"
 	"strconv"
-)
-
-const (
-	gitLabServer = "http://192.168.130.29:81"
-	v4APIVersion = "v4"
-	pid          = 37
-	branch       = "master"
-	name         = "cntest"
-	gitLabRepo   = "192.168.130.29:81/fufu/test/blob/master/"
-	gitLabToken  = "c5o6YxuraCcrBtiAgGW4"
 )
 
 func random() int64 {
@@ -28,14 +16,14 @@ func random() int64 {
 }
 
 //完成 Gitlab Tag 自动触发
-func GitlabTag() {
+func GitlabTag(name, gitLabToken, gitLabServer, v4APIVersion, branch string, pid int) error {
 	//GO文档https://godoc.org/github.com/xanzy/go-gitlab
 	//API文档https://docs.gitlab.com/ee/api
 	nameNew := name + strconv.FormatInt(random(), 10)
 	httpClient := &http.Client{}
 	git, err := gitlab.NewClient(gitLabToken, gitlab.WithHTTPClient(httpClient), gitlab.WithBaseURL(gitLabServer+"/api/"+v4APIVersion))
 	if err != nil {
-		logger.Failf("v", err)
+		return err
 	}
 
 	//tags := &gitlab.ListTagsOptions{}
@@ -50,26 +38,23 @@ func GitlabTag() {
 	}
 	_, _, err = git.Tags.CreateTag(pid, creTag)
 	if err != nil {
-		logger.Failf("%v", err)
-	} else {
-		logger.Infof("创建Tag成功")
+		return err
 	}
 
 	_, err = git.Tags.DeleteTag(pid, nameNew)
 	if err == nil {
-		logger.Infof("删除Tag成功")
-	} else {
-		logger.Errorf("删除Tag失败")
+		return err
 	}
+	return nil
 }
 
 //完成 Gitlab Branch Push 触发
-func GitlabBranchPush() {
+func GitlabBranchPush(name, gitLabToken, gitLabServer, v4APIVersion, branch string, pid int) error {
 	nameNew := name + strconv.FormatInt(random(), 10)
 	httpClient := &http.Client{}
 	git, err := gitlab.NewClient(gitLabToken, gitlab.WithHTTPClient(httpClient), gitlab.WithBaseURL(gitLabServer+"/api/"+v4APIVersion))
 	if err != nil {
-		logger.Failf("v", err)
+		return err
 	}
 
 	//TODO Branch Push触发
@@ -80,9 +65,7 @@ func GitlabBranchPush() {
 	}
 	_, _, err = git.RepositoryFiles.CreateFile(pid, nameNew, creFile)
 	if err != nil {
-		logger.Failf("%v", err)
-	} else {
-		logger.Infof("创建File成功")
+		return err
 	}
 
 	delFile := &gitlab.DeleteFileOptions{
@@ -91,19 +74,18 @@ func GitlabBranchPush() {
 	}
 	_, err = git.RepositoryFiles.DeleteFile(pid, nameNew, delFile)
 	if err == nil {
-		logger.Infof("删除File成功")
-	} else {
-		logger.Errorf("删除File失败")
+		return err
 	}
+	return nil
 }
 
 //完成 Gitlab PR Commit 触发
-func GitlabPRCommit() {
+func GitlabPRCommit(name, gitLabToken, gitLabServer, v4APIVersion, branch, gitLabRepo string, pid int) error {
 	nameNew := name + strconv.FormatInt(random(), 10)
 	httpClient := &http.Client{}
 	git, err := gitlab.NewClient(gitLabToken, gitlab.WithHTTPClient(httpClient), gitlab.WithBaseURL(gitLabServer+"/api/"+v4APIVersion))
 	if err != nil {
-		logger.Failf("v", err)
+		return err
 	}
 
 	//TODO PR Commit触发
@@ -121,18 +103,17 @@ func GitlabPRCommit() {
 	}
 	_, _, err = git.Commits.CreateCommit(pid, creCommit)
 	if err != nil {
-		logger.Failf("%v", err)
-	} else {
-		logger.Infof("创建Commit成功")
+		return err
 	}
+	return nil
 }
 
 //完成 Gitlab PR Comment 触发
-func GitlabPRComment() {
+func GitlabPRComment(name, gitLabToken, gitLabServer, v4APIVersion string, pid int) error {
 	httpClient := &http.Client{}
 	git, err := gitlab.NewClient(gitLabToken, gitlab.WithHTTPClient(httpClient), gitlab.WithBaseURL(gitLabServer+"/api/"+v4APIVersion))
 	if err != nil {
-		logger.Failf("v", err)
+		return err
 	}
 
 	//getPR := &gitlab.GetMergeRequestsOptions{}
@@ -145,8 +126,7 @@ func GitlabPRComment() {
 	}
 	_, _, err = git.Discussions.CreateMergeRequestDiscussion(pid, 1, creComment)
 	if err != nil {
-		logger.Failf("%v", err)
-	} else {
-		logger.Infof("创建Comment成功")
+		return err
 	}
+	return nil
 }
