@@ -12,9 +12,6 @@ const Scheme = "http"
 type ContextType struct {
 	*commonconfig.TestContextType
 
-	BaseUrl string
-	Scheme  string
-
 	// preset default resource, PresetResourceRaw is from configuration file.
 	ClusterID             string
 	PresetResourceRaw     PresetResourceRaw
