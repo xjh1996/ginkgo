@@ -3,19 +3,21 @@ module github.com/caicloud/zeus
 go 1.15
 
 require (
-	github.com/caicloud/app v0.0.0-20201214102315-9cf375c41ea5
-	github.com/caicloud/cargo-server v0.0.0-20201214095028-bcb03a7a8fe2
-	github.com/caicloud/containeros v1.0.0-alpha.1.0.20201214055653-3fd25271b910
+	github.com/caicloud/app v1.0.0-alpha.1
+	github.com/caicloud/cargo-server v0.1.0-alpha
+	github.com/caicloud/containeros v1.0.0-alpha.2
 	github.com/caicloud/nirvana v0.3.0-rc.3
-	github.com/caicloud/nubela v0.0.0-20201214094516-041195f0fe70
-	github.com/caicloud/pipeline v0.0.0-20201214105434-1cfdcc4ed9be
+	github.com/caicloud/nubela v0.0.0-20201220040806-ec2949dc414c
+	github.com/caicloud/pipeline v0.1.0-alpha.1
 	github.com/go-test/deep v1.0.7 // indirect
+	github.com/google/go-github v17.0.0+incompatible
 	github.com/google/uuid v1.1.2 // indirect
 	github.com/imdario/mergo v0.3.11 // indirect
 	github.com/kr/pretty v0.2.1 // indirect
 	github.com/onsi/ginkgo v1.14.0
 	github.com/onsi/gomega v1.10.1
 	github.com/xanzy/go-gitlab v0.28.0
+	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	k8s.io/api v0.19.2
 	k8s.io/apimachinery v0.19.2
 	k8s.io/client-go v12.0.0+incompatible
