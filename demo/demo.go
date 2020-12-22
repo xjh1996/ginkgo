@@ -5,18 +5,38 @@ import (
 	"fmt"
 	"net/http"
 
+	commonconfig "github.com/caicloud/nubela/config"
 	"github.com/caicloud/nubela/expect"
 	"github.com/caicloud/nubela/logger"
 	"github.com/caicloud/zeus/framework"
 	"github.com/caicloud/zeus/framework/config"
-	"github.com/onsi/ginkgo"
-	"github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/tools/clientcmd"
+
+	"github.com/onsi/ginkgo"
+	"github.com/onsi/gomega"
 )
+
+var webInfo struct {
+	BaseUrl string `default:"baidu.com" usage:"url to test communication"`
+	Sheme   string `default:"http" usage:"transfer protocol"`
+	User    user
+}
+
+type user struct {
+	Name     string `default:"admin" usage:"user to login"`
+	Password string `default:"pwd123456" usage:"password of this user"`
+}
+
+// in config file, the parameter is setting as
+// demo.web.baseurl (lower case)
+// demo.web.sheme
+// demo.web.user.name
+// demo.web.user.password
+var _ = commonconfig.AddOptions(&webInfo, "demo.web")
 
 var _ = SIGDescribe("无状态服务基础部署", func() {
 	//var k8scl clientset.Interface
@@ -60,8 +80,8 @@ func testBasicDeployment(f *framework.Framework) {
 	logger.Infof("deployment status: %v", k8sDeployment.Status.Conditions)
 
 	//check 3： 业务层面检查
-	url := "http://baidu.com" //  从业务资源获取
-	gomega.Expect(testConnection(url)).Should(gomega.HaveHTTPStatus(http.StatusOK), "服务 nodeport 类型 service %s 无法通信", url)
+	url := fmt.Sprintf("%s://%s", webInfo.Sheme, webInfo.BaseUrl)
+	gomega.Expect(testConnection(url)).Should(gomega.HaveHTTPStatus(http.StatusOK), "nodeport 类型的 service (%s) 无法通信", url)
 
 	/*
 		获取 crd 的临时解决方案

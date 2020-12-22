@@ -38,3 +38,7 @@ cicd-enable: false
 # If set true, must input elastic info.
 elastic-enable: false
 elastic-address:
+
+# testcase settings
+# demo.web.baseurl: test.io
+# demo.web.user.name: test

@@ -25,6 +25,21 @@ import (
 // also use it instead of directly adding to the global command line.
 var Flags = flag.NewFlagSet("", flag.ContinueOnError)
 
+// CopyFlags ensures that all flags that are defined in the source flag
+// set appear in the target flag set as if they had been defined there
+// directly. From the flag package it inherits the behavior that there
+// is a panic if the target already contains a flag from the source.
+// Here, it registers settings of testcases into global state.
+func CopyFlags(source *flag.FlagSet, target *flag.FlagSet) {
+	source.VisitAll(func(flag *flag.Flag) {
+		// We don't need to copy flag.DefValue. The original
+		// default (from, say, flag.String) was stored in
+		// the value and gets extracted by Var for the help
+		// message.
+		target.Var(flag.Value, flag.Name, flag.Usage)
+	})
+}
+
 // AddOptions analyzes the options value and creates the necessary
 // flags to populate it.
 //
@@ -69,7 +84,7 @@ func addStructFields(flags *flag.FlagSet, structType reflect.Type, structValue r
 			name = prefix + "." + name
 		}
 		if structField.PkgPath != "" {
-			panic(fmt.Sprintf("struct entry should %q not exported, please make it to lower case", name))
+			panic(fmt.Sprintf("struct entry %q not exported, please make %q starts with an uppercase letter", name, structField.Name))
 		}
 		ptr := addr.Interface()
 		if structField.Anonymous {

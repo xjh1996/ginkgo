@@ -3,11 +3,12 @@ module github.com/caicloud/zeus
 go 1.15
 
 require (
+	github.com/caicloud/api v0.0.0-20201203122721-ef27bd38a552
 	github.com/caicloud/app v1.0.0-alpha.1
 	github.com/caicloud/cargo-server v0.1.0-alpha
 	github.com/caicloud/containeros v1.0.0-alpha.2
 	github.com/caicloud/nirvana v0.3.0-rc.3
-	github.com/caicloud/nubela v0.0.0-20201220040806-ec2949dc414c
+	github.com/caicloud/nubela v0.0.0-20201222075559-0c186fee2d4f
 	github.com/caicloud/pipeline v0.1.0-alpha.1
 	github.com/go-test/deep v1.0.7 // indirect
 	github.com/google/go-github v17.0.0+incompatible

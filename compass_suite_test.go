@@ -22,6 +22,7 @@ var viperConfig = flag.String("config", "e2e-config.yaml", "The name of a viper 
 
 // handleFlags sets up all flags and parses the command line.
 func handleFlags() {
+	commonconfig.CopyFlags(commonconfig.Flags, flag.CommandLine)
 	config.RegisterFlags(flag.CommandLine)
 	flag.Parse()
 }

@@ -1,6 +1,7 @@
 # github.com/beorn7/perks v1.0.1
 github.com/beorn7/perks/quantile
 # github.com/caicloud/api v0.0.0-20201203122721-ef27bd38a552
+## explicit
 github.com/caicloud/api/meta/v1
 # github.com/caicloud/app v1.0.0-alpha.1
 ## explicit
@@ -47,7 +48,7 @@ github.com/caicloud/nirvana/rest
 github.com/caicloud/nirvana/service
 github.com/caicloud/nirvana/service/executor
 github.com/caicloud/nirvana/service/rest/router
-# github.com/caicloud/nubela v0.0.0-20201220040806-ec2949dc414c
+# github.com/caicloud/nubela v0.0.0-20201222075559-0c186fee2d4f
 ## explicit
 github.com/caicloud/nubela/baseclient
 github.com/caicloud/nubela/config
