@@ -30,21 +30,21 @@ func NewConfigMap(name, namespace, key, value string) *types.ConfigMap {
 	}
 }
 
-func NewConfigGetOptions(clustername, namespace, name string) types.ConfigMapGetOption {
+func NewConfigGetOptions(clusterName, namespace, name string) types.ConfigMapGetOption {
 	return types.ConfigMapGetOption{
 		Cluster: types.Cluster{
-			ClusterName: clustername,
-			Namespace:   namespace,
+			ClusterName: clusterName,
+			Namespace:   NS4Auth(clusterName, namespace),
 			Name:        name,
 		},
 	}
 }
 
-func NewConfigDeleteOptions(clustername, namespace, name string) types.ConfigMapDeleteOption {
+func NewConfigDeleteOptions(clusterName, namespace, name string) types.ConfigMapDeleteOption {
 	return types.ConfigMapDeleteOption{
 		Cluster: types.Cluster{
-			ClusterName: clustername,
-			Namespace:   namespace,
+			ClusterName: clusterName,
+			Namespace:   NS4Auth(clusterName, namespace),
 			Name:        name,
 		},
 	}
@@ -70,10 +70,10 @@ func NewUpdateConfigMap(name, namespace, key, value string) *types.ConfigMap {
 	}
 }
 
-func NewListOptions(clustername, namespace string) types.ConfigMapListOption {
+func NewListOptions(clusterName, namespace string) types.ConfigMapListOption {
 	return types.ConfigMapListOption{
 		Cluster: types.Cluster{
-			ClusterName: clustername,
+			ClusterName: clusterName,
 			Namespace:   namespace,
 		},
 	}

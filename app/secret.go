@@ -36,14 +36,15 @@ func testCRUDSecret(f *framework.Framework) {
 
 	a, err := f.APIClient.App()
 	expect.NoError(err, "App Client Build Failed")
+	secret := a.V20201010()
 
 	//新建Secret 传入配置名称和NameSpace
 	secretData := app.NewSecret(secretName, namespace, oldKey, oldValue)
-	_, err = a.V20201010().CreateSecret(context.TODO(), secretData)
+	secretGetOption := app.NewSecretGetOptions(clusterID, namespace, secretName)
+	_, err = secret.CreateSecret(context.TODO(), secretGetOption, secretData)
 	expect.NoError(err, "Create Secret Failed")
 
-	secretGetoption := app.NewSecretGetOptions(clusterID, namespace, secretName)
-	secretData, err = a.V20201010().GetSecret(context.TODO(), secretGetoption)
+	secretData, err = secret.GetSecret(context.TODO(), secretGetOption)
 	expect.NoError(err, "Get NewSecret Failed")
 
 	//后期校验多KV值
@@ -57,21 +58,21 @@ func testCRUDSecret(f *framework.Framework) {
 
 	//更新KV值
 	secretKVUpdate := app.NewUpdateSecret(secretName, namespace, key, value)
-	_, err = a.V20201010().UpdateSecret(context.TODO(), secretKVUpdate)
+	_, err = secret.UpdateSecret(context.TODO(), secretGetOption, secretKVUpdate)
 	expect.NoError(err, "Update Secret Failed")
 
 	// Get secret 更新后的信息
-	secretData, err = a.V20201010().GetSecret(context.TODO(), secretGetoption)
+	secretData, err = secret.GetSecret(context.TODO(), secretGetOption)
 	expect.NoError(err, "Get UpdateSecret Failed")
 	expect.Equal(secretData.Data, secretKVUpdate.Data, "kv值更新失败")
 
 	//删除secret
-	secretDeleteoption := app.NewSecretDeleteOptions(clusterID, namespace, secretName)
-	err = a.V20201010().DeleteSecret(context.TODO(), secretDeleteoption)
+	secretDeleteOption := app.NewSecretDeleteOptions(clusterID, namespace, secretName)
+	err = secret.DeleteSecret(context.TODO(), secretDeleteOption)
 	expect.NoError(err, "Del Secret Failed")
 
 	//验证删除成功
-	_, err = a.V20201010().GetSecret(context.TODO(), secretGetoption)
+	_, err = secret.GetSecret(context.TODO(), secretGetOption)
 	expect.Error(err, "Del Secret Failed")
 
 }

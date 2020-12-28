@@ -1,61 +1,38 @@
 package v20201010
 
 import (
-	v1 "github.com/caicloud/api/meta/v1"
+	"github.com/caicloud/api/meta/v1"
 	time "time"
 )
 
 // Application describes an application entry.
 type Application struct {
 	v1.ObjectMeta `json:",inline"`
-	Spec          ApplicationSpec   `json:"spec"`
-	Status        ApplicationStatus `json:"status"`
+	Spec          Spec   `json:"Spec"`
+	Status        Status `json:"Status"`
 }
 
-// ApplicationList is a list of Application entry
-type ApplicationList struct {
-	v1.ListMeta `json:",inline"`
-	Items       []Application `json:"items,omitempty"`
+// ApplicationDeleteOption has some options for application delete API
+//
+// +nirvana:api=origin:"DeleteOption"
+type ApplicationDeleteOption struct {
+	Cluster
 }
 
-// ApplicationRevision describes the revision of an application.
-type ApplicationRevision struct {
-	v1.ObjectMeta `json:",inline"`
-	Spec          ApplicationRevisionSpec   `json:"spec,omitempty"`
-	Status        ApplicationRevisionStatus `json:"status,omitempty"`
+// ApplicationGetOption has some options for application get API
+//
+// +nirvana:api=origin:"GetOption"
+type ApplicationGetOption struct {
+	Cluster
 }
 
-// ApplicationRevisionList is a list of ApplicationRevision entry
-type ApplicationRevisionList struct {
-	v1.ListMeta `json:",inline"`
-	Items       []ApplicationRevision `json:"items,omitempty"`
-}
-
-// ApplicationRevisionSpec describes the application revision infos those can not be changed.
-type ApplicationRevisionSpec struct {
-	Revision     int    `json:"revision"`
-	Repo         string `json:"repo"`
-	ChartName    string `json:"chartName"`
-	ChartVersion string `json:"chartVersion,omitempty"`
-	Values       string `json:"values,omitempty"`
-}
-
-// ApplicationRevisionStatus describes the application revision
-type ApplicationRevisionStatus struct {
-}
-
-// ApplicationSpec describes the application spec
-type ApplicationSpec struct {
-	Repo         string `json:"repo"`
-	ChartName    string `json:"chartName"`
-	ChartVersion string `json:"chartVersion,omitempty"`
-	Values       string `json:"values,omitempty"`
-}
-
-// ApplicationStatus describes the application status
-type ApplicationStatus struct {
-	Phase           string    `json:"phase"`
-	UpdateTimestamp time.Time `json:"updateTimestamp,omitempty"`
+// ApplicationListOption has some options for application list API
+//
+// +nirvana:api=origin:"ListOption"
+type ApplicationListOption struct {
+	Pagination
+	Filter
+	Cluster
 }
 
 // Cluster ...
@@ -123,9 +100,27 @@ type ConfigMapReference struct {
 	Kind string `json:"Kind"`
 }
 
-// Exporter is the options when export native resource
-type Exporter struct {
-	ContentType string `source:"query,ContentType"`
+// Deployment describes a deployment entry.
+type Deployment struct {
+	v1.ObjectMeta `json:",inline"`
+	Spec          DeploymentSpec `json:"Spec,omitempty"`
+	YAML          string         `json:"Yaml,omitempty"`
+}
+
+// DeploymentList is a list of deployment entries.
+//
+// +nirvana:api=origin:"List"
+type DeploymentList struct {
+	v1.ListMeta `json:",inline"`
+	Items       []Deployment `json:"Items,omitempty"`
+}
+
+// DeploymentSpec describes the attributes that a user uses to create a deployment
+//
+// +nirvana:api=origin:"Spec"
+type DeploymentSpec struct {
+	// TODO: 容器网络
+	Replicas *int32
 }
 
 // Filter ...
@@ -137,6 +132,26 @@ type Filter struct {
 type GetWorkloadOption struct {
 	Pagination
 	Cluster
+}
+
+// List is a list of Application entry
+type List struct {
+	v1.ListMeta `json:",inline"`
+	Items       []Application `json:"Items"`
+}
+
+// Overview contains the workload info in overview page.
+type Overview struct {
+	v1.ObjectMeta `json:",inline"`
+	Status        *OverviewStatus `json:"Status,omitempty"`
+}
+
+// OverviewStatus represents the simple status of all workloads.
+type OverviewStatus struct {
+	Total    int `json:"Total"`
+	Running  int `json:"Running"`
+	Updating int `json:"Updating"`
+	Error    int `json:"Error"`
 }
 
 // Pagination ...
@@ -152,12 +167,42 @@ type Port struct {
 	NodePort int32  `json:"NodePort,omitempty"`
 }
 
+// Revision describes the revision of an application.
+type Revision struct {
+	v1.ObjectMeta `json:",inline"`
+	Spec          RevisionSpec   `json:"Spec"`
+	Status        RevisionStatus `json:"Status,omitempty"`
+}
+
+// RevisionList is a list of Revision entry
+type RevisionList struct {
+	v1.ListMeta `json:",inline"`
+	Items       []Revision `json:"items,omitempty"`
+}
+
+// RevisionSpec describes the application revision which can not be changed.
+type RevisionSpec struct {
+	Revision     int    `json:"Revision"`
+	Repo         string `json:"Repo"`
+	ChartName    string `json:"ChartName"`
+	ChartVersion string `json:"ChartVersion"`
+	Values       string `json:"Values"`
+}
+
+// RevisionStatus describes the application revision status.
+type RevisionStatus struct {
+}
+
 // Secret describes a secret entry.
 type Secret struct {
 	v1.ObjectMeta `json:",inline"`
-	Data          []SecretData      `json:"Data,omitempty"`
-	YAML          string            `json:"YAML,omitempty"`
-	References    []SecretReference `json:"References,omitempty"`
+	Type          string `json:"Type,omitempty"`
+	// KV || FILE
+	Encryption string `json:"Encryption,omitempty"`
+	// Kubernetes Secret types (e.g., Opaque, kubernetes.io/tls)
+	Data       []SecretData      `json:"Data,omitempty"`
+	YAML       string            `json:"Yaml,omitempty"`
+	References []SecretReference `json:"References,omitempty"`
 }
 
 // SecretData describes a kv pair.
@@ -180,7 +225,6 @@ type SecretDeleteOption struct {
 // +nirvana:api=origin:"GetOption"
 type SecretGetOption struct {
 	Cluster
-	Style string `source:"query,Style"`
 }
 
 // SecretList is a list of secret entries.
@@ -198,7 +242,6 @@ type SecretListOption struct {
 	Pagination
 	Filter
 	Cluster
-	Style string `source:"query,Style"`
 }
 
 // SecretReference provides a workload's minimum info
@@ -214,7 +257,7 @@ type SecretReference struct {
 type Service struct {
 	v1.ObjectMeta `json:",inline"`
 	Spec          ServiceSpec   `json:"Spec,omitempty"`
-	YAML          []uint8       `json:"YAML,omitempty"`
+	YAML          string        `json:"Yaml,omitempty"`
 	Workloads     *WorkloadList `json:"WorkloadList,omitempty"`
 }
 
@@ -230,7 +273,6 @@ type ServiceDeleteOption struct {
 // +nirvana:api=origin:"GetOption"
 type ServiceGetOption struct {
 	Cluster
-	Exporter
 }
 
 // ServiceList is a list of Service entry
@@ -275,11 +317,19 @@ type SessionAffinity struct {
 	TimeoutSeconds *int32 `json:"TimeoutSeconds,omitempty"`
 }
 
+// Spec describes the application spec
+type Spec struct {
+	Repo         string `json:"Repo"`
+	ChartName    string `json:"ChartName"`
+	ChartVersion string `json:"ChartVersion"`
+	Values       string `json:"Values"`
+}
+
 // StatefulSet describes a statefulset entry.
 type StatefulSet struct {
 	v1.ObjectMeta `json:",inline"`
 	Spec          StatefulSetSpec `json:"Spec,omitempty"`
-	YAML          []uint8         `json:"YAML,omitempty"`
+	YAML          string          `json:"Yaml,omitempty"`
 }
 
 // StatefulSetDeleteOption has some options for statefulset delete API
@@ -294,10 +344,9 @@ type StatefulSetDeleteOption struct {
 // +nirvana:api=origin:"GetOption"
 type StatefulSetGetOption struct {
 	Cluster
-	Style string `source:"query,Style"`
 }
 
-// StatefulSetList is a list of configmap entries.
+// StatefulSetList is a list of statefulset entries.
 //
 // +nirvana:api=origin:"List"
 type StatefulSetList struct {
@@ -312,7 +361,6 @@ type StatefulSetListOption struct {
 	Pagination
 	Filter
 	Cluster
-	Style string `source:"query,Style"`
 }
 
 // StatefulSetRestartOption has some options for statefulset delete API
@@ -330,9 +378,10 @@ type StatefulSetSpec struct {
 	Replicas *int32
 }
 
-// Workload describes a workload entry.
-type Workload struct {
-	Name string `json:"name"`
+// Status describes the application status
+type Status struct {
+	Phase           string    `json:"Phase"`
+	UpdateTimestamp time.Time `json:"UpdateTimestamp"`
 }
 
 // WorkloadList is a list of Workload entry

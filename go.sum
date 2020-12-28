@@ -164,8 +164,10 @@ github.com/caicloud/admission-server v0.2.2-0.20201221061423-ec93996dcaf7/go.mod
 github.com/caicloud/api v0.0.0-20201106023450-0ea5d630578b/go.mod h1:72F4EwbqlmwZUU8H64CypJHjlgXn606SByXQ+j6HkHc=
 github.com/caicloud/api v0.0.0-20201203122721-ef27bd38a552 h1:L0QnnY6uJtIDWWRFwGlVPyVSevxknFvOy9FTpJfO8fI=
 github.com/caicloud/api v0.0.0-20201203122721-ef27bd38a552/go.mod h1:fGGtrsVIa8dVewCThBsYVkSkYhi9C5MroBa/uKr3+50=
-github.com/caicloud/app v1.0.0-alpha.1 h1:DtlfHsr687A1BsiP0riCW+LHUE6a6QFYlX2VY69uU1o=
-github.com/caicloud/app v1.0.0-alpha.1/go.mod h1:MccMzewyEs3cRVza+00PiPCyOrH9chOHe9SshzXP8Po=
+github.com/caicloud/api v0.0.0-20201214034828-9e5d698f165c h1:FMsNKZ9BKCIVHvU8OmwnU1Z6UGwPwXFFEVEh8HgzqSk=
+github.com/caicloud/api v0.0.0-20201214034828-9e5d698f165c/go.mod h1:hrrDPwUQod1dkw05E26K/pVlXSYndKKMtNEJXD3+Q7Y=
+github.com/caicloud/app v1.0.0-alpha.1.0.20201224083016-46da8cc2be30 h1:qRUvDduJiSfoaoSx67+L4nQLF/w7lMMt9zbciaxV4FQ=
+github.com/caicloud/app v1.0.0-alpha.1.0.20201224083016-46da8cc2be30/go.mod h1:qfyfaWLqnww1hlwLvHG97Udx2w04xoQLUoi4xc8YzZ8=
 github.com/caicloud/cargo-server v0.1.0-alpha h1:WOLmHaLSje7vZMSbU1+KC3aXVTDsos8VusFMpZ43Fck=
 github.com/caicloud/cargo-server v0.1.0-alpha/go.mod h1:2ccHnv6bxybVwf3ucJunC0U/fVYDB/WVOQ6SL1tbV2k=
 github.com/caicloud/cauth v2.7.4+incompatible/go.mod h1:4JsEpZIiBNaL83VVtYjocvDYHpzJS0LfjlYsrmXUMZw=
@@ -174,7 +176,7 @@ github.com/caicloud/containeros v1.0.0-alpha.1.0.20201211103836-edcdf9fb93ff h1:
 github.com/caicloud/containeros v1.0.0-alpha.1.0.20201211103836-edcdf9fb93ff/go.mod h1:5uspd1aDaPQM9l+7i3GmfhiHlFMx5avaTsCJYh4ZR2A=
 github.com/caicloud/containeros v1.0.0-alpha.1.0.20201214055653-3fd25271b910 h1:sBwIDdTw2eIxtF78fkQgxkBGnVJEPalJLuWGZo84dz8=
 github.com/caicloud/containeros v1.0.0-alpha.1.0.20201214055653-3fd25271b910/go.mod h1:I8q+pqpgvl9cYMygpCwD5ka0oJbg9ZanYkVf9XtNa34=
-github.com/caicloud/containeros v1.0.0-alpha.2 h1:JF0C6ZS0SdlZY8sXkoc2xO7zK5905tg6CvAXxznIRK0=
+github.com/caicloud/containeros v1.0.0-alpha.2 h1:t8aQeofT+m/tTIn28FNKaw7UEU68fWsHL+5lpx1V5f0=
 github.com/caicloud/containeros v1.0.0-alpha.2/go.mod h1:ZdQXrOBhC35Lq8pc9AOGbj5FQfmnwINChrCdtaFiMC8=
 github.com/caicloud/cyclone v1.2.0-alpha h1:LuUf+ZR6Agxmur6gDEknwm4P0NBTFdqjwgLjTS8ofgs=
 github.com/caicloud/cyclone v1.2.0-alpha/go.mod h1:Fpet4IX4vj3hT1gwTj1VQx1atMyNOrOjdmpe2pFss2Y=
@@ -182,6 +184,7 @@ github.com/caicloud/go-common v0.4.0-alpha.2/go.mod h1:Vc7NCG/m2aZ3nU5IWU00GZKyH
 github.com/caicloud/go-common v0.4.0-beta.1/go.mod h1:wtkP8fsGq2bbb2kyoB6OsEHwIRhlYhghqCLva/3bjuo=
 github.com/caicloud/go-common v0.4.0-beta.2/go.mod h1:wtkP8fsGq2bbb2kyoB6OsEHwIRhlYhghqCLva/3bjuo=
 github.com/caicloud/go-common v0.4.0-beta.4/go.mod h1:D6dT7e/nC123JU+I4UNjm5RbTE6FFO1hZPlvOrFtMDY=
+github.com/caicloud/go-common v0.4.0-beta.5.0.20201221072453-c3e2609574b8/go.mod h1:UixoHxE5UHbJglaRM8lsU7y29TAfNnTT7VCQ9x996BQ=
 github.com/caicloud/module-template v0.0.0-20201130082715-3a2a9a8e5841/go.mod h1:pEo8N9Kye2eRNBvUmnOF37LQO1OzeNu/OgQMAC3J9v8=
 github.com/caicloud/network-agent v1.5.0-alpha.1.0.20201203094520-c26da1d902d9/go.mod h1:A4UMtdahBtunwmQ1CeI3HRX7zPXKY6WuN0Ai1D0E4xk=
 github.com/caicloud/network-agent v1.5.0-alpha.2.0.20201211074159-bcc70f81528b/go.mod h1:A4UMtdahBtunwmQ1CeI3HRX7zPXKY6WuN0Ai1D0E4xk=

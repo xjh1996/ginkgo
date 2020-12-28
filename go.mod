@@ -3,8 +3,8 @@ module github.com/caicloud/zeus
 go 1.15
 
 require (
-	github.com/caicloud/api v0.0.0-20201203122721-ef27bd38a552
-	github.com/caicloud/app v1.0.0-alpha.1
+	github.com/caicloud/api v0.0.0-20201214034828-9e5d698f165c
+	github.com/caicloud/app v1.0.0-alpha.1.0.20201224083016-46da8cc2be30
 	github.com/caicloud/cargo-server v0.1.0-alpha
 	github.com/caicloud/containeros v1.0.0-alpha.2
 	github.com/caicloud/nirvana v0.3.0-rc.3

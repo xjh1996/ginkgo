@@ -44,29 +44,30 @@ func testCRUDConfigMap(f *framework.Framework) {
 
 	a, err := f.APIClient.App()
 	expect.NoError(err, "App Client Build Failed")
+	configmap := a.V20201010()
 
 	configmapData := app.NewConfigMap(ConfigName, namespace, oldKey, oldValue)
-	_, err = a.V20201010().CreateConfigMap(context.TODO(), configmapData)
+	configmapGetOption := app.NewConfigGetOptions(clusterID, namespace, ConfigName)
+	_, err = configmap.CreateConfigMap(context.TODO(), configmapGetOption, configmapData)
 	expect.NoError(err, "Create Configmap Failed")
 
-	configmapGetoption := app.NewConfigGetOptions(clusterID, namespace, ConfigName)
-	configmapData, err = a.V20201010().GetConfigMap(context.TODO(), configmapGetoption)
+	configmapData, err = a.V20201010().GetConfigMap(context.TODO(), configmapGetOption)
 	expect.NoError(err, "Get Configmap Failed")
 	expect.Equal(configmapData.Data[0], types.ConfigMapData{Key: oldKey, Value: oldValue}, "kv值下发失败")
 
 	configmapUpdate := app.NewUpdateConfigMap(ConfigName, namespace, key, value)
-	_, err = a.V20201010().UpdateConfigMap(context.TODO(), configmapUpdate)
+	_, err = configmap.UpdateConfigMap(context.TODO(), configmapGetOption, configmapUpdate)
 	expect.NoError(err, "Update Configmap Failed")
 
-	configmapData, err = a.V20201010().GetConfigMap(context.TODO(), configmapGetoption)
+	configmapData, err = a.V20201010().GetConfigMap(context.TODO(), configmapGetOption)
 	expect.NoError(err, "Get Configmap Failed")
 	expect.Equal(configmapData.Data, configmapUpdate.Data, "kv值更新失败")
 
 	configmapDeleteOption := app.NewConfigDeleteOptions(clusterID, namespace, ConfigName)
-	err = a.V20201010().DeleteConfigMap(context.TODO(), configmapDeleteOption)
+	err = configmap.DeleteConfigMap(context.TODO(), configmapDeleteOption)
 	expect.NoError(err, "Del Configmap Failed")
 
-	_, err = a.V20201010().GetConfigMap(context.TODO(), configmapGetoption)
+	_, err = configmap.GetConfigMap(context.TODO(), configmapGetOption)
 	expect.Error(err, "Configmap Deleted")
 }
 
@@ -84,7 +85,8 @@ func testlistConfigmap(f *framework.Framework) {
 	for i := 0; i < 10; i++ {
 		ConfigName[i] = rand.String(20)
 		configNameData := app.NewConfigMap(ConfigName[i], namespace, key, value)
-		_, err = a.V20201010().CreateConfigMap(context.TODO(), configNameData)
+		configmapGetOption := app.NewConfigGetOptions(clusterID, namespace, ConfigName[i])
+		_, err = a.V20201010().CreateConfigMap(context.TODO(), configmapGetOption, configNameData)
 		expect.NoError(err, "Create Configmap Failed")
 	}
 

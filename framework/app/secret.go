@@ -28,21 +28,21 @@ func NewSecret(name, namespace, key, value string) *types.Secret {
 	}
 }
 
-func NewSecretGetOptions(clustername, namespace, name string) types.SecretGetOption {
+func NewSecretGetOptions(clusterName, namespace, name string) types.SecretGetOption {
 	return types.SecretGetOption{
 		Cluster: types.Cluster{
-			ClusterName: clustername,
-			Namespace:   namespace,
+			ClusterName: clusterName,
+			Namespace:   NS4Auth(clusterName, namespace),
 			Name:        name,
 		},
 	}
 }
 
-func NewSecretDeleteOptions(clustername, namespace, name string) types.SecretDeleteOption {
+func NewSecretDeleteOptions(clusterName, namespace, name string) types.SecretDeleteOption {
 	return types.SecretDeleteOption{
 		Cluster: types.Cluster{
-			ClusterName: clustername,
-			Namespace:   namespace,
+			ClusterName: clusterName,
+			Namespace:   NS4Auth(clusterName, namespace),
 			Name:        name,
 		},
 	}
