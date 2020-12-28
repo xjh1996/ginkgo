@@ -21,7 +21,7 @@ type User struct {
 func (u *User) App() (appclient.Interface, error) {
 	return appclient.NewClient(&rest.Config{
 		Scheme:   config.Context.Scheme,
-		Host:     config.Context.BaseUrl + "/hodor/apis/app.caicloud.io",
+		Host:     config.Context.BaseUrl + "/hodor",
 		Executor: baseclient.NewRequestExecutorWithAuth(u.Username, u.Password),
 	})
 }

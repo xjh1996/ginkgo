@@ -14,7 +14,7 @@ import (
 	"github.com/onsi/ginkgo"
 )
 
-// TODO 框架实现Namespac的创建
+// TODO 框架实现Namespace的创建
 const namespace = "app"
 
 var _ = SIGDescribe("配置项", func() {
@@ -77,7 +77,7 @@ func testlistConfigmap(f *framework.Framework) {
 	key := rand.String(20)
 	value := rand.String(20)
 
-	var ConfigName [9]string
+	var ConfigName [10]string
 	a, err := f.APIClient.App()
 	expect.NoError(err, "App Client Build Failed")
 

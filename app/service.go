@@ -32,7 +32,7 @@ func testCRDService(f *framework.Framework) {
 	service := a.V20201010()
 
 	//新建Service 传入名称和NameSpace
-	serviceData := app.NewService(ServiceName, "default")
+	serviceData := app.NewService(ServiceName, namespace)
 	serviceCreateOption := app.NewServiceGetOptions(clusterID, namespace, ServiceName)
 	_, err = service.CreateService(context.TODO(), serviceCreateOption, serviceData)
 	expect.NoError(err, "Create Service Failed")

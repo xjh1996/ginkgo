@@ -43,7 +43,7 @@ func Auth(raw AuthRawInfo, c *http.Client) (auth *AuthInfo, err error) {
 			build:         false,
 			TenantID:      raw.TenantID,
 			User:          raw.User,
-			Password:      raw.User,
+			Password:      raw.Password,
 			AdminTenantID: raw.AdminTenantID,
 			AdminUser:     raw.AdminUser,
 			AdminPassword: raw.AdminPassword,

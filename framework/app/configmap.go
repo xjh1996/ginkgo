@@ -74,7 +74,7 @@ func NewListOptions(clusterName, namespace string) types.ConfigMapListOption {
 	return types.ConfigMapListOption{
 		Cluster: types.Cluster{
 			ClusterName: clusterName,
-			Namespace:   namespace,
+			Namespace:   NS4Auth(clusterName, namespace),
 		},
 	}
 }
