@@ -3,7 +3,7 @@ github.com/beorn7/perks/quantile
 # github.com/caicloud/api v0.0.0-20201214034828-9e5d698f165c
 ## explicit
 github.com/caicloud/api/meta/v1
-# github.com/caicloud/app v1.0.0-alpha.1.0.20201224083016-46da8cc2be30
+# github.com/caicloud/app v1.0.0-alpha.2.0.20201229020410-d166e099ce19
 ## explicit
 github.com/caicloud/app/pkg/server/client
 github.com/caicloud/app/pkg/server/client/v20201010

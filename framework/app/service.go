@@ -9,6 +9,32 @@ import (
 	"k8s.io/apimachinery/pkg/util/uuid"
 )
 
+type Modifier func(service *types.Service)
+
+func FakeService(name, namespace string, f Modifier) *types.Service {
+	svc := &types.Service{
+		ObjectMeta: v1.ObjectMeta{
+			Kind:              "Service",
+			APIVersion:        "v1",
+			UID:               string(uuid.NewUUID()),
+			CreationTimestamp: time.Now(),
+			Name:              name,
+			Namespace:         namespace,
+		},
+		Spec: types.ServiceSpec{
+			Type: "ClusterIP",
+			Ports: []types.Port{
+				{
+					Protocol: "TCP",
+					Port:     80,
+				},
+			},
+		},
+	}
+	f(svc)
+	return svc
+}
+
 func NewService(name, namespace string) *types.Service {
 	return &types.Service{
 		ObjectMeta: v1.ObjectMeta{

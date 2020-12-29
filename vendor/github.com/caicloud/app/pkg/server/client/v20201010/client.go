@@ -8,38 +8,38 @@ import (
 
 // Interface describes v20201010 client.
 type Interface interface {
-	// CreateApplication does not have any description.
-	CreateApplication(ctx context.Context, applicationGetOption ApplicationGetOption, application *Application) (application1 *Application, err error)
 	// CreateConfigMap does not have any description.
 	CreateConfigMap(ctx context.Context, configMapGetOption ConfigMapGetOption, configMap *ConfigMap) (configMap1 *ConfigMap, err error)
 	// CreateDeployment does not have any description.
-	CreateDeployment(ctx context.Context, statefulSetGetOption StatefulSetGetOption, deployment *Deployment) (deployment1 *Deployment, err error)
+	CreateDeployment(ctx context.Context, deploymentGetOption DeploymentGetOption, deployment *Deployment) (deployment1 *Deployment, err error)
+	// CreateHelmApp does not have any description.
+	CreateHelmApp(ctx context.Context, createOption CreateOption, helmApp *HelmApp) (helmApp1 *HelmApp, err error)
 	// CreateSecret does not have any description.
 	CreateSecret(ctx context.Context, secretGetOption SecretGetOption, secret *Secret) (secret1 *Secret, err error)
 	// CreateService does not have any description.
 	CreateService(ctx context.Context, serviceGetOption ServiceGetOption, service *Service) (service1 *Service, err error)
 	// CreateStatefulSet does not have any description.
 	CreateStatefulSet(ctx context.Context, statefulSetGetOption StatefulSetGetOption, statefulSet *StatefulSet) (statefulSet1 *StatefulSet, err error)
-	// DeleteApplication does not have any description.
-	DeleteApplication(ctx context.Context, applicationDeleteOption ApplicationDeleteOption) (application *Application, err error)
 	// DeleteConfigMap does not have any description.
 	DeleteConfigMap(ctx context.Context, configMapDeleteOption ConfigMapDeleteOption) (err error)
 	// DeleteDeployment does not have any description.
-	DeleteDeployment(ctx context.Context, statefulSetDeleteOption StatefulSetDeleteOption) (err error)
+	DeleteDeployment(ctx context.Context, deploymentDeleteOption DeploymentDeleteOption) (err error)
+	// DeleteHelmApp does not have any description.
+	DeleteHelmApp(ctx context.Context, deleteOption DeleteOption) (err error)
 	// DeleteSecret does not have any description.
 	DeleteSecret(ctx context.Context, secretDeleteOption SecretDeleteOption) (err error)
 	// DeleteService does not have any description.
 	DeleteService(ctx context.Context, serviceDeleteOption ServiceDeleteOption) (err error)
 	// DeleteStatefulSet does not have any description.
 	DeleteStatefulSet(ctx context.Context, statefulSetDeleteOption StatefulSetDeleteOption) (err error)
-	// GetApplication does not have any description.
-	GetApplication(ctx context.Context, applicationGetOption ApplicationGetOption) (application *Application, err error)
-	// GetApplicationRevision does not have any description.
-	GetApplicationRevision(ctx context.Context, application string, revision int) (revision1 *Revision, err error)
 	// GetConfigMap does not have any description.
 	GetConfigMap(ctx context.Context, configMapGetOption ConfigMapGetOption) (configMap *ConfigMap, err error)
 	// GetDeployment does not have any description.
-	GetDeployment(ctx context.Context, statefulSetGetOption StatefulSetGetOption) (deployment *Deployment, err error)
+	GetDeployment(ctx context.Context, deploymentGetOption DeploymentGetOption) (deployment *Deployment, err error)
+	// GetHelmApp does not have any description.
+	GetHelmApp(ctx context.Context, getOption GetOption) (helmApp *HelmApp, err error)
+	// GetHelmAppRevision does not have any description.
+	GetHelmAppRevision(ctx context.Context, getHelmRevisionOption GetHelmRevisionOption) (helmRevision *HelmRevision, err error)
 	// GetOverview does not have any description.
 	GetOverview(ctx context.Context) (overview *Overview, err error)
 	// GetSecret does not have any description.
@@ -48,32 +48,32 @@ type Interface interface {
 	GetService(ctx context.Context, serviceGetOption ServiceGetOption) (service *Service, err error)
 	// GetStatefulSet does not have any description.
 	GetStatefulSet(ctx context.Context, statefulSetGetOption StatefulSetGetOption) (statefulSet *StatefulSet, err error)
-	// GetWorkloadsByService does not have any description.
-	GetWorkloadsByService(ctx context.Context, getWorkloadOption GetWorkloadOption) (service *Service, err error)
-	// ListApplicationRevisions does not have any description.
-	ListApplicationRevisions(ctx context.Context, application string) (revisionList *RevisionList, err error)
-	// ListApplications does not have any description.
-	ListApplications(ctx context.Context, applicationListOption ApplicationListOption) (list *List, err error)
 	// ListConfigMaps does not have any description.
 	ListConfigMaps(ctx context.Context, configMapListOption ConfigMapListOption) (configMapList *ConfigMapList, err error)
 	// ListDeployments does not have any description.
-	ListDeployments(ctx context.Context, statefulSetListOption StatefulSetListOption) (deploymentList *DeploymentList, err error)
+	ListDeployments(ctx context.Context, deploymentListOption DeploymentListOption) (deploymentList *DeploymentList, err error)
+	// ListHelmApp does not have any description.
+	ListHelmApp(ctx context.Context, listOption ListOption) (helmAppList *HelmAppList, err error)
+	// ListHelmAppRevisions does not have any description.
+	ListHelmAppRevisions(ctx context.Context, listOption ListOption) (revisionList *RevisionList, err error)
 	// ListSecrets does not have any description.
 	ListSecrets(ctx context.Context, secretListOption SecretListOption) (secretList *SecretList, err error)
 	// ListServices does not have any description.
 	ListServices(ctx context.Context, serviceListOption ServiceListOption) (serviceList *ServiceList, err error)
 	// ListStatefulSets does not have any description.
 	ListStatefulSets(ctx context.Context, statefulSetListOption StatefulSetListOption) (statefulSetList *StatefulSetList, err error)
+	// RestartDeployment does not have any description.
+	RestartDeployment(ctx context.Context, deploymentRestartOption DeploymentRestartOption) (err error)
 	// RestartStatefulSet does not have any description.
 	RestartStatefulSet(ctx context.Context, statefulSetRestartOption StatefulSetRestartOption) (err error)
-	// RollbackApplicationToRevision does not have any description.
-	RollbackApplicationToRevision(ctx context.Context, application string, revision int) (application1 *Application, err error)
-	// UpdateApplication does not have any description.
-	UpdateApplication(ctx context.Context, applicationGetOption ApplicationGetOption, application *Application) (application1 *Application, err error)
+	// RollbackHelmAppToRevision does not have any description.
+	RollbackHelmAppToRevision(ctx context.Context, rollbackHelmAppToRevisionOption RollbackHelmAppToRevisionOption) (helmApp *HelmApp, err error)
 	// UpdateConfigMap does not have any description.
 	UpdateConfigMap(ctx context.Context, configMapGetOption ConfigMapGetOption, configMap *ConfigMap) (configMap1 *ConfigMap, err error)
 	// UpdateDeployment does not have any description.
-	UpdateDeployment(ctx context.Context, statefulSetGetOption StatefulSetGetOption, deployment *Deployment) (deployment1 *Deployment, err error)
+	UpdateDeployment(ctx context.Context, deploymentGetOption DeploymentGetOption, deployment *Deployment) (deployment1 *Deployment, err error)
+	// UpdateHelmApp does not have any description.
+	UpdateHelmApp(ctx context.Context, updateOption UpdateOption, helmApp *HelmApp) (helmApp1 *HelmApp, err error)
 	// UpdateSecret does not have any description.
 	UpdateSecret(ctx context.Context, secretGetOption SecretGetOption, secret *Secret) (secret1 *Secret, err error)
 	// UpdateService does not have any description.
@@ -105,19 +105,6 @@ func MustNewClient(cfg *rest.Config) *Client {
 	return client
 }
 
-// CreateApplication does not have any description.
-func (c *Client) CreateApplication(ctx context.Context, applicationGetOption ApplicationGetOption, application *Application) (application1 *Application, err error) {
-	application1 = new(Application)
-	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=CreateApplication").
-		Query("ClusterName", applicationGetOption.ClusterName).
-		Query("Namespace", applicationGetOption.Namespace).
-		Query("Name", applicationGetOption.Name).
-		Body("application/json", application).
-		TOPRPCData(application1).
-		Do(ctx)
-	return
-}
-
 // CreateConfigMap does not have any description.
 func (c *Client) CreateConfigMap(ctx context.Context, configMapGetOption ConfigMapGetOption, configMap *ConfigMap) (configMap1 *ConfigMap, err error) {
 	configMap1 = new(ConfigMap)
@@ -132,14 +119,27 @@ func (c *Client) CreateConfigMap(ctx context.Context, configMapGetOption ConfigM
 }
 
 // CreateDeployment does not have any description.
-func (c *Client) CreateDeployment(ctx context.Context, statefulSetGetOption StatefulSetGetOption, deployment *Deployment) (deployment1 *Deployment, err error) {
+func (c *Client) CreateDeployment(ctx context.Context, deploymentGetOption DeploymentGetOption, deployment *Deployment) (deployment1 *Deployment, err error) {
 	deployment1 = new(Deployment)
 	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=CreateDeployment").
-		Query("ClusterName", statefulSetGetOption.ClusterName).
-		Query("Namespace", statefulSetGetOption.Namespace).
-		Query("Name", statefulSetGetOption.Name).
+		Query("ClusterName", deploymentGetOption.ClusterName).
+		Query("Namespace", deploymentGetOption.Namespace).
+		Query("Name", deploymentGetOption.Name).
 		Body("application/json", deployment).
 		TOPRPCData(deployment1).
+		Do(ctx)
+	return
+}
+
+// CreateHelmApp does not have any description.
+func (c *Client) CreateHelmApp(ctx context.Context, createOption CreateOption, helmApp *HelmApp) (helmApp1 *HelmApp, err error) {
+	helmApp1 = new(HelmApp)
+	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=CreateHelmApp").
+		Query("ClusterName", createOption.ClusterName).
+		Query("Namespace", createOption.Namespace).
+		Query("Name", createOption.Name).
+		Body("application/json", helmApp).
+		TOPRPCData(helmApp1).
 		Do(ctx)
 	return
 }
@@ -183,18 +183,6 @@ func (c *Client) CreateStatefulSet(ctx context.Context, statefulSetGetOption Sta
 	return
 }
 
-// DeleteApplication does not have any description.
-func (c *Client) DeleteApplication(ctx context.Context, applicationDeleteOption ApplicationDeleteOption) (application *Application, err error) {
-	application = new(Application)
-	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=DeleteApplication").
-		Query("ClusterName", applicationDeleteOption.ClusterName).
-		Query("Namespace", applicationDeleteOption.Namespace).
-		Query("Name", applicationDeleteOption.Name).
-		TOPRPCData(application).
-		Do(ctx)
-	return
-}
-
 // DeleteConfigMap does not have any description.
 func (c *Client) DeleteConfigMap(ctx context.Context, configMapDeleteOption ConfigMapDeleteOption) (err error) {
 	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=DeleteConfigMap").
@@ -206,11 +194,21 @@ func (c *Client) DeleteConfigMap(ctx context.Context, configMapDeleteOption Conf
 }
 
 // DeleteDeployment does not have any description.
-func (c *Client) DeleteDeployment(ctx context.Context, statefulSetDeleteOption StatefulSetDeleteOption) (err error) {
+func (c *Client) DeleteDeployment(ctx context.Context, deploymentDeleteOption DeploymentDeleteOption) (err error) {
 	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=DeleteDeployment").
-		Query("ClusterName", statefulSetDeleteOption.ClusterName).
-		Query("Namespace", statefulSetDeleteOption.Namespace).
-		Query("Name", statefulSetDeleteOption.Name).
+		Query("ClusterName", deploymentDeleteOption.ClusterName).
+		Query("Namespace", deploymentDeleteOption.Namespace).
+		Query("Name", deploymentDeleteOption.Name).
+		Do(ctx)
+	return
+}
+
+// DeleteHelmApp does not have any description.
+func (c *Client) DeleteHelmApp(ctx context.Context, deleteOption DeleteOption) (err error) {
+	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=DeleteHelmApp").
+		Query("ClusterName", deleteOption.ClusterName).
+		Query("Namespace", deleteOption.Namespace).
+		Query("Name", deleteOption.Name).
 		Do(ctx)
 	return
 }
@@ -245,29 +243,6 @@ func (c *Client) DeleteStatefulSet(ctx context.Context, statefulSetDeleteOption 
 	return
 }
 
-// GetApplication does not have any description.
-func (c *Client) GetApplication(ctx context.Context, applicationGetOption ApplicationGetOption) (application *Application, err error) {
-	application = new(Application)
-	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=GetApplication").
-		Query("ClusterName", applicationGetOption.ClusterName).
-		Query("Namespace", applicationGetOption.Namespace).
-		Query("Name", applicationGetOption.Name).
-		TOPRPCData(application).
-		Do(ctx)
-	return
-}
-
-// GetApplicationRevision does not have any description.
-func (c *Client) GetApplicationRevision(ctx context.Context, application string, revision int) (revision1 *Revision, err error) {
-	revision1 = new(Revision)
-	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=GetApplicationRevision").
-		Query("Application", application).
-		Query("Revision", revision).
-		TOPRPCData(revision1).
-		Do(ctx)
-	return
-}
-
 // GetConfigMap does not have any description.
 func (c *Client) GetConfigMap(ctx context.Context, configMapGetOption ConfigMapGetOption) (configMap *ConfigMap, err error) {
 	configMap = new(ConfigMap)
@@ -281,13 +256,38 @@ func (c *Client) GetConfigMap(ctx context.Context, configMapGetOption ConfigMapG
 }
 
 // GetDeployment does not have any description.
-func (c *Client) GetDeployment(ctx context.Context, statefulSetGetOption StatefulSetGetOption) (deployment *Deployment, err error) {
+func (c *Client) GetDeployment(ctx context.Context, deploymentGetOption DeploymentGetOption) (deployment *Deployment, err error) {
 	deployment = new(Deployment)
 	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=GetDeployment").
-		Query("ClusterName", statefulSetGetOption.ClusterName).
-		Query("Namespace", statefulSetGetOption.Namespace).
-		Query("Name", statefulSetGetOption.Name).
+		Query("ClusterName", deploymentGetOption.ClusterName).
+		Query("Namespace", deploymentGetOption.Namespace).
+		Query("Name", deploymentGetOption.Name).
 		TOPRPCData(deployment).
+		Do(ctx)
+	return
+}
+
+// GetHelmApp does not have any description.
+func (c *Client) GetHelmApp(ctx context.Context, getOption GetOption) (helmApp *HelmApp, err error) {
+	helmApp = new(HelmApp)
+	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=GetHelmApp").
+		Query("ClusterName", getOption.ClusterName).
+		Query("Namespace", getOption.Namespace).
+		Query("Name", getOption.Name).
+		TOPRPCData(helmApp).
+		Do(ctx)
+	return
+}
+
+// GetHelmAppRevision does not have any description.
+func (c *Client) GetHelmAppRevision(ctx context.Context, getHelmRevisionOption GetHelmRevisionOption) (helmRevision *HelmRevision, err error) {
+	helmRevision = new(HelmRevision)
+	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=GetHelmAppRevision").
+		Query("ClusterName", getHelmRevisionOption.ClusterName).
+		Query("Namespace", getHelmRevisionOption.Namespace).
+		Query("Name", getHelmRevisionOption.Name).
+		Query("Revision", getHelmRevisionOption.Revision).
+		TOPRPCData(helmRevision).
 		Do(ctx)
 	return
 }
@@ -337,45 +337,6 @@ func (c *Client) GetStatefulSet(ctx context.Context, statefulSetGetOption Statef
 	return
 }
 
-// GetWorkloadsByService does not have any description.
-func (c *Client) GetWorkloadsByService(ctx context.Context, getWorkloadOption GetWorkloadOption) (service *Service, err error) {
-	service = new(Service)
-	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=GetWorkloadsByService").
-		Query("Start", getWorkloadOption.Start).
-		Query("Limit", getWorkloadOption.Limit).
-		Query("ClusterName", getWorkloadOption.ClusterName).
-		Query("Namespace", getWorkloadOption.Namespace).
-		Query("Name", getWorkloadOption.Name).
-		TOPRPCData(service).
-		Do(ctx)
-	return
-}
-
-// ListApplicationRevisions does not have any description.
-func (c *Client) ListApplicationRevisions(ctx context.Context, application string) (revisionList *RevisionList, err error) {
-	revisionList = new(RevisionList)
-	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=ListApplicationRevisions").
-		Query("Application", application).
-		TOPRPCData(revisionList).
-		Do(ctx)
-	return
-}
-
-// ListApplications does not have any description.
-func (c *Client) ListApplications(ctx context.Context, applicationListOption ApplicationListOption) (list *List, err error) {
-	list = new(List)
-	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=ListApplications").
-		Query("Start", applicationListOption.Start).
-		Query("Limit", applicationListOption.Limit).
-		Query("Query", applicationListOption.Query).
-		Query("ClusterName", applicationListOption.ClusterName).
-		Query("Namespace", applicationListOption.Namespace).
-		Query("Name", applicationListOption.Name).
-		TOPRPCData(list).
-		Do(ctx)
-	return
-}
-
 // ListConfigMaps does not have any description.
 func (c *Client) ListConfigMaps(ctx context.Context, configMapListOption ConfigMapListOption) (configMapList *ConfigMapList, err error) {
 	configMapList = new(ConfigMapList)
@@ -392,16 +353,46 @@ func (c *Client) ListConfigMaps(ctx context.Context, configMapListOption ConfigM
 }
 
 // ListDeployments does not have any description.
-func (c *Client) ListDeployments(ctx context.Context, statefulSetListOption StatefulSetListOption) (deploymentList *DeploymentList, err error) {
+func (c *Client) ListDeployments(ctx context.Context, deploymentListOption DeploymentListOption) (deploymentList *DeploymentList, err error) {
 	deploymentList = new(DeploymentList)
 	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=ListDeployments").
-		Query("Start", statefulSetListOption.Start).
-		Query("Limit", statefulSetListOption.Limit).
-		Query("Query", statefulSetListOption.Query).
-		Query("ClusterName", statefulSetListOption.ClusterName).
-		Query("Namespace", statefulSetListOption.Namespace).
-		Query("Name", statefulSetListOption.Name).
+		Query("Start", deploymentListOption.Start).
+		Query("Limit", deploymentListOption.Limit).
+		Query("Query", deploymentListOption.Query).
+		Query("ClusterName", deploymentListOption.ClusterName).
+		Query("Namespace", deploymentListOption.Namespace).
+		Query("Name", deploymentListOption.Name).
 		TOPRPCData(deploymentList).
+		Do(ctx)
+	return
+}
+
+// ListHelmApp does not have any description.
+func (c *Client) ListHelmApp(ctx context.Context, listOption ListOption) (helmAppList *HelmAppList, err error) {
+	helmAppList = new(HelmAppList)
+	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=ListHelmApp").
+		Query("Start", listOption.Start).
+		Query("Limit", listOption.Limit).
+		Query("Query", listOption.Query).
+		Query("ClusterName", listOption.ClusterName).
+		Query("Namespace", listOption.Namespace).
+		Query("Name", listOption.Name).
+		TOPRPCData(helmAppList).
+		Do(ctx)
+	return
+}
+
+// ListHelmAppRevisions does not have any description.
+func (c *Client) ListHelmAppRevisions(ctx context.Context, listOption ListOption) (revisionList *RevisionList, err error) {
+	revisionList = new(RevisionList)
+	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=ListHelmAppRevisions").
+		Query("Start", listOption.Start).
+		Query("Limit", listOption.Limit).
+		Query("Query", listOption.Query).
+		Query("ClusterName", listOption.ClusterName).
+		Query("Namespace", listOption.Namespace).
+		Query("Name", listOption.Name).
+		TOPRPCData(revisionList).
 		Do(ctx)
 	return
 }
@@ -451,6 +442,16 @@ func (c *Client) ListStatefulSets(ctx context.Context, statefulSetListOption Sta
 	return
 }
 
+// RestartDeployment does not have any description.
+func (c *Client) RestartDeployment(ctx context.Context, deploymentRestartOption DeploymentRestartOption) (err error) {
+	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=RestartDeployment").
+		Query("ClusterName", deploymentRestartOption.ClusterName).
+		Query("Namespace", deploymentRestartOption.Namespace).
+		Query("Name", deploymentRestartOption.Name).
+		Do(ctx)
+	return
+}
+
 // RestartStatefulSet does not have any description.
 func (c *Client) RestartStatefulSet(ctx context.Context, statefulSetRestartOption StatefulSetRestartOption) (err error) {
 	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=RestartStatefulSet").
@@ -461,26 +462,15 @@ func (c *Client) RestartStatefulSet(ctx context.Context, statefulSetRestartOptio
 	return
 }
 
-// RollbackApplicationToRevision does not have any description.
-func (c *Client) RollbackApplicationToRevision(ctx context.Context, application string, revision int) (application1 *Application, err error) {
-	application1 = new(Application)
-	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=RollbackApplicationToRevision").
-		Query("Application", application).
-		Query("Revision", revision).
-		TOPRPCData(application1).
-		Do(ctx)
-	return
-}
-
-// UpdateApplication does not have any description.
-func (c *Client) UpdateApplication(ctx context.Context, applicationGetOption ApplicationGetOption, application *Application) (application1 *Application, err error) {
-	application1 = new(Application)
-	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=UpdateApplication").
-		Query("ClusterName", applicationGetOption.ClusterName).
-		Query("Namespace", applicationGetOption.Namespace).
-		Query("Name", applicationGetOption.Name).
-		Body("application/json", application).
-		TOPRPCData(application1).
+// RollbackHelmAppToRevision does not have any description.
+func (c *Client) RollbackHelmAppToRevision(ctx context.Context, rollbackHelmAppToRevisionOption RollbackHelmAppToRevisionOption) (helmApp *HelmApp, err error) {
+	helmApp = new(HelmApp)
+	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=RollbackHelmAppToRevision").
+		Query("ClusterName", rollbackHelmAppToRevisionOption.ClusterName).
+		Query("Namespace", rollbackHelmAppToRevisionOption.Namespace).
+		Query("Name", rollbackHelmAppToRevisionOption.Name).
+		Query("Revision", rollbackHelmAppToRevisionOption.Revision).
+		TOPRPCData(helmApp).
 		Do(ctx)
 	return
 }
@@ -499,14 +489,27 @@ func (c *Client) UpdateConfigMap(ctx context.Context, configMapGetOption ConfigM
 }
 
 // UpdateDeployment does not have any description.
-func (c *Client) UpdateDeployment(ctx context.Context, statefulSetGetOption StatefulSetGetOption, deployment *Deployment) (deployment1 *Deployment, err error) {
+func (c *Client) UpdateDeployment(ctx context.Context, deploymentGetOption DeploymentGetOption, deployment *Deployment) (deployment1 *Deployment, err error) {
 	deployment1 = new(Deployment)
 	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=UpdateDeployment").
-		Query("ClusterName", statefulSetGetOption.ClusterName).
-		Query("Namespace", statefulSetGetOption.Namespace).
-		Query("Name", statefulSetGetOption.Name).
+		Query("ClusterName", deploymentGetOption.ClusterName).
+		Query("Namespace", deploymentGetOption.Namespace).
+		Query("Name", deploymentGetOption.Name).
 		Body("application/json", deployment).
 		TOPRPCData(deployment1).
+		Do(ctx)
+	return
+}
+
+// UpdateHelmApp does not have any description.
+func (c *Client) UpdateHelmApp(ctx context.Context, updateOption UpdateOption, helmApp *HelmApp) (helmApp1 *HelmApp, err error) {
+	helmApp1 = new(HelmApp)
+	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=UpdateHelmApp").
+		Query("ClusterName", updateOption.ClusterName).
+		Query("Namespace", updateOption.Namespace).
+		Query("Name", updateOption.Name).
+		Body("application/json", helmApp).
+		TOPRPCData(helmApp1).
 		Do(ctx)
 	return
 }

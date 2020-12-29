@@ -1,38 +1,15 @@
 package v20201010
 
 import (
-	"github.com/caicloud/api/meta/v1"
+	v1 "github.com/caicloud/api/meta/v1"
 	time "time"
 )
 
-// Application describes an application entry.
-type Application struct {
-	v1.ObjectMeta `json:",inline"`
-	Spec          Spec   `json:"Spec"`
-	Status        Status `json:"Status"`
-}
-
-// ApplicationDeleteOption has some options for application delete API
-//
-// +nirvana:api=origin:"DeleteOption"
-type ApplicationDeleteOption struct {
-	Cluster
-}
-
-// ApplicationGetOption has some options for application get API
-//
-// +nirvana:api=origin:"GetOption"
-type ApplicationGetOption struct {
-	Cluster
-}
-
-// ApplicationListOption has some options for application list API
-//
-// +nirvana:api=origin:"ListOption"
-type ApplicationListOption struct {
-	Pagination
-	Filter
-	Cluster
+// Affinity 页面位置：高级配置 - 调度策略，不包括污点调度
+type Affinity struct {
+	NodeAffinity    *NodeAffinity    `json:"NodeAffinity,omitempty"`
+	PodAffinity     *PodAffinity     `json:"PodAffinity,omitempty"`
+	PodAntiAffinity *PodAntiAffinity `json:"PodAntiAffinity,omitempty"`
 }
 
 // Cluster ...
@@ -65,6 +42,11 @@ type ConfigMapData struct {
 // +nirvana:api=origin:"DeleteOption"
 type ConfigMapDeleteOption struct {
 	Cluster
+}
+
+// ConfigMapEnvSource ...
+type ConfigMapEnvSource struct {
+	Name string `json:"Name"`
 }
 
 // ConfigMapGetOption has some options for configmap get API
@@ -100,11 +82,64 @@ type ConfigMapReference struct {
 	Kind string `json:"Kind"`
 }
 
+// ConfigMapVolumeSource ...
+type ConfigMapVolumeSource struct {
+	Name string `json:"Name"`
+}
+
+// Container 页面位置：容器配置
+type Container struct {
+	Name  string `json:"Name"`
+	Image string `json:"Image"`
+	// image + version
+	Command []string `json:"Command"`
+	// 页面位置：启动命令 - 运行命令
+	Args []string `json:"Args"`
+	// 页面位置：启动命令 - 运行参数
+	Resources ResourceRequirements `json:"Resources,omitempty"`
+	// TODO: GPU usage
+	Env []EnvVar `json:"Env,omitempty"`
+	// custom env
+	EnvFrom []EnvFromSource `json:"EnvFrom,omitempty"`
+	// env from configmap or secret
+	VolumeMounts  []VolumeMount `json:"VolumeMounts"`
+	Lifecycle     *Lifecycle    `json:"Lifecycle"`
+	LivenessProbe *Probe        `json:"LivenessProbe,omitempty"`
+	// 页面位置：容器配置 - 健康检查 - 存活检查
+	ReadinessProbe *Probe `json:"ReadinessProbe,omitempty"`
+}
+
+// CreateOption has some options for create API
+type CreateOption struct {
+	Cluster
+}
+
+// DeleteOption has some options for delete API
+type DeleteOption struct {
+	Cluster
+}
+
 // Deployment describes a deployment entry.
 type Deployment struct {
 	v1.ObjectMeta `json:",inline"`
-	Spec          DeploymentSpec `json:"Spec,omitempty"`
-	YAML          string         `json:"Yaml,omitempty"`
+	Network       string           `json:"Network,omitempty"`
+	YAML          string           `json:"Yaml,omitempty"`
+	Spec          DeploymentSpec   `json:"Spec,omitempty"`
+	Status        DeploymentStatus `json:"Status,omitempty"`
+}
+
+// DeploymentDeleteOption has some options for deployment delete API
+//
+// +nirvana:api=origin:"DeleteOption"
+type DeploymentDeleteOption struct {
+	Cluster
+}
+
+// DeploymentGetOption has some options for deployment get API
+//
+// +nirvana:api=origin:"GetOption"
+type DeploymentGetOption struct {
+	Cluster
 }
 
 // DeploymentList is a list of deployment entries.
@@ -115,12 +150,57 @@ type DeploymentList struct {
 	Items       []Deployment `json:"Items,omitempty"`
 }
 
+// DeploymentListOption has some options for deployment list API
+//
+// +nirvana:api=origin:"ListOption"
+type DeploymentListOption struct {
+	Pagination
+	Filter
+	Cluster
+}
+
+// DeploymentRestartOption has some options for deployment restart API
+//
+// +nirvana:api=origin:"RestartOption"
+type DeploymentRestartOption struct {
+	Cluster
+}
+
 // DeploymentSpec describes the attributes that a user uses to create a deployment
 //
 // +nirvana:api=origin:"Spec"
 type DeploymentSpec struct {
-	// TODO: 容器网络
-	Replicas *int32
+	Replicas *int32       `json:"Replicas,omitempty"`
+	Template TemplateSpec `json:"Template"`
+	Strategy Strategy     `json:"Strategy,omitempty"`
+}
+
+// DeploymentStatus describes the status of a deployment
+//
+// +nirvana:api=origin:"Status"
+type DeploymentStatus struct {
+}
+
+// EmptyDirVolumeSource ...
+type EmptyDirVolumeSource struct {
+	Medium string `json:"Medium"`
+}
+
+// EnvFromSource 页面位置： 容器配置 - 环境变量 - 配置
+type EnvFromSource struct {
+	ConfigMapRef *ConfigMapEnvSource `json:"ConfigMapRef,omitempty"`
+	SecretRef    *SecretEnvSource    `json:"SecretRef,omitempty"`
+}
+
+// EnvVar 页面位置： 容器配置 - 环境变量 - 自定义
+type EnvVar struct {
+	Name  string `json:"Name"`
+	Value string `json:"Value,omitempty"`
+}
+
+// ExecAction ...
+type ExecAction struct {
+	Command []string `json:"Command"`
 }
 
 // Filter ...
@@ -128,16 +208,128 @@ type Filter struct {
 	Query string `source:"query,Query"`
 }
 
-// GetWorkloadOption has some options for get workload API
-type GetWorkloadOption struct {
-	Pagination
+// GetHelmRevisionOption has some options for GetHelmRevision API
+//
+// +nirvana:api=alias:"GetHelmRevisionOption"
+type GetHelmRevisionOption struct {
+	Cluster
+	Revision int `source:"query,Revision"`
+}
+
+// GetOption has some options for get API
+type GetOption struct {
 	Cluster
 }
 
-// List is a list of Application entry
-type List struct {
+// HTTPGetAction ...
+type HTTPGetAction struct {
+	Scheme string `json:"Scheme"`
+	// 协议
+	Path        string       `json:"Path"`
+	Port        int          `json:"Port"`
+	HTTPHeaders []HTTPHeader `json:"HttpHeaders,omitempty"`
+}
+
+// HTTPHeader 页面位置：容器配置 - 健康检查 - HTTP 请求头
+type HTTPHeader struct {
+	Name  string `json:"Name"`
+	Value string `json:"Value"`
+}
+
+// Handler ...
+type Handler struct {
+	Exec *ExecAction `json:"Exec,omitempty"`
+	// 健康检查 - 执行命令检查
+	HTTPGet *HTTPGetAction `json:"HttpGet,omitempty"`
+	// 健康检查- HTTP 请求肩擦好
+	TCPSocket *TCPSocketAction `json:"TcpSocket,omitempty"`
+}
+
+// HelmApp describes an application entry.
+type HelmApp struct {
+	v1.ObjectMeta `json:",inline"`
+	Spec          HelmAppSpec   `json:"Spec"`
+	Status        HelmAppStatus `json:"Status"`
+}
+
+// HelmAppList is a list of HelmApp entry
+type HelmAppList struct {
 	v1.ListMeta `json:",inline"`
-	Items       []Application `json:"Items"`
+	Items       []HelmApp `json:"Items"`
+}
+
+// HelmAppSpec describes the application spec
+type HelmAppSpec struct {
+	ChartName    string `json:"ChartName"`
+	ChartVersion string `json:"ChartVersion"`
+	Values       string `json:"Values"`
+	Network      string `json:"Network"`
+}
+
+// HelmAppStatus describes the application status
+type HelmAppStatus struct {
+	Phase           string    `json:"Phase"`
+	UpdateTimestamp time.Time `json:"UpdateTimestamp"`
+	Version         int       `json:"Version"`
+}
+
+// HelmRevision describes the revision of an application.
+type HelmRevision struct {
+	v1.ObjectMeta `json:",inline"`
+	Spec          HelmRevisionSpec   `json:"HelmAppSpec"`
+	Status        HelmRevisionStatus `json:"HelmAppStatus,omitempty"`
+}
+
+// HelmRevisionSpec describes the application revision which can not be changed.
+type HelmRevisionSpec struct {
+	Revision     int    `json:"HelmRevision"`
+	Repo         string `json:"Repo"`
+	ChartName    string `json:"ChartName"`
+	ChartVersion string `json:"ChartVersion"`
+	Values       string `json:"Values"`
+}
+
+// HelmRevisionStatus describes the application revision status.
+type HelmRevisionStatus struct {
+}
+
+// HostAlias 页面位置：高级配置 - DNS 配置 - Hosts 文件配置
+type HostAlias struct {
+	IP        string   `json:"Ip"`
+	HostNames []string `json:"HostNames"`
+}
+
+// KV represents a single key-value pair in the form of a struct
+type KV struct {
+	Key   string `json:"Key"`
+	Value string `json:"Value"`
+}
+
+// Lifecycle 页面位置：容器配置 - 生命周期
+type Lifecycle struct {
+	PostStart []string `json:"PostStart,omitempty"`
+	PreStop   []string `json:"PreStop,omitempty"`
+}
+
+// ListOption has some options for list API
+type ListOption struct {
+	Pagination
+	Filter
+	Cluster
+}
+
+// Metadata 使用在 PodTemplate 中的元数据
+// 不直接使用 `cpsmetav1.ObjectMeta`，因为包含了太多无用字段
+type Metadata struct {
+	Labels      []KV `json:"Labels,omitempty"`
+	Annotations []KV `json:"Annotations,omitempty"`
+}
+
+// NodeAffinity 页面位置：高级配置 - 调度策略 - 节点亲和性
+type NodeAffinity struct {
+	Type string `json:"Type"`
+	// one of Required and Preferred
+	Labels []KV `json:"Labels"`
 }
 
 // Overview contains the workload info in overview page.
@@ -160,37 +352,86 @@ type Pagination struct {
 	Limit uint `source:"query,Limit,default=99999"`
 }
 
+// PersistentVolumeClaimVolumeSource ...
+type PersistentVolumeClaimVolumeSource struct {
+	ClaimName string `json:"ClaimName"`
+}
+
+// PodAffinity 页面位置：高级配置 - 调度策略 - Pod 亲和性
+// nolint
+type PodAffinity struct {
+	Type   string `json:"Type"`
+	Labels []KV   `json:"Labels"`
+}
+
+// PodAntiAffinity 页面位置：高级配置 - 调度策略 - Pod 反亲和性
+// nolint
+type PodAntiAffinity struct {
+	Type   string `json:"Type"`
+	Labels []KV   `json:"Labels"`
+}
+
+// PodSpec ...
+//
+// +nirvana:api=origin:"Spec"
+type PodSpec struct {
+	InitContainers                []Container      `json:"InitContainers,omitempty"`
+	Containers                    []Container      `json:"Containers"`
+	Volumes                       []Volume         `json:"Volumes,omitempty"`
+	TerminationGracePeriodSeconds *int64           `json:"TerminationGracePeriodSeconds,omitempty"`
+	DNSPolicy                     string           `json:"DnsPolicy,omitempty"`
+	Affinity                      *Affinity        `json:"Affinity,omitempty"`
+	Tolerations                   []Toleration     `json:"Tolerations,omitempty"`
+	HostAliases                   []HostAlias      `json:"HostAliases,omitempty"`
+	SecurityContext               *SecurityContext `json:"PodSecurityContext,omitempty"`
+}
+
 // Port represents the port on which the service is exposed
 type Port struct {
+	Name     string `json:"Name,omitempty"`
 	Protocol string `json:"Protocol"`
 	Port     int32  `json:"Port"`
 	NodePort int32  `json:"NodePort,omitempty"`
 }
 
-// Revision describes the revision of an application.
-type Revision struct {
-	v1.ObjectMeta `json:",inline"`
-	Spec          RevisionSpec   `json:"Spec"`
-	Status        RevisionStatus `json:"Status,omitempty"`
+// Probe 页面位置：容器配置 - 健康检查
+type Probe struct {
+	Handler             `json:",inline"`
+	InitialDelaySeconds int32 `json:"InitialDelaySeconds"`
+	// 时间设置 - 初始等待
+	TimeoutSeconds int32 `json:"TimeoutSeconds"`
+	// 时间设置 - 超时
+	PeriodSeconds int32 `json:"PeriodSeconds"`
+	// 时间设置 - 检查间隔
+	SuccessThreshold int32 `json:"SuccessThreshold"`
+	// 阈值 - 成功
+	FailureThreshold int32 `json:"FailureThreshold"`
 }
 
-// RevisionList is a list of Revision entry
+// ResourceRequirements 页面位置： 容器配置 - 容器基本信息 - 资源配额
+type ResourceRequirements struct {
+	Limits   []KV `json:"Limits"`
+	Requests []KV `json:"Requests"`
+}
+
+// RevisionList is a list of HelmRevision entry
 type RevisionList struct {
 	v1.ListMeta `json:",inline"`
-	Items       []Revision `json:"items,omitempty"`
+	Items       []HelmRevision `json:"items,omitempty"`
 }
 
-// RevisionSpec describes the application revision which can not be changed.
-type RevisionSpec struct {
-	Revision     int    `json:"Revision"`
-	Repo         string `json:"Repo"`
-	ChartName    string `json:"ChartName"`
-	ChartVersion string `json:"ChartVersion"`
-	Values       string `json:"Values"`
+// RollbackHelmAppToRevisionOption has some options for RollbackHelmAppToRevision API
+//
+// +nirvana:api=alias:"RollbackHelmAppToRevisionOption"
+type RollbackHelmAppToRevisionOption struct {
+	Cluster
+	Revision int `source:"query,Revision"`
 }
 
-// RevisionStatus describes the application revision status.
-type RevisionStatus struct {
+// RollingUpdateDeployment 页面位置： 高级配置 - 更新策略（滚动更新） - 最大不可用 & 最大超量
+type RollingUpdateDeployment struct {
+	MaxUnavailable int `json:"MaxUnavailable,omitempty"`
+	MaxSurge       int `json:"MaxSurge,omitempty"`
 }
 
 // Secret describes a secret entry.
@@ -218,6 +459,11 @@ type SecretData struct {
 // +nirvana:api=origin:"DeleteOption"
 type SecretDeleteOption struct {
 	Cluster
+}
+
+// SecretEnvSource ...
+type SecretEnvSource struct {
+	Name string `json:"Name"`
 }
 
 // SecretGetOption has some options for secret get API
@@ -253,12 +499,22 @@ type SecretReference struct {
 	Kind string `json:"Kind"`
 }
 
+// SecretVolumeSource ...
+type SecretVolumeSource struct {
+	SecretName string `json:"SecretName"`
+}
+
+// SecurityContext 页面位置：高级配置 - 安全
+type SecurityContext struct {
+	RunAsNonRoot *bool `json:"RunAsNonRoot,omitempty"`
+}
+
 // Service describes a service entry
 type Service struct {
 	v1.ObjectMeta `json:",inline"`
-	Spec          ServiceSpec   `json:"Spec,omitempty"`
-	YAML          string        `json:"Yaml,omitempty"`
-	Workloads     *WorkloadList `json:"WorkloadList,omitempty"`
+	Spec          ServiceSpec        `json:"Spec,omitempty"`
+	YAML          string             `json:"Yaml,omitempty"`
+	Workloads     []*ServiceWorkload `json:"Workloads,omitempty"`
 }
 
 // ServiceDeleteOption has some options for service delete API
@@ -273,6 +529,14 @@ type ServiceDeleteOption struct {
 // +nirvana:api=origin:"GetOption"
 type ServiceGetOption struct {
 	Cluster
+}
+
+// ServiceLabelSelector describes a kv pair.
+//
+// +nirvana:api=origin:"LabelSelector"
+type ServiceLabelSelector struct {
+	Key   string `json:"Key"`
+	Value string `json:"Value"`
 }
 
 // ServiceList is a list of Service entry
@@ -296,12 +560,12 @@ type ServiceListOption struct {
 //
 // +nirvana:api=origin:"Spec"
 type ServiceSpec struct {
-	Selector        map[string]string `json:"Selector,omitempty"`
-	Type            string            `json:"Type"`
-	Ports           []Port            `json:"Ports"`
-	ClusterIP       string            `json:"ClusterIP,omitempty"`
-	ExternalName    string            `json:"ExternalName,omitempty"`
-	SessionAffinity *SessionAffinity  `json:"SessionAffinity,omitempty"`
+	Selector        []ServiceLabelSelector `json:"Selector,omitempty"`
+	Type            string                 `json:"Type"`
+	Ports           []Port                 `json:"Ports"`
+	ClusterIP       string                 `json:"ClusterIP,omitempty"`
+	NodeIP          string                 `json:"NodeIP,omitempty"`
+	SessionAffinity *SessionAffinity       `json:"SessionAffinity,omitempty"`
 }
 
 // ServiceWorkload contains the basic info of a workload
@@ -315,14 +579,6 @@ type ServiceWorkload struct {
 // SessionAffinity contains the configurations of session affinity
 type SessionAffinity struct {
 	TimeoutSeconds *int32 `json:"TimeoutSeconds,omitempty"`
-}
-
-// Spec describes the application spec
-type Spec struct {
-	Repo         string `json:"Repo"`
-	ChartName    string `json:"ChartName"`
-	ChartVersion string `json:"ChartVersion"`
-	Values       string `json:"Values"`
 }
 
 // StatefulSet describes a statefulset entry.
@@ -363,7 +619,7 @@ type StatefulSetListOption struct {
 	Cluster
 }
 
-// StatefulSetRestartOption has some options for statefulset delete API
+// StatefulSetRestartOption has some options for statefulset restart API
 //
 // +nirvana:api=origin:"RestartOption"
 type StatefulSetRestartOption struct {
@@ -378,14 +634,60 @@ type StatefulSetSpec struct {
 	Replicas *int32
 }
 
-// Status describes the application status
-type Status struct {
-	Phase           string    `json:"Phase"`
-	UpdateTimestamp time.Time `json:"UpdateTimestamp"`
+// Strategy 页面位置： 高级配置 - 更新策略
+type Strategy struct {
+	Type          string                   `json:"Type,omitempty"`
+	RollingUpdate *RollingUpdateDeployment `json:"RollingUpdate,omitempty"`
 }
 
-// WorkloadList is a list of Workload entry
-type WorkloadList struct {
-	v1.ListMeta `json:",inline"`
-	Items       []ServiceWorkload `json:"items,omitempty"`
+// TCPSocketAction ...
+type TCPSocketAction struct {
+	Port int    `json:"Port"`
+	Host string `json:"Host,omitempty"`
+}
+
+// TemplateSpec ...
+type TemplateSpec struct {
+	Metadata Metadata `json:"Metadata,omitempty"`
+	Spec     PodSpec  `json:"PodSpec,omitempty"`
+}
+
+// Toleration 页面位置：高级配置 - 调度策略 - 节点污染调度
+type Toleration struct {
+	Key    string `json:"Key"`
+	Value  string `json:"Value"`
+	Effect string `json:"Effect"`
+}
+
+// UpdateOption has some options for update API
+type UpdateOption struct {
+	Cluster
+}
+
+// Volume 页面位置：存储配置
+type Volume struct {
+	Name         string `json:"Name"`
+	VolumeSource `json:",inline"`
+}
+
+// VolumeMount 页面位置：容器配置 - 配置 - 挂载配置 / 存储配置
+type VolumeMount struct {
+	Name string `json:"Name"`
+	// name of volume mount or related volume
+	ReadOnly bool `json:"ReadOnly"`
+	// should be true
+	MountPath string `json:"MountPath"`
+	// suffix should be subpath
+	SubPath    string `json:"SubPath"`
+	SourceName string `json:"SourceName"`
+	// name of configmap or secret
+	Source string `json:"Source"`
+}
+
+// VolumeSource ...
+type VolumeSource struct {
+	EmptyDir              *EmptyDirVolumeSource              `json:"EmptyDir,omitempty"`
+	Secret                *SecretVolumeSource                `json:"Secret,omitempty"`
+	PersistentVolumeClaim *PersistentVolumeClaimVolumeSource `json:"PersistentVolumeClaim,omitempty"`
+	ConfigMap             *ConfigMapVolumeSource             `json:"ConfigMap,omitempty"`
 }
