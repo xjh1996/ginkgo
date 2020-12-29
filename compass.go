@@ -82,7 +82,7 @@ func setupSuite() {
 	// Run only on Ginkgo node 1
 	klog.Infof("Running setupSuite actions on node 1")
 
-	err := client.LoadClientsetFromConfig(e2econfig.Context.KubeConfig)
+	err := client.LoadClientsetFromConfig(e2econfig.Context.KubeConfig, e2econfig.Context.ControlClusterConfig, e2econfig.Context.UserClusterConfigs)
 	if err != nil {
 		logger.Failf("Error loading Clientset: %v", err)
 	}

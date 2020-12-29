@@ -5,11 +5,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/caicloud/zeus/framework/auth"
-
 	"github.com/caicloud/nubela/expect"
-
 	"github.com/caicloud/nubela/logger"
+	"github.com/caicloud/zeus/framework/auth"
 	"github.com/caicloud/zeus/framework/client"
 	e2econfig "github.com/caicloud/zeus/framework/config"
 	"github.com/caicloud/zeus/framework/util"
@@ -28,8 +26,10 @@ type Framework struct {
 	UniqueName string
 
 	// Set the Clientset for kubernetes
-	skipK8sClientsetCreation bool                   // Whether to skip creationg a k8s clientset
-	ClientSet                *client.BaseClientType // return backend clientset
+	skipK8sClientsetCreation bool                    // Whether to skip creationg a k8s clientset
+	ClientSet                *client.BaseClientType  // return backend clientset
+	ControlClusterClientSet  *client.BaseClientType  // control cluster clientset
+	UserClusterClientSet     []client.BaseClientType // user cluster clientset
 
 	// cluster info
 	APIClient      client.User
@@ -69,6 +69,8 @@ func (f *Framework) BeforeEach() {
 	f.APIClient = client.NewAPIClient(f.PresetResource.Auth.User, f.PresetResource.Auth.Password)
 	f.AdminAPIClient = client.NewAPIClient(f.PresetResource.Auth.AdminUser, f.PresetResource.Auth.Password)
 	f.ClientSet = client.BaseClient
+	f.ControlClusterClientSet = client.ControlClient
+	f.UserClusterClientSet = client.UserClients
 
 	if !f.skipNamespaceCreation {
 		ginkgo.By(fmt.Sprintf("Building a namespace, basename %s", f.BaseName))
