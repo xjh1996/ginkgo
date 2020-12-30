@@ -208,14 +208,6 @@ type Filter struct {
 	Query string `source:"query,Query"`
 }
 
-// GetHelmRevisionOption has some options for GetHelmRevision API
-//
-// +nirvana:api=alias:"GetHelmRevisionOption"
-type GetHelmRevisionOption struct {
-	Cluster
-	Revision int `source:"query,Revision"`
-}
-
 // GetOption has some options for get API
 type GetOption struct {
 	Cluster
@@ -258,39 +250,101 @@ type HelmAppList struct {
 	Items       []HelmApp `json:"Items"`
 }
 
-// HelmAppSpec describes the application spec
-type HelmAppSpec struct {
+// HelmAppResourceConfig is the config info in application's details page.
+type HelmAppResourceConfig struct {
+	v1.ObjectMeta
+	YAML string `json:"Yaml"`
+}
+
+// HelmAppResourceMisc includes other resource in application's details page
+type HelmAppResourceMisc struct {
+	v1.ObjectMeta
+	YAML string `json:"Yaml"`
+}
+
+// HelmAppResourcePVC is the PVC info in application's details page.
+type HelmAppResourcePVC struct {
+	v1.ObjectMeta
+	YAML     string `json:"Yaml"`
+	Size     string `json:"Size"`
+	Capacity string `json:"Capacity"`
+}
+
+// HelmAppResourceService is the service info in application's details page.
+type HelmAppResourceService struct {
+	v1.ObjectMeta
+	YAML      string                       `json:"Yaml"`
+	Type      string                       `json:"Type"`
+	Ports     []HelmAppResourceServicePort `json:"Ports"`
+	ClusterIP string                       `json:"ClusterIP,omitempty"`
+	NodeIP    string                       `json:"NodeIP,omitempty"`
+}
+
+// HelmAppResourceServicePort is the port of service in application's details page.
+type HelmAppResourceServicePort struct {
+	Name     string `json:"Name,omitempty"`
+	Protocol string `json:"Protocol"`
+	Port     int32  `json:"Port"`
+	NodePort int32  `json:"NodePort,omitempty"`
+}
+
+// HelmAppResourceWorkload is the workloads info in application's details page.
+type HelmAppResourceWorkload struct {
+	v1.ObjectMeta
+	YAML  string `json:"Yaml"`
+	Phase string `json:"Phase"`
+}
+
+// HelmAppResources is the resources created by helm application
+type HelmAppResources struct {
+	Workloads []HelmAppResourceWorkload `json:"Workloads"`
+	Services  []HelmAppResourceService  `json:"Services"`
+	Configs   []HelmAppResourceConfig   `json:"Configs"`
+	Volumes   []HelmAppResourcePVC      `json:"Volumes"`
+	Misc      []HelmAppResourceMisc     `json:"Misc"`
+}
+
+// HelmAppRevision describes the revision of an application.
+type HelmAppRevision struct {
+	v1.ObjectMeta `json:",inline"`
+	Spec          HelmAppRevisionSpec   `json:"Spec"`
+	Status        HelmAppRevisionStatus `json:"Status,omitempty"`
+}
+
+// HelmAppRevisionList is a list of HelmAppRevision entry
+type HelmAppRevisionList struct {
+	v1.ListMeta `json:",inline"`
+	Items       []HelmAppRevision `json:"Items,omitempty"`
+}
+
+// HelmAppRevisionSpec describes the application revision which can not be changed.
+type HelmAppRevisionSpec struct {
 	ChartName    string `json:"ChartName"`
 	ChartVersion string `json:"ChartVersion"`
 	Values       string `json:"Values"`
-	Network      string `json:"Network"`
+	Revision     int    `json:"HelmAppRevision"`
+}
+
+// HelmAppRevisionStatus describes the application revision status.
+type HelmAppRevisionStatus struct {
+	UpdateTimestamp time.Time `json:"UpdateTimestamp"`
+}
+
+// HelmAppSpec describes the application spec
+type HelmAppSpec struct {
+	ChartName     string `json:"ChartName"`
+	ChartVersion  string `json:"ChartVersion"`
+	IsCustomChart bool   `json:"IsCustomChart"`
+	Values        string `json:"Values"`
+	Network       string `json:"Network"`
 }
 
 // HelmAppStatus describes the application status
 type HelmAppStatus struct {
-	Phase           string    `json:"Phase"`
-	UpdateTimestamp time.Time `json:"UpdateTimestamp"`
-	Version         int       `json:"Version"`
-}
-
-// HelmRevision describes the revision of an application.
-type HelmRevision struct {
-	v1.ObjectMeta `json:",inline"`
-	Spec          HelmRevisionSpec   `json:"HelmAppSpec"`
-	Status        HelmRevisionStatus `json:"HelmAppStatus,omitempty"`
-}
-
-// HelmRevisionSpec describes the application revision which can not be changed.
-type HelmRevisionSpec struct {
-	Revision     int    `json:"HelmRevision"`
-	Repo         string `json:"Repo"`
-	ChartName    string `json:"ChartName"`
-	ChartVersion string `json:"ChartVersion"`
-	Values       string `json:"Values"`
-}
-
-// HelmRevisionStatus describes the application revision status.
-type HelmRevisionStatus struct {
+	Phase           string            `json:"Phase"`
+	UpdateTimestamp time.Time         `json:"UpdateTimestamp"`
+	Version         int               `json:"Version"`
+	Resources       *HelmAppResources `json:"Resources,omitempty"`
 }
 
 // HostAlias 页面位置：高级配置 - DNS 配置 - Hosts 文件配置
@@ -357,6 +411,13 @@ type PersistentVolumeClaimVolumeSource struct {
 	ClaimName string `json:"ClaimName"`
 }
 
+// Pod describes a pod entry
+type Pod struct {
+	v1.ObjectMeta `json:",inline"`
+	Spec          PodSpec   `json:"Spec,omitempty"`
+	Status        PodStatus `json:"Status,omitempty"`
+}
+
 // PodAffinity 页面位置：高级配置 - 调度策略 - Pod 亲和性
 // nolint
 type PodAffinity struct {
@@ -369,6 +430,14 @@ type PodAffinity struct {
 type PodAntiAffinity struct {
 	Type   string `json:"Type"`
 	Labels []KV   `json:"Labels"`
+}
+
+// PodList ...
+//
+// +nirvana:api=origin:"List"
+type PodList struct {
+	v1.ListMeta `json:",inline"`
+	Items       []Pod `json:"Items,omitempty"`
 }
 
 // PodSpec ...
@@ -384,6 +453,12 @@ type PodSpec struct {
 	Tolerations                   []Toleration     `json:"Tolerations,omitempty"`
 	HostAliases                   []HostAlias      `json:"HostAliases,omitempty"`
 	SecurityContext               *SecurityContext `json:"PodSecurityContext,omitempty"`
+}
+
+// PodStatus ...
+//
+// +nirvana:api=origin:"Status"
+type PodStatus struct {
 }
 
 // Port represents the port on which the service is exposed
@@ -408,16 +483,19 @@ type Probe struct {
 	FailureThreshold int32 `json:"FailureThreshold"`
 }
 
+// Remarks ...
+type Remarks struct {
+	SubjectName            string   `json:"SubjectName,omitempty"`
+	IssuerName             []string `json:"IssuerName,omitempty"`
+	NotBefore              string   `json:"NotBefore,omitempty"`
+	NotAfter               string   `json:"NotAfter,omitempty"`
+	SubjectAlternativeName []string `json:"SubjectAlternativeName,omitempty"`
+}
+
 // ResourceRequirements 页面位置： 容器配置 - 容器基本信息 - 资源配额
 type ResourceRequirements struct {
 	Limits   []KV `json:"Limits"`
 	Requests []KV `json:"Requests"`
-}
-
-// RevisionList is a list of HelmRevision entry
-type RevisionList struct {
-	v1.ListMeta `json:",inline"`
-	Items       []HelmRevision `json:"items,omitempty"`
 }
 
 // RollbackHelmAppToRevisionOption has some options for RollbackHelmAppToRevision API
@@ -444,6 +522,7 @@ type Secret struct {
 	Data       []SecretData      `json:"Data,omitempty"`
 	YAML       string            `json:"Yaml,omitempty"`
 	References []SecretReference `json:"References,omitempty"`
+	Remarks    Remarks           `json:"Remarks,omitempty"`
 }
 
 // SecretData describes a kv pair.
@@ -690,4 +769,25 @@ type VolumeSource struct {
 	Secret                *SecretVolumeSource                `json:"Secret,omitempty"`
 	PersistentVolumeClaim *PersistentVolumeClaimVolumeSource `json:"PersistentVolumeClaim,omitempty"`
 	ConfigMap             *ConfigMapVolumeSource             `json:"ConfigMap,omitempty"`
+}
+
+// YAML describe a yaml resource
+type YAML struct {
+	v1.ObjectMeta `json:",inline"`
+	Spec          YamlSpec `json:"Spec"`
+}
+
+// YamlCreateOption has some options for yaml create API
+//
+// +nirvana:api=origin:"CreateOption"
+type YamlCreateOption struct {
+	Cluster
+	Network string `source:"query,Network"`
+}
+
+// YamlSpec describe yaml content
+//
+// +nirvana:api=origin:"Spec"
+type YamlSpec struct {
+	Content string `json:"Content"`
 }

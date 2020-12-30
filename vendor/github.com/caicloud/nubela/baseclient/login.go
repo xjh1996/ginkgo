@@ -1,6 +1,7 @@
 package baseclient
 
 import (
+	"encoding/base64"
 	"net/http"
 
 	"github.com/caicloud/nirvana/rest"
@@ -16,13 +17,21 @@ func GetToken(username, password string) (string, error) {
 
 type requestExecutorWithAuth struct {
 	c        *http.Client
+	tenant   string
 	username string
 	password string
+}
+
+func basicAuth(username, password string) string {
+	auth := username + ":" + password
+	return base64.StdEncoding.EncodeToString([]byte(auth))
 }
 
 // Do uses the http.Client to send an HTTP request and set basic authentication before sending.
 func (r *requestExecutorWithAuth) Do(req *http.Request) (*http.Response, error) {
 	req.SetBasicAuth(r.username, r.password)
+	req.Header.Add("Authorization", "basic "+basicAuth(r.username, r.password))
+	req.Header.Add("X-Tenant", r.tenant)
 	return r.c.Do(req)
 }
 
@@ -31,11 +40,12 @@ func (r *requestExecutorWithAuth) Do(req *http.Request) (*http.Response, error) 
 //   xxx.NewClient(&client.Config{
 //	     Scheme:   "...",
 //	     Host:     "...",
-//	     Executor: NewRequestExecutorWithAuth("admin", "Pwd123456"),
+//	     Executor: NewRequestExecutorWithAuth("system-tenant", "admin", "Pwd123456"),
 //   })
-func NewRequestExecutorWithAuth(username, password string) rest.RequestExecutor {
+func NewRequestExecutorWithAuth(tenant, username, password string) rest.RequestExecutor {
 	return &requestExecutorWithAuth{
 		c:        &http.Client{},
+		tenant:   tenant,
 		username: username,
 		password: password,
 	}

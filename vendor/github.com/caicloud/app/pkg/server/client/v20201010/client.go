@@ -20,6 +20,8 @@ type Interface interface {
 	CreateService(ctx context.Context, serviceGetOption ServiceGetOption, service *Service) (service1 *Service, err error)
 	// CreateStatefulSet does not have any description.
 	CreateStatefulSet(ctx context.Context, statefulSetGetOption StatefulSetGetOption, statefulSet *StatefulSet) (statefulSet1 *StatefulSet, err error)
+	// CreateWithYAML does not have any description.
+	CreateWithYAML(ctx context.Context, yamlCreateOption YamlCreateOption, yAML YAML) (yAML1 *YAML, err error)
 	// DeleteConfigMap does not have any description.
 	DeleteConfigMap(ctx context.Context, configMapDeleteOption ConfigMapDeleteOption) (err error)
 	// DeleteDeployment does not have any description.
@@ -38,8 +40,6 @@ type Interface interface {
 	GetDeployment(ctx context.Context, deploymentGetOption DeploymentGetOption) (deployment *Deployment, err error)
 	// GetHelmApp does not have any description.
 	GetHelmApp(ctx context.Context, getOption GetOption) (helmApp *HelmApp, err error)
-	// GetHelmAppRevision does not have any description.
-	GetHelmAppRevision(ctx context.Context, getHelmRevisionOption GetHelmRevisionOption) (helmRevision *HelmRevision, err error)
 	// GetOverview does not have any description.
 	GetOverview(ctx context.Context) (overview *Overview, err error)
 	// GetSecret does not have any description.
@@ -55,7 +55,9 @@ type Interface interface {
 	// ListHelmApp does not have any description.
 	ListHelmApp(ctx context.Context, listOption ListOption) (helmAppList *HelmAppList, err error)
 	// ListHelmAppRevisions does not have any description.
-	ListHelmAppRevisions(ctx context.Context, listOption ListOption) (revisionList *RevisionList, err error)
+	ListHelmAppRevisions(ctx context.Context, listOption ListOption) (helmAppRevisionList *HelmAppRevisionList, err error)
+	// ListPodsForWorkload does not have any description.
+	ListPodsForWorkload(ctx context.Context, cluster Cluster, kind string) (podList *PodList, err error)
 	// ListSecrets does not have any description.
 	ListSecrets(ctx context.Context, secretListOption SecretListOption) (secretList *SecretList, err error)
 	// ListServices does not have any description.
@@ -67,7 +69,7 @@ type Interface interface {
 	// RestartStatefulSet does not have any description.
 	RestartStatefulSet(ctx context.Context, statefulSetRestartOption StatefulSetRestartOption) (err error)
 	// RollbackHelmAppToRevision does not have any description.
-	RollbackHelmAppToRevision(ctx context.Context, rollbackHelmAppToRevisionOption RollbackHelmAppToRevisionOption) (helmApp *HelmApp, err error)
+	RollbackHelmAppToRevision(ctx context.Context, rollbackHelmAppToRevisionOption RollbackHelmAppToRevisionOption) (err error)
 	// UpdateConfigMap does not have any description.
 	UpdateConfigMap(ctx context.Context, configMapGetOption ConfigMapGetOption, configMap *ConfigMap) (configMap1 *ConfigMap, err error)
 	// UpdateDeployment does not have any description.
@@ -183,6 +185,20 @@ func (c *Client) CreateStatefulSet(ctx context.Context, statefulSetGetOption Sta
 	return
 }
 
+// CreateWithYAML does not have any description.
+func (c *Client) CreateWithYAML(ctx context.Context, yamlCreateOption YamlCreateOption, yAML YAML) (yAML1 *YAML, err error) {
+	yAML1 = new(YAML)
+	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=CreateWithYAML").
+		Query("ClusterName", yamlCreateOption.ClusterName).
+		Query("Namespace", yamlCreateOption.Namespace).
+		Query("Name", yamlCreateOption.Name).
+		Query("Network", yamlCreateOption.Network).
+		Body("application/json", yAML).
+		TOPRPCData(yAML1).
+		Do(ctx)
+	return
+}
+
 // DeleteConfigMap does not have any description.
 func (c *Client) DeleteConfigMap(ctx context.Context, configMapDeleteOption ConfigMapDeleteOption) (err error) {
 	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=DeleteConfigMap").
@@ -279,19 +295,6 @@ func (c *Client) GetHelmApp(ctx context.Context, getOption GetOption) (helmApp *
 	return
 }
 
-// GetHelmAppRevision does not have any description.
-func (c *Client) GetHelmAppRevision(ctx context.Context, getHelmRevisionOption GetHelmRevisionOption) (helmRevision *HelmRevision, err error) {
-	helmRevision = new(HelmRevision)
-	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=GetHelmAppRevision").
-		Query("ClusterName", getHelmRevisionOption.ClusterName).
-		Query("Namespace", getHelmRevisionOption.Namespace).
-		Query("Name", getHelmRevisionOption.Name).
-		Query("Revision", getHelmRevisionOption.Revision).
-		TOPRPCData(helmRevision).
-		Do(ctx)
-	return
-}
-
 // GetOverview does not have any description.
 func (c *Client) GetOverview(ctx context.Context) (overview *Overview, err error) {
 	overview = new(Overview)
@@ -383,8 +386,8 @@ func (c *Client) ListHelmApp(ctx context.Context, listOption ListOption) (helmAp
 }
 
 // ListHelmAppRevisions does not have any description.
-func (c *Client) ListHelmAppRevisions(ctx context.Context, listOption ListOption) (revisionList *RevisionList, err error) {
-	revisionList = new(RevisionList)
+func (c *Client) ListHelmAppRevisions(ctx context.Context, listOption ListOption) (helmAppRevisionList *HelmAppRevisionList, err error) {
+	helmAppRevisionList = new(HelmAppRevisionList)
 	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=ListHelmAppRevisions").
 		Query("Start", listOption.Start).
 		Query("Limit", listOption.Limit).
@@ -392,7 +395,20 @@ func (c *Client) ListHelmAppRevisions(ctx context.Context, listOption ListOption
 		Query("ClusterName", listOption.ClusterName).
 		Query("Namespace", listOption.Namespace).
 		Query("Name", listOption.Name).
-		TOPRPCData(revisionList).
+		TOPRPCData(helmAppRevisionList).
+		Do(ctx)
+	return
+}
+
+// ListPodsForWorkload does not have any description.
+func (c *Client) ListPodsForWorkload(ctx context.Context, cluster Cluster, kind string) (podList *PodList, err error) {
+	podList = new(PodList)
+	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=ListPodsForWorkload").
+		Query("ClusterName", cluster.ClusterName).
+		Query("Namespace", cluster.Namespace).
+		Query("Name", cluster.Name).
+		Query("Kind", kind).
+		TOPRPCData(podList).
 		Do(ctx)
 	return
 }
@@ -463,14 +479,12 @@ func (c *Client) RestartStatefulSet(ctx context.Context, statefulSetRestartOptio
 }
 
 // RollbackHelmAppToRevision does not have any description.
-func (c *Client) RollbackHelmAppToRevision(ctx context.Context, rollbackHelmAppToRevisionOption RollbackHelmAppToRevisionOption) (helmApp *HelmApp, err error) {
-	helmApp = new(HelmApp)
+func (c *Client) RollbackHelmAppToRevision(ctx context.Context, rollbackHelmAppToRevisionOption RollbackHelmAppToRevisionOption) (err error) {
 	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=RollbackHelmAppToRevision").
 		Query("ClusterName", rollbackHelmAppToRevisionOption.ClusterName).
 		Query("Namespace", rollbackHelmAppToRevisionOption.Namespace).
 		Query("Name", rollbackHelmAppToRevisionOption.Name).
 		Query("Revision", rollbackHelmAppToRevisionOption.Revision).
-		TOPRPCData(helmApp).
 		Do(ctx)
 	return
 }

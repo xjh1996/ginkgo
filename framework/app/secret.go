@@ -66,3 +66,12 @@ func NewUpdateSecret(name, namespace, key, value string) *types.Secret {
 		},
 	}
 }
+
+func NewSecretListOptions(clusterName, namespace string) types.SecretListOption {
+	return types.SecretListOption{
+		Cluster: types.Cluster{
+			ClusterName: clusterName,
+			Namespace:   NS4Auth(clusterName, namespace),
+		},
+	}
+}

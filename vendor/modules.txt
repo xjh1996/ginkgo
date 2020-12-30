@@ -3,7 +3,7 @@ github.com/beorn7/perks/quantile
 # github.com/caicloud/api v0.0.0-20201214034828-9e5d698f165c
 ## explicit
 github.com/caicloud/api/meta/v1
-# github.com/caicloud/app v1.0.0-alpha.2.0.20201229020410-d166e099ce19
+# github.com/caicloud/app v1.0.0-alpha.2.0.20201229132246-88cca4ad919f
 ## explicit
 github.com/caicloud/app/pkg/server/client
 github.com/caicloud/app/pkg/server/client/v20201010
@@ -39,7 +39,7 @@ github.com/caicloud/cyclone/pkg/apis/cyclone/v1alpha1
 github.com/caicloud/cyclone/pkg/server/apis/v1alpha1
 github.com/caicloud/cyclone/pkg/util/http
 github.com/caicloud/cyclone/pkg/workflow/workload/delegation
-# github.com/caicloud/nirvana v0.3.0-rc.3
+# github.com/caicloud/nirvana v0.3.0-rc.4.0.20201225034230-7fdcb6ab9c4f
 ## explicit
 github.com/caicloud/nirvana/definition
 github.com/caicloud/nirvana/errors
@@ -48,7 +48,7 @@ github.com/caicloud/nirvana/rest
 github.com/caicloud/nirvana/service
 github.com/caicloud/nirvana/service/executor
 github.com/caicloud/nirvana/service/rest/router
-# github.com/caicloud/nubela v0.0.0-20201222075559-0c186fee2d4f
+# github.com/caicloud/nubela v0.0.0-20201230021821-a075139c7657
 ## explicit
 github.com/caicloud/nubela/baseclient
 github.com/caicloud/nubela/config

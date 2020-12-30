@@ -63,7 +63,7 @@ func viperUnmarshal(flags *flag.FlagSet) error {
 			return
 		}
 		str := fmt.Sprintf("%v", viper.Get(f.Name))
-		if err := f.Value.Set(str); err != nil {
+		if err = f.Value.Set(str); err != nil {
 			err = fmt.Errorf("setting option %q from config file value: %s", f.Name, err)
 		}
 

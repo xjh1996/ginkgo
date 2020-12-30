@@ -43,7 +43,10 @@ const (
 type TestContextType struct {
 	BaseUrl    string
 	Scheme     string
-	KubeConfig string
+
+	KubeConfig string    // default cluster config file, could be control or user cluster
+	ControlClusterConfig string   // control cluster config file
+	UserClusterConfigs string   // user cluster config files
 
 	ViperConfig string
 
@@ -108,6 +111,8 @@ func RegisterCommonFlags(flags *flag.FlagSet) {
 	flags.StringVar(&TestContext.Scheme, "scheme", Scheme, "The communication way with platform. Default is http")
 
 	flags.StringVar(&TestContext.KubeConfig, "kube-config", "~/.kube/config", "Path to the kubeconfig file.")
+	flags.StringVar(&TestContext.ControlClusterConfig, "control-cluster-config", "", "control cluster kubeconfig file")
+	flags.StringVar(&TestContext.UserClusterConfigs, "users-cluster-config", "", "user cluster kubeconfig files, separate by comma")
 
 	flags.StringVar(&TestContext.GatherKubeSystemResourceUsageData, "gather-resource-usage", "false", "If set to 'true' or 'all' framework will be monitoring resource usage of system all add-ons in (some) e2e tests, if set to 'master' framework will be monitoring master node only, if set to 'none' of 'false' monitoring will be turned off.")
 	flags.BoolVar(&TestContext.GatherLogsSizes, "gather-logs-sizes", false, "If set to true framework will be monitoring logs sizes on all machines running e2e tests.")
