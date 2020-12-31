@@ -13,6 +13,7 @@ import (
 
 // User is used to login.
 type User struct {
+	Tenant   string
 	Username string
 	Password string
 }
@@ -22,7 +23,7 @@ func (u *User) App() (appclient.Interface, error) {
 	return appclient.NewClient(&rest.Config{
 		Scheme:   config.Context.Scheme,
 		Host:     config.Context.BaseUrl + "/hodor",
-		Executor: baseclient.NewRequestExecutorWithAuth(u.Username, u.Password),
+		Executor: baseclient.NewRequestExecutorWithAuth(u.Tenant, u.Username, u.Password),
 	})
 }
 
@@ -31,7 +32,7 @@ func (u *User) Pipeline() (pipelineclient.Interface, error) {
 	return pipelineclient.NewClient(&rest.Config{
 		Scheme:   config.Context.Scheme,
 		Host:     config.Context.BaseUrl + "/hodor/apis/pipeline.caicloud.io",
-		Executor: baseclient.NewRequestExecutorWithAuth(u.Username, u.Password),
+		Executor: baseclient.NewRequestExecutorWithAuth(u.Tenant, u.Username, u.Password),
 	})
 }
 
@@ -40,7 +41,7 @@ func (u *User) Cargo() (cargoclient.Interface, error) {
 	return cargoclient.NewClient(&rest.Config{
 		Scheme:   config.Context.Scheme,
 		Host:     config.Context.BaseUrl,
-		Executor: baseclient.NewRequestExecutorWithAuth(u.Username, u.Password),
+		Executor: baseclient.NewRequestExecutorWithAuth(u.Tenant, u.Username, u.Password),
 	})
 }
 
@@ -50,8 +51,9 @@ func (u *User) Auth() (*http.Client, error) {
 }
 
 // NewAPIClient return a rest client with specified user
-func NewAPIClient(username, password string) User {
+func NewAPIClient(tenant, username, password string) User {
 	return User{
+		Tenant:   tenant,
 		Username: username,
 		Password: password,
 	}

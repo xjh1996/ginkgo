@@ -13,7 +13,7 @@ import (
 
 var BaseClient *BaseClientType
 var ControlClient *BaseClientType
-var UserClients []BaseClientType
+var UserClients []*BaseClientType
 var err error
 
 type BaseClientType struct {
@@ -25,29 +25,31 @@ type BaseClientType struct {
 // LoadClientFromConfig returns basic baseclient and crd clients for the kubernetes cluster.
 func LoadClientsetFromConfig(kubeConfig, controlConfig, userConfigs string) error {
 	if kubeConfig == "" {
-		logger.Infof("kubeconfig file is not set")
+		return fmt.Errorf("kubeConfig file is not set")
 	}
 	if BaseClient, err = loadClient(kubeConfig); err != nil {
-		return err
+		return fmt.Errorf("load config file %q failed, %v", kubeConfig, err)
 	}
 
 	if controlConfig == "" {
 		logger.Infof("controlConfig file is not set")
-	}
-	if ControlClient, err = loadClient(controlConfig); err != nil {
-		return err
+	} else {
+		if ControlClient, err = loadClient(controlConfig); err != nil {
+			return fmt.Errorf("load config file %q failed, %v", controlConfig, err)
+		}
 	}
 
 	if userConfigs == "" {
 		logger.Infof("userConfigs file is not set")
-	}
-	// load multi userClusterClient, config files are separated by comma.
-	configs := strings.Split(userConfigs, ", ")
-	for _, c := range configs {
-		if client, err := loadClient(c); err != nil {
-			return err
-		} else {
-			UserClients = append(UserClients, *client)
+	} else {
+		// load multi userClusterClient, config files are separated by comma.
+		configs := strings.Split(userConfigs, ", ")
+		for _, c := range configs {
+			if client, err := loadClient(c); err != nil {
+				return fmt.Errorf("load userconfigs %q failed, %v", c, err)
+			} else {
+				UserClients = append(UserClients, client)
+			}
 		}
 	}
 	return nil

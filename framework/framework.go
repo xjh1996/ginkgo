@@ -26,10 +26,10 @@ type Framework struct {
 	UniqueName string
 
 	// Set the Clientset for kubernetes
-	skipK8sClientsetCreation bool                    // Whether to skip creationg a k8s clientset
-	ClientSet                *client.BaseClientType  // return backend clientset
-	ControlClusterClientSet  *client.BaseClientType  // control cluster clientset
-	UserClusterClientSet     []client.BaseClientType // user cluster clientset
+	skipK8sClientsetCreation bool                     // Whether to skip creationg a k8s clientset
+	ClientSet                *client.BaseClientType   // return backend clientset
+	ControlClusterClientSet  *client.BaseClientType   // control cluster clientset
+	UserClusterClientSet     []*client.BaseClientType // user cluster clientset
 
 	// cluster info
 	APIClient      client.User
@@ -66,8 +66,8 @@ func NewFramework(baseName string, skipK8sClientsetCreation, skipNamespaceCreati
 func (f *Framework) BeforeEach() {
 	f.ClusterID = e2econfig.Context.ClusterID
 	f.PresetResource = e2econfig.Context.PresetCompassResource
-	f.APIClient = client.NewAPIClient(f.PresetResource.Auth.User, f.PresetResource.Auth.Password)
-	f.AdminAPIClient = client.NewAPIClient(f.PresetResource.Auth.AdminUser, f.PresetResource.Auth.Password)
+	f.APIClient = client.NewAPIClient(f.PresetResource.Auth.TenantID, f.PresetResource.Auth.User, f.PresetResource.Auth.Password)
+	f.AdminAPIClient = client.NewAPIClient(f.PresetResource.Auth.AdminTenantID, f.PresetResource.Auth.AdminUser, f.PresetResource.Auth.Password)
 	f.ClientSet = client.BaseClient
 	f.ControlClusterClientSet = client.ControlClient
 	f.UserClusterClientSet = client.UserClients
