@@ -7,11 +7,11 @@ github.com/caicloud/api/meta/v1
 ## explicit
 github.com/caicloud/app/pkg/server/client
 github.com/caicloud/app/pkg/server/client/v20201010
-# github.com/caicloud/cargo-server v0.1.0-alpha
+# github.com/caicloud/cargo-server v0.1.0-alpha.2
 ## explicit
 github.com/caicloud/cargo-server/pkg/server/client
 github.com/caicloud/cargo-server/pkg/server/client/v20201010
-# github.com/caicloud/containeros v1.0.0-alpha.2
+# github.com/caicloud/containeros v1.0.0-alpha.2.0.20201222090623-e5e4e7537605
 ## explicit
 github.com/caicloud/containeros/pkg/apis/auth
 github.com/caicloud/containeros/pkg/apis/auth/v1alpha1
@@ -283,7 +283,8 @@ golang.org/x/text/secure/bidirule
 golang.org/x/text/transform
 golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
-# golang.org/x/time v0.0.0-20191024005414-555d28b269f0
+# golang.org/x/time v0.0.0-20200630173020-3af7569d3a1e
+## explicit
 golang.org/x/time/rate
 # golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543
 golang.org/x/xerrors
@@ -524,7 +525,8 @@ k8s.io/klog/v2
 k8s.io/kube-openapi/pkg/util/proto
 # k8s.io/kubernetes v1.19.2
 k8s.io/kubernetes/test/e2e/framework/ginkgowrapper
-# k8s.io/utils v0.0.0-20200821003339-5e75c0163111
+# k8s.io/utils v0.0.0-20201015054608-420da100c033
+## explicit
 k8s.io/utils/buffer
 k8s.io/utils/integer
 k8s.io/utils/pointer

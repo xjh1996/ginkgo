@@ -31,7 +31,7 @@ func (u *User) App() (appclient.Interface, error) {
 func (u *User) Pipeline() (pipelineclient.Interface, error) {
 	return pipelineclient.NewClient(&rest.Config{
 		Scheme:   config.Context.Scheme,
-		Host:     config.Context.BaseUrl + "/hodor/apis/pipeline.caicloud.io",
+		Host:     config.Context.BaseUrl,
 		Executor: baseclient.NewRequestExecutorWithAuth(u.Tenant, u.Username, u.Password),
 	})
 }

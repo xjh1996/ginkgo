@@ -12,7 +12,7 @@ const (
 	// CargoKind is the name of the Cargo resource kind.
 	CargoKind = "Cargo"
 	// CargoName is the name of the Cargo resource (plural).
-	CargoName = "cargos"
+	CargoName = "cargoes"
 	// CargoKindKey is used as the key when mapping to the Cargo resource.
 	CargoKindKey = "cargo"
 )

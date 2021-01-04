@@ -26,7 +26,7 @@ type Interface interface {
 	CreateRegistry(ctx context.Context, xTenant string, xUser string, createRegistryReq *CreateRegistryReq) (registryResp *RegistryResp, err error)
 	// CreateReplication description:
 	// create replication
-	CreateReplication(ctx context.Context, xTenant string, createReplicationReq *CreateReplicationReq) (replicationResp *ReplicationResp, err error)
+	CreateReplication(ctx context.Context, xTenant string, createReplicationReq *CreateReplicationReq) (replication *Replication, err error)
 	// DeleteArtifactCleanPolicy description:
 	// delete artifact clean policy
 	DeleteArtifactCleanPolicy(ctx context.Context, xTenant string, registry string, project string, policy string) (err error)
@@ -78,6 +78,9 @@ type Interface interface {
 	// GetCICDSummary description:
 	// Get CICD summary
 	GetCICDSummary(ctx context.Context, xTenant string, xUser string, pagination *Pagination) (registryListResp *RegistryListResp, err error)
+	// GetCargoAccount description:
+	// get cargo account
+	GetCargoAccount(ctx context.Context, registry string, xUser string) (cargoAccount *CargoAccount, err error)
 	// GetCargoConfig description:
 	// get cargo config
 	GetCargoConfig(ctx context.Context, xTenant string, config string) (configInfoResp *ConfigInfoResp, err error)
@@ -107,10 +110,10 @@ type Interface interface {
 	GetRegistry(ctx context.Context, xTenant string, xUser string, registry string) (registryResp *RegistryResp, err error)
 	// GetReplication description:
 	// get replication
-	GetReplication(ctx context.Context, xTenant string, replication string) (replicationResp *ReplicationResp, err error)
+	GetReplication(ctx context.Context, xTenant string, replication string) (replication1 *Replication, err error)
 	// GetReplicationRecord description:
 	// get replication record
-	GetReplicationRecord(ctx context.Context, xTenant string, replication string, record string) (recordResp *RecordResp, err error)
+	GetReplicationRecord(ctx context.Context, xTenant string, replication string, record string) (record1 *Record, err error)
 	// GetRepository description:
 	// get repository
 	GetRepository(ctx context.Context, xTenant string, registry string, project string, repository string) (repository1 *Repository, err error)
@@ -212,7 +215,7 @@ type Interface interface {
 	UpdateRegistry(ctx context.Context, xTenant string, xUser string, registry string, updateRegistryReq *UpdateRegistryReq) (registryResp *RegistryResp, err error)
 	// UpdateReplication description:
 	// update replication
-	UpdateReplication(ctx context.Context, xTenant string, replication string, updateReplicationReq *UpdateReplicationReq) (replicationResp *ReplicationResp, err error)
+	UpdateReplication(ctx context.Context, xTenant string, replication string, updateReplicationReq *UpdateReplicationReq) (replication1 *Replication, err error)
 	// UpdateRepository description:
 	// update repository
 	UpdateRepository(ctx context.Context, xTenant string, registry string, project string, repository string, updateRepositoryReq *UpdateRepositoryReq) (repository1 *Repository, err error)
@@ -318,12 +321,12 @@ func (c *Client) CreateRegistry(ctx context.Context, xTenant string, xUser strin
 
 // CreateReplication description:
 // create replication
-func (c *Client) CreateReplication(ctx context.Context, xTenant string, createReplicationReq *CreateReplicationReq) (replicationResp *ReplicationResp, err error) {
-	replicationResp = new(ReplicationResp)
+func (c *Client) CreateReplication(ctx context.Context, xTenant string, createReplicationReq *CreateReplicationReq) (replication *Replication, err error) {
+	replication = new(Replication)
 	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=CreateReplication").
 		Header("X-Tenant", xTenant).
 		Body("application/json", createReplicationReq).
-		TOPRPCData(replicationResp).
+		TOPRPCData(replication).
 		Do(ctx)
 	return
 }
@@ -514,7 +517,7 @@ func (c *Client) GetArtifactPublicTag(ctx context.Context, xTenant string, regis
 		Query("Repository", repository).
 		Query("Tag", tag).
 		Query("ArtifactDigest", artifactDigest).
-		Data(artifactTagResp).
+		TOPRPCData(artifactTagResp).
 		Do(ctx)
 	return
 }
@@ -530,7 +533,7 @@ func (c *Client) GetArtifactTag(ctx context.Context, xTenant string, registry st
 		Query("Repository", repository).
 		Query("Tag", tag).
 		Query("ArtifactDigest", artifactDigest).
-		Data(artifactTagResp).
+		TOPRPCData(artifactTagResp).
 		Do(ctx)
 	return
 }
@@ -545,6 +548,18 @@ func (c *Client) GetCICDSummary(ctx context.Context, xTenant string, xUser strin
 		Query("Start", pagination.Start).
 		Query("Limit", pagination.Limit).
 		TOPRPCData(registryListResp).
+		Do(ctx)
+	return
+}
+
+// GetCargoAccount description:
+// get cargo account
+func (c *Client) GetCargoAccount(ctx context.Context, registry string, xUser string) (cargoAccount *CargoAccount, err error) {
+	cargoAccount = new(CargoAccount)
+	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=GetCargoAccount").
+		Query("Registry", registry).
+		Header("X-User", xUser).
+		TOPRPCData(cargoAccount).
 		Do(ctx)
 	return
 }
@@ -666,25 +681,25 @@ func (c *Client) GetRegistry(ctx context.Context, xTenant string, xUser string, 
 
 // GetReplication description:
 // get replication
-func (c *Client) GetReplication(ctx context.Context, xTenant string, replication string) (replicationResp *ReplicationResp, err error) {
-	replicationResp = new(ReplicationResp)
+func (c *Client) GetReplication(ctx context.Context, xTenant string, replication string) (replication1 *Replication, err error) {
+	replication1 = new(Replication)
 	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=GetReplication").
 		Header("X-Tenant", xTenant).
 		Query("Replication", replication).
-		TOPRPCData(replicationResp).
+		TOPRPCData(replication1).
 		Do(ctx)
 	return
 }
 
 // GetReplicationRecord description:
 // get replication record
-func (c *Client) GetReplicationRecord(ctx context.Context, xTenant string, replication string, record string) (recordResp *RecordResp, err error) {
-	recordResp = new(RecordResp)
+func (c *Client) GetReplicationRecord(ctx context.Context, xTenant string, replication string, record string) (record1 *Record, err error) {
+	record1 = new(Record)
 	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=GetReplicationRecord").
 		Header("X-Tenant", xTenant).
 		Query("Replication", replication).
 		Query("Record", record).
-		TOPRPCData(recordResp).
+		TOPRPCData(record1).
 		Do(ctx)
 	return
 }
@@ -806,7 +821,7 @@ func (c *Client) ListArtifactPublicTags(ctx context.Context, xTenant string, reg
 		Query("BaseImageCheck", baseImageCheck).
 		Query("Start", pagination.Start).
 		Query("Limit", pagination.Limit).
-		Data(artifactTagListResp).
+		TOPRPCData(artifactTagListResp).
 		Do(ctx)
 	return
 }
@@ -824,7 +839,7 @@ func (c *Client) ListArtifactTags(ctx context.Context, xTenant string, registry 
 		Query("BaseImageCheck", baseImageCheck).
 		Query("Start", pagination.Start).
 		Query("Limit", pagination.Limit).
-		Data(artifactTagListResp).
+		TOPRPCData(artifactTagListResp).
 		Do(ctx)
 	return
 }
@@ -1181,13 +1196,13 @@ func (c *Client) UpdateRegistry(ctx context.Context, xTenant string, xUser strin
 
 // UpdateReplication description:
 // update replication
-func (c *Client) UpdateReplication(ctx context.Context, xTenant string, replication string, updateReplicationReq *UpdateReplicationReq) (replicationResp *ReplicationResp, err error) {
-	replicationResp = new(ReplicationResp)
+func (c *Client) UpdateReplication(ctx context.Context, xTenant string, replication string, updateReplicationReq *UpdateReplicationReq) (replication1 *Replication, err error) {
+	replication1 = new(Replication)
 	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=UpdateReplication").
 		Header("X-Tenant", xTenant).
 		Query("Replication", replication).
 		Body("application/json", updateReplicationReq).
-		TOPRPCData(replicationResp).
+		TOPRPCData(replication1).
 		Do(ctx)
 	return
 }

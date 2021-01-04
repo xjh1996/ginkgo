@@ -41,6 +41,53 @@ cicd-enable: false
 elastic-enable: false
 elastic-address:
 
-# testcase settings
-# demo.web.baseurl: test.io
-# demo.web.user.name: test
+#Cargo Test Case Config
+cargo.registry.username: admin
+cargo.registry.password: Pwd123456
+cargo.registry.basename: cntest
+cargo.registry.systemTenant: system-tenant
+cargo.registry.cargoDomain: cntest.cargo.io
+cargo.registry.userTenant: 
+cargo.registry.imageRepo: 
+cargo.registry.defaultRegistryName: default
+cargo.registry.description: 自动化创建
+cargo.registry.path: 
+
+#Pipeline Test Case Config
+pipeline.svn.server: http://172.19.30.61/svn/
+pipeline.svn.url: SampleProject
+pipeline.svn.run: 
+pipeline.svn.user: cncn
+pipeline.svn.password: qa2020
+pipeline.svn.token: 
+
+pipeline.bitbucket.server: http://172.19.30.59:7990/
+pipeline.bitbucket.url: CNTES/cppdemo
+pipeline.bitbucket.run: 
+pipeline.bitbucket.user: admin
+pipeline.bitbucket.password: qa2020
+pipeline.bitbucket.token: MTgyODYxNTM2MjAzOjFtcU8bk4vY1sD797bVcdsKGqHL
+
+pipeline.github.server: https://github.com
+pipeline.github.url: chenne69163/cppdemo
+pipeline.github.run: 
+pipeline.github.user: 
+pipeline.github.password: 
+pipeline.github.token: c9612923112f2744671b2e1a7804e77c8e9e7e51
+
+pipeline.gitlab.server: http://172.19.30.58:81
+pipeline.gitlab.url: fufu/cntest20200103
+pipeline.gitlab.run: 
+pipeline.gitlab.user: fufu
+pipeline.gitlab.password: admin123
+pipeline.gitlab.token: c5o6YxuraCcrBtiAgGW4
+
+pipeline.public.baseName: cntest
+pipeline.public.nameSpace: 
+pipeline.public.configSpace: 
+pipeline.public.userTenant: system-tenant
+pipeline.public.systemTenant: system-tenant
+pipeline.public.pvcName: 
+pipeline.public.pvcquota: 10Gi
+pipeline.public.podName: 
+

@@ -50,6 +50,20 @@ type ArtifactTagResp struct {
 	Status         *TagStatus `json:"Status"`
 }
 
+// CargoAccount ...
+type CargoAccount struct {
+	v1.ObjectMeta `json:",inline"`
+	Spec          CargoAccountSpec `json:"Spec"`
+}
+
+// CargoAccountSpec ...
+type CargoAccountSpec struct {
+	Domain   string `json:"domain"`
+	Host     string `json:"host"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
 // CleanPolicyListResp ...
 type CleanPolicyListResp struct {
 	*v1.ListMeta `json:",inline"`
@@ -113,8 +127,8 @@ type CreateRegistryReq struct {
 
 // CreateReplicationReq ...
 type CreateReplicationReq struct {
-	Metadata *ReplicationMetadata `json:"metadata"`
-	Spec     *ReplicationSpec     `json:"spec"`
+	v1.ObjectMeta `json:",inline"`
+	Spec          ReplicationSpec `json:"Spec"`
 }
 
 // DefaultPublicProject ...
@@ -330,29 +344,30 @@ type PublicProject struct {
 	Status         *ProjectStatus `json:"Status"`
 }
 
-// Record replication record table
+// Record ...
 type Record struct {
-	Replication *Replication        `json:"Replication"`
-	Trigger     *ReplicationTrigger `json:"Trigger"`
+	v1.ObjectMeta `json:",inline"`
+	Spec          RecordSpec    `json:"Spec"`
+	Status        *RecordStatus `json:"Status"`
 }
 
 // RecordArtifact ...
 type RecordArtifact struct {
-	Artifact  string `json:"Artifact"`
-	Operation string `json:"Operation"`
+	v1.ObjectMeta `json:",inline"`
+	Spec          RecordArtifactSpec    `json:"Spec"`
+	Status        *RecordArtifactStatus `json:"Status"`
 }
 
 // RecordArtifactListResp ...
 type RecordArtifactListResp struct {
-	*v1.ListMeta `json:",inline"`
-	Items        []*RecordArtifactResp `json:"Items"`
+	v1.ListMeta `json:",inline"`
+	Items       []*RecordArtifact `json:"Items"`
 }
 
-// RecordArtifactResp ...
-type RecordArtifactResp struct {
-	*v1.ObjectMeta `json:",inline"`
-	Spec           *RecordArtifact       `json:"Spec"`
-	Status         *RecordArtifactStatus `json:"Status"`
+// RecordArtifactSpec ...
+type RecordArtifactSpec struct {
+	Artifact  string `json:"Artifact"`
+	Operation string `json:"Operation"`
 }
 
 // RecordArtifactStatus ...
@@ -362,15 +377,14 @@ type RecordArtifactStatus struct {
 
 // RecordListResp ...
 type RecordListResp struct {
-	*v1.ListMeta `json:",inline"`
-	Items        []*RecordResp `json:"Items"`
+	v1.ListMeta `json:",inline"`
+	Items       []*Record `json:"Items"`
 }
 
-// RecordResp ...
-type RecordResp struct {
-	*v1.ObjectMeta `json:",inline"`
-	Spec           *Record       `json:"Spec"`
-	Status         *RecordStatus `json:"Status"`
+// RecordSpec replication record table
+type RecordSpec struct {
+	Replication *Replication        `json:"Replication"`
+	Trigger     *ReplicationTrigger `json:"Trigger"`
 }
 
 // RecordStatus ...
@@ -416,28 +430,21 @@ type RegistryStatus struct {
 
 // Replication ...
 type Replication struct {
-	Metadata *ReplicationMetadata `json:"metadata"`
-	Spec     *ReplicationSpec     `json:"spec"`
-	Status   *ReplicationStatus   `json:"status"`
+	v1.ObjectMeta `json:",inline"`
+	Spec          *ReplicationSpec   `json:"Spec"`
+	Status        *ReplicationStatus `json:"Status"`
 }
 
 // ReplicationFilter ...
 type ReplicationFilter struct {
-	Kind  string `json:"kind"`
-	Value string `json:"value"`
+	Kind  string `json:"Kind"`
+	Value string `json:"Value"`
 }
 
 // ReplicationListResp ...
 type ReplicationListResp struct {
-	*v1.ListMeta `json:",inline"`
-	Items        []*ReplicationResp `json:"Items"`
-}
-
-// ReplicationMetadata ...
-type ReplicationMetadata struct {
-	Name         string    `json:"name"`
-	Alias        string    `json:"alias"`
-	CreationTime time.Time `json:"creationTime"`
+	v1.ListMeta `json:",inline"`
+	Items       []*Replication `json:"Items"`
 }
 
 // ReplicationObject ...
@@ -447,25 +454,13 @@ type ReplicationObject struct {
 	Domain string `json:"Domain"`
 }
 
-// ReplicationResp ...
-type ReplicationResp struct {
-	*v1.ObjectMeta `json:",inline"`
-	Spec           *ReplicationSpec   `json:"Spec"`
-	Status         *ReplicationStatus `json:"Status"`
-}
-
-// ReplicationSource ...
-type ReplicationSource struct {
-	ReplicationObject
-}
-
 // ReplicationSpec ...
 type ReplicationSpec struct {
 	Project           string               `json:"Project"`
 	ReplicateNow      bool                 `json:"ReplicateNow"`
 	ReplicateDeletion bool                 `json:"ReplicateDeletion"`
-	Source            *ReplicationSource   `json:"Source"`
-	Target            *ReplicationTarget   `json:"Target"`
+	Source            *ReplicationObject   `json:"Source"`
+	Target            *ReplicationObject   `json:"Target"`
 	Trigger           *ReplicationTrigger  `json:"Trigger"`
 	Filters           []*ReplicationFilter `json:"Filters"`
 }
@@ -473,13 +468,8 @@ type ReplicationSpec struct {
 // ReplicationStatus ...
 type ReplicationStatus struct {
 	LastUpdateTime      time.Time `json:"LastUpdateTime"`
-	IsSyncing           bool      `json:"SsSyncing"`
+	IsSyncing           bool      `json:"IsSyncing"`
 	LastReplicationTime time.Time `json:"LastReplicationTime"`
-}
-
-// ReplicationTarget ...
-type ReplicationTarget struct {
-	*ReplicationObject
 }
 
 // ReplicationTrigger ...
@@ -647,7 +637,7 @@ type TriggerImageCopyReq struct {
 
 // TriggerReplicationReq ...
 type TriggerReplicationReq struct {
-	Action string `json:"action"`
+	Action string `json:"Action"`
 }
 
 // TriggerSettings is the setting about the trigger
@@ -675,8 +665,8 @@ type UpdateRegistryReq struct {
 
 // UpdateReplicationReq ...
 type UpdateReplicationReq struct {
-	Metadata *ReplicationMetadata `json:"metadata"`
-	Spec     *ReplicationSpec     `json:"spec"`
+	v1.ObjectMeta `json:",inline"`
+	Spec          ReplicationSpec `json:"Spec"`
 }
 
 // UpdateRepositoryReq ...
