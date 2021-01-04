@@ -1,26 +1,31 @@
 package demo
 
 import (
+	// 官方包
 	"context"
 	"fmt"
 	"net/http"
 
+	// 本仓库包
+	"github.com/caicloud/zeus/framework"
+	"github.com/caicloud/zeus/framework/config"
+
+	// caicloud 第三方包
 	commonconfig "github.com/caicloud/nubela/config"
 	"github.com/caicloud/nubela/expect"
 	"github.com/caicloud/nubela/logger"
-	"github.com/caicloud/zeus/framework"
-	"github.com/caicloud/zeus/framework/config"
+
+	// 其他第三方包
+	"github.com/onsi/ginkgo"
+	"github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/tools/clientcmd"
-
-	"github.com/onsi/ginkgo"
-	"github.com/onsi/gomega"
 )
 
-var webInfo struct {
+type webType struct {
 	BaseUrl string `default:"baidu.com" usage:"url to test communication"`
 	Sheme   string `default:"http" usage:"transfer protocol"`
 	User    user
@@ -31,12 +36,14 @@ type user struct {
 	Password string `default:"pwd123456" usage:"password of this user"`
 }
 
+var web webType
+
 // in config file, the parameter is setting as
 // demo.web.baseurl (lower case)
 // demo.web.sheme
 // demo.web.user.name
 // demo.web.user.password
-var _ = commonconfig.AddOptions(&webInfo, "demo.web")
+var _ = commonconfig.AddOptions(&web, "demo.web")
 
 var _ = SIGDescribe("无状态服务基础部署", func() {
 	//var k8scl clientset.Interface
@@ -44,7 +51,7 @@ var _ = SIGDescribe("无状态服务基础部署", func() {
 
 	f := framework.NewDefaultFramework("deployment-basic")
 	ginkgo.BeforeEach(func() {
-		//k8scl = f.K8sClientSet
+		//k8scl = f.ClientSet.K8S
 		//ns = f.Namespace.Name
 		//ns = "default"
 	})
@@ -68,7 +75,7 @@ var _ = SIGDescribe("无状态服务高级配置", func() {})
 func testBasicDeployment(f *framework.Framework) {
 	c := f.ClientSet.K8S
 	//ns = f.Namespace.Name
-	ns := "default"
+	ns := "default" //举例 default 分区
 
 	// TODO 业务完成创建服务操作
 	// check 1： 业务完成查询操作
@@ -80,12 +87,12 @@ func testBasicDeployment(f *framework.Framework) {
 	logger.Infof("deployment status: %v", k8sDeployment.Status.Conditions)
 
 	//check 3： 业务层面检查
-	url := fmt.Sprintf("%s://%s", webInfo.Sheme, webInfo.BaseUrl)
+	url := fmt.Sprintf("%s://%s", web.Sheme, web.BaseUrl)
 	gomega.Expect(testConnection(url)).Should(gomega.HaveHTTPStatus(http.StatusOK), "nodeport 类型的 service (%s) 无法通信", url)
 
 	/*
 		获取 crd 的临时解决方案
-		如下暂时可以获取 2.x 版本的 crd 资源，但需要自己传入 crd group version 等资源（目前框架不统一提供该功能），后续会对接效能团队提供的 client 更加便捷的获取 crd 资源
+		如下可以获取 crd 资源，但需要自己传入 crd group version 等资源，后续如果业务组有快捷获取 crd 资源提诉再解决
 	*/
 	config, err := clientcmd.BuildConfigFromFlags("", config.Context.KubeConfig)
 	dynamicClient, err := dynamic.NewForConfig(config)
@@ -99,7 +106,7 @@ func testBasicDeployment(f *framework.Framework) {
 	/*
 		cos 层使用
 	*/
-	//f.K8sCRDClient.Cos.NetworkingV1beta1().LoadBalancers(ns).Get(context.TODO(), "test", metav1.GetOptions{})
+	f.ClientSet.COSCRD.NetworkingV1beta1().LoadBalancers(ns).Get(context.TODO(), "test", metav1.GetOptions{})
 }
 
 func testConnection(url string) (*http.Response, error) {
