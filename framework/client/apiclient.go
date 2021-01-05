@@ -1,13 +1,13 @@
 package client
 
 import (
-	"net/http"
-
 	appclient "github.com/caicloud/app/pkg/server/client"
+	authclient "github.com/caicloud/auth/pkg/server/client"
 	cargoclient "github.com/caicloud/cargo-server/pkg/server/client"
 	"github.com/caicloud/nirvana/rest"
 	"github.com/caicloud/nubela/baseclient"
 	pipelineclient "github.com/caicloud/pipeline/pkg/server/client"
+	resourceclient "github.com/caicloud/resource/pkg/server/client"
 	"github.com/caicloud/zeus/framework/config"
 )
 
@@ -46,8 +46,21 @@ func (u *User) Cargo() (cargoclient.Interface, error) {
 }
 
 // Auth retrieves the authClient
-func (u *User) Auth() (*http.Client, error) {
-	return nil, nil
+func (u *User) Auth() (authclient.Interface, error) {
+	return authclient.NewClient(&rest.Config{
+		Scheme:   config.Context.Scheme,
+		Host:     config.Context.BaseUrl + "/hodor",
+		Executor: baseclient.NewRequestExecutorWithAuth(u.Tenant, u.Username, u.Password),
+	})
+}
+
+// Resource retrieves the ResourceClient
+func (u *User) Resource() (resourceclient.Interface, error) {
+	return resourceclient.NewClient(&rest.Config{
+		Scheme: config.Context.Scheme,
+		Host:   config.Context.BaseUrl + "/hodor",
+		//Executor: baseclient.NewRequestExecutorWithAuth("hyw-test", "richard", "Pwd123456"),
+	})
 }
 
 // NewAPIClient return a rest client with specified user

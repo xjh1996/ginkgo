@@ -33,9 +33,11 @@ func (pcs *PrometheusClusterSet) Mutate() *PrometheusClusterSet {
 
 // GetClusterStatus fetch the deployment status of the given cluster.
 func (pcs *PrometheusClusterSet) GetClusterStatus(cluster string) (*ClusterStatus, bool) {
-	for i := range pcs.Status.Clusters {
-		if pcs.Status.Clusters[i].Cluster == cluster {
-			return &pcs.Status.Clusters[i], true
+	if pcs.Status != nil {
+		for i := range pcs.Status.Clusters {
+			if pcs.Status.Clusters[i].Cluster == cluster {
+				return &pcs.Status.Clusters[i], true
+			}
 		}
 	}
 	return nil, false

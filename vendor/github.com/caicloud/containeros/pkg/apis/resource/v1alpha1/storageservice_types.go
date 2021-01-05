@@ -33,7 +33,8 @@ const (
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +kubebuilder:resource:scope=Cluster
 // +kubebuilder:storageversion
-// +kubebuilder:printcolumn:name="Type",type="string",JSONPath=".typpeName",description="The storage type"
+// +kubebuilder:printcolumn:name="Type",type="string",JSONPath=".spec.typeName",description="The storage type"
+// +kubebuilder:printcolumn:name="Phase",type="string",JSONPath=".status.phase",description="The storage phase"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 // +kubebuilder:subresource:status
 
@@ -70,7 +71,7 @@ type StorageServiceSpec struct {
 type StorageServiceStatus struct {
 	// Phase is a string representation of a StorageService Phase.
 	// +optional
-	Phase StorageServicePhase `json:"phas,omitempty"`
+	Phase StorageServicePhase `json:"phase,omitempty"`
 
 	// StorageMetaData represents the current metadata for each storage backend.
 	// NOTE: this is something being hacking, as this field is only used by some spectify storage.

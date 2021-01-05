@@ -12,7 +12,7 @@ const (
 	// CargoKind is the name of the Cargo resource kind.
 	CargoKind = "Cargo"
 	// CargoName is the name of the Cargo resource (plural).
-	CargoName = "cargoes"
+	CargoName = "cargos"
 	// CargoKindKey is used as the key when mapping to the Cargo resource.
 	CargoKindKey = "cargo"
 )
@@ -20,7 +20,7 @@ const (
 // +genclient
 // +genclient:nonNamespaced
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-// +kubebuilder:resource:scope=Cluster
+// +kubebuilder:resource:scope=Cluster,path=cargos
 // +kubebuilder:storageversion
 // +kubebuilder:printcolumn:name="domain",type=string,JSONPath=`.spec.domain`
 // +kubebuilder:subresource:status
@@ -46,10 +46,26 @@ type CargoSpec struct {
 	// Domain of the cargo registry, for example: test.cargo.io
 	Domain string `json:"domain"`
 
-	// Host of the cargo registry
+	// +kubebuilder:validation:Optional
+	// Host of the cargo registry, for example: https://test.cargo.io
+	//
+	// +optional, default value is: https://{Domain}
 	Host string `json:"host"`
+	// +kubebuilder:validation:Required
 	// AccountRef is the reference of a cargo account which used to manage the cargo registry
-	AccountRef string `json:"accountRef"`
+	AccountRef AccountRef `json:"accountRef"`
+}
+
+// AccountRef references to a cargo account(secret) in the cluster
+type AccountRef struct {
+	// +kubebuilder:validation:Optional
+	// Namespace of the secret
+	//
+	// +optional, if Namespace is empty, will use the default value(cos-system).
+	Namespace string `json:"namespace"`
+	// +kubebuilder:validation:Required
+	// Name of the secret
+	Name string `json:"name"`
 }
 
 // CargoStatus describes status of a cargo registry

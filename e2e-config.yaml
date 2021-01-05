@@ -4,10 +4,10 @@ control-cluster-config: # 控制集群config文件
 users-cluster-config:   # 用户集群config文件
 
 # The address of a test cluster, it always like 192.168.129.30:6060.
-baseurl: 172.0.0.1:6060
+baseurl: 127.0.0.1:6060
 shceme: http
 # The ID of test cluster.
-cluster: compass-stack
+cluster: kubernetes-stack
 
 # preset resource
 # If admin-tenant, admin-user and admin-password are not right, testcases will be fail in prepare phase.
@@ -15,7 +15,7 @@ cluster: compass-stack
 tenant: test
 user: admin
 password: Pwd123456
-admin-tenant: sys-tenant
+admin-tenant: system-tenant
 admin-user: admin
 admin-password: Pwd123456
 
