@@ -1,7 +1,6 @@
 package preset
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 )
@@ -23,7 +22,7 @@ type StorageInfo struct {
 // Existed resource is checked first, if it can not work then the raw storage information is used to build a new one.
 func Storage(raw StorageRawInfo, c *http.Client) (storage *StorageInfo, err error) {
 	if !raw.Enabled {
-		return &StorageInfo{}, errors.New(fmt.Sprintf("Storage integration is disabled!!"))
+		return &StorageInfo{}, fmt.Errorf("Storage integration is disabled!!")
 	}
 	if raw.StorageClass != "" {
 		// TODO：check whether the storage class exists, if it works then return nil
@@ -39,7 +38,7 @@ func Storage(raw StorageRawInfo, c *http.Client) (storage *StorageInfo, err erro
 		// 2. 创建 stroage class
 		// 3. 分配给租户
 	}
-	return &StorageInfo{}, errors.New(fmt.Sprintf("Storage with info %v cannot be created!!!!", raw))
+	return &StorageInfo{}, fmt.Errorf("Storage with info %v cannot be created!!!!", raw)
 }
 
 func (storage *StorageInfo) Delete(c *http.Client) error {

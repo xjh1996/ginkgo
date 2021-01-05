@@ -1,7 +1,6 @@
 package preset
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 )
@@ -21,7 +20,7 @@ type CargoInfo struct {
 // the raw information is used to integrate a new one.
 func Cargo(raw CargoRawInfo, c *http.Client) (cargo *CargoInfo, err error) {
 	if !raw.Enabled {
-		return &CargoInfo{}, errors.New(fmt.Sprintf("Cargo integration is disabled!!"))
+		return &CargoInfo{}, fmt.Errorf("Cargo integration is disabled!!")
 	}
 	if raw.Host != "" {
 		// TODO：check whether the cargo service exists, if it works then return nil
@@ -35,7 +34,7 @@ func Cargo(raw CargoRawInfo, c *http.Client) (cargo *CargoInfo, err error) {
 	}
 	// Specified cargo does not work, then  a new cargo service with cargo information.
 	// TODO：build a new cargo service
-	return nil, errors.New(fmt.Sprintf("Cargo cannot be integrated!!!! configuration: %v", raw))
+	return nil, fmt.Errorf("Cargo cannot be integrated!!!! configuration: %v", raw)
 }
 
 func (cargo *CargoInfo) Delete(c *http.Client) error {

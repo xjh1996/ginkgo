@@ -1,7 +1,6 @@
 package preset
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 )
@@ -20,7 +19,7 @@ type ElasticInfo struct {
 // Elastic checks whether the elastic is existed. If it does not exist, build a elastic service for all insight-e2e cases.
 func Elastic(raw ElasticRawInfo, c *http.Client) (elastic *ElasticInfo, err error) {
 	if !raw.Enabled {
-		return &ElasticInfo{}, errors.New(fmt.Sprintf("Elastic configuration is disabled!!"))
+		return &ElasticInfo{}, fmt.Errorf("Elastic configuration is disabled!!")
 	}
 	if raw.Address != "" {
 		// TODO：check whether elastic works, if it is true then return nil
@@ -31,7 +30,7 @@ func Elastic(raw ElasticRawInfo, c *http.Client) (elastic *ElasticInfo, err erro
 	}
 	// Specified elastic does not work, then build a elastic service.
 	// TODO：build a new elastic
-	return nil, errors.New(fmt.Sprintf("Elastic cannot be integrated!!!! configuration: %v", raw))
+	return nil, fmt.Errorf("Elastic cannot be integrated!!!! configuration: %v", raw)
 }
 
 func (elastic *ElasticInfo) Delete(c *http.Client) error {

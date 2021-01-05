@@ -95,7 +95,9 @@ func testBasicDeployment(f *framework.Framework) {
 		如下可以获取 crd 资源，但需要自己传入 crd group version 等资源，后续如果业务组有快捷获取 crd 资源提诉再解决
 	*/
 	config, err := clientcmd.BuildConfigFromFlags("", config.Context.KubeConfig)
+	expect.NoError(err)
 	dynamicClient, err := dynamic.NewForConfig(config)
+	expect.NoError(err)
 	deploymentResource := schema.GroupVersionResource{Group: "release.caicloud.io", Version: "v1alpha1", Resource: "releases"}
 	k8sRelease, err := dynamicClient.Resource(deploymentResource).Namespace(ns).Get(context.TODO(), "user-web", metav1.GetOptions{})
 	expect.NoError(err)
@@ -106,7 +108,8 @@ func testBasicDeployment(f *framework.Framework) {
 	/*
 		cos 层使用
 	*/
-	f.ClientSet.COSCRD.NetworkingV1beta1().LoadBalancers(ns).Get(context.TODO(), "test", metav1.GetOptions{})
+	_, err = f.ClientSet.COSCRD.NetworkingV1beta1().LoadBalancers(ns).Get(context.TODO(), "test", metav1.GetOptions{})
+	expect.NoError(err)
 }
 
 func testConnection(url string) (*http.Response, error) {

@@ -60,8 +60,7 @@ var _ = SIGDescribe("存储管理", func() {
 })
 
 func testVolumeAvailable(f *framework.Framework) {
-	var k8scl clientset.Interface
-	k8scl = f.ClientSet.K8S
+	k8scl := f.ClientSet.K8S
 	storageServiceCreate()
 	storageClasseCreate(k8scl)
 	nameSpacesCreate(k8scl, nsQuota)
@@ -107,7 +106,7 @@ func storageClasseCreate(k8scl clientset.Interface) {
 	scinfo := scInfo{}
 	err = json.Unmarshal([]byte(scJson), &scinfo)
 	if err != nil {
-		logger.Failf("Deserialization failed", err)
+		logger.Failf("Deserialization failed %v", err)
 	}
 	gomega.Expect(storageClassNum).Should(gomega.BeEquivalentTo(scinfo.Persistentvolumeclaims))
 	gomega.Expect(storageClassCap).Should(gomega.BeEquivalentTo(scinfo.Requestsstorage))

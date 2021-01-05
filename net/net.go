@@ -101,7 +101,7 @@ func testBridgeVlanCheck(f *framework.Framework, bridgeVlanID string) {
 
 	vlanID, _, err := unstructured.NestedInt64(networkCR.Object, "spec", "cni", "bridge-vlan", "vlanID")
 	expect.NoError(err, "unstructured.NestedSlice vlanID get failed")
-	for i, _ := range subnet {
+	for i := range subnet {
 		gomega.Expect(subnet[i].Cidr).To(gomega.BeEquivalentTo(networkIPv4Data.Subnet[i].Cidr), "cidr 匹配错误")
 		gomega.Expect(subnet[i].RangeStart).To(gomega.BeEquivalentTo(networkIPv4Data.Subnet[i].RangeStart), "rangeStart 匹配错误")
 		gomega.Expect(subnet[i].RangeEnd).To(gomega.BeEquivalentTo(networkIPv4Data.Subnet[i].RangeEnd), "rangeEnd 匹配错误")

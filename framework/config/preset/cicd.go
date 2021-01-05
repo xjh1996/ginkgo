@@ -1,7 +1,6 @@
 package preset
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 )
@@ -20,7 +19,7 @@ type CICDInfo struct {
 // then build a CICD namespace for all CICD-e2e cases.
 func CICD(raw CICDRawInfo, c *http.Client) (cicd *CICDInfo, err error) {
 	if !raw.Enabled {
-		return &CICDInfo{}, errors.New(fmt.Sprintf("CICD configuration is disabled!!"))
+		return &CICDInfo{}, fmt.Errorf("CICD configuration is disabled!!")
 	}
 	// TODO：check whether the cicd namespace exists, if it is true then return namespace, nil
 	//return &CICDInfo{
@@ -30,7 +29,7 @@ func CICD(raw CICDRawInfo, c *http.Client) (cicd *CICDInfo, err error) {
 
 	// CICD namespace does not exist, then build one.
 	// TODO：build a new CICD namespace
-	return nil, errors.New(fmt.Sprintf("Namespace of CICD cannot be created!!!!"))
+	return nil, fmt.Errorf("Namespace of CICD cannot be created!!!!")
 }
 
 func (cicd *CICDInfo) Delete(c *http.Client) error {

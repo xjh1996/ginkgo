@@ -40,9 +40,9 @@ const (
 
 func initImageConfigs() map[int]Config {
 	configs := map[int]Config{}
-	configs[Nginx] = Config{defaultLibraryRegistry, "nginx", "1.12.2"}
-	configs[BusyBox] = Config{defaultLibraryRegistry, "busybox", "1.30.0"}
-	configs[Apline] = Config{defaultLibraryRegistry, "alpine", "3.6"}
+	configs[Nginx] = Config{Registry: defaultLibraryRegistry, Name: "nginx", Version: "1.12.2"}
+	configs[BusyBox] = Config{Registry: defaultLibraryRegistry, Name: "busybox", Version: "1.30.0"}
+	configs[Apline] = Config{Registry: defaultLibraryRegistry, Name: "alpine", Version: "3.6"}
 	return configs
 }
 
