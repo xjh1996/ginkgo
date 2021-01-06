@@ -92,9 +92,9 @@ type Container struct {
 	Name  string `json:"Name"`
 	Image string `json:"Image"`
 	// image + version
-	Command []string `json:"Command"`
+	Command []string `json:"Command,omitempty"`
 	// 页面位置：启动命令 - 运行命令
-	Args []string `json:"Args"`
+	Args []string `json:"Args,omitempty"`
 	// 页面位置：启动命令 - 运行参数
 	Resources ResourceRequirements `json:"Resources,omitempty"`
 	// TODO: GPU usage
@@ -102,11 +102,53 @@ type Container struct {
 	// custom env
 	EnvFrom []EnvFromSource `json:"EnvFrom,omitempty"`
 	// env from configmap or secret
-	VolumeMounts  []VolumeMount `json:"VolumeMounts"`
-	Lifecycle     *Lifecycle    `json:"Lifecycle"`
+	VolumeMounts  []VolumeMount `json:"VolumeMounts,omitempty"`
+	Lifecycle     *Lifecycle    `json:"Lifecycle,omitempty"`
 	LivenessProbe *Probe        `json:"LivenessProbe,omitempty"`
 	// 页面位置：容器配置 - 健康检查 - 存活检查
 	ReadinessProbe *Probe `json:"ReadinessProbe,omitempty"`
+}
+
+// ContainerState ...
+type ContainerState struct {
+	Waiting    *ContainerStateWaiting    `json:"Waiting,omitempty"`
+	Running    *ContainerStateRunning    `json:"Running,omitempty"`
+	Terminated *ContainerStateTerminated `json:"Terminated,omitempty"`
+}
+
+// ContainerStateRunning ...
+type ContainerStateRunning struct {
+	StartedAt time.Time `json:"StartedAt"`
+}
+
+// ContainerStateTerminated ...
+type ContainerStateTerminated struct {
+	ExitCode    int32     `json:"ExitCode"`
+	Signal      int32     `json:"Signal"`
+	Reason      string    `json:"Reason"`
+	Message     string    `json:"Message"`
+	StartedAt   time.Time `json:"StartedAt"`
+	FinishedAt  time.Time `json:"FinishedAt"`
+	ContainerID string    `json:"ContainerID"`
+}
+
+// ContainerStateWaiting ...
+type ContainerStateWaiting struct {
+	Reason  string `json:"Reason"`
+	Message string `json:"Message"`
+}
+
+// ContainerStatus ...
+type ContainerStatus struct {
+	Name                 string         `json:"Name"`
+	State                ContainerState `json:"State"`
+	LastTerminationState ContainerState `json:"LastTerminationState,omitempty"`
+	Ready                bool           `json:"Ready,omitempty"`
+	RestartCount         int32          `json:"RestartCount"`
+	Image                string         `json:"Image"`
+	ImageID              string         `json:"ImageID"`
+	ContainerID          string         `json:"ContainerID,omitempty"`
+	Started              *bool          `json:"Started,omitempty"`
 }
 
 // CreateOption has some options for create API
@@ -170,7 +212,8 @@ type DeploymentRestartOption struct {
 //
 // +nirvana:api=origin:"Spec"
 type DeploymentSpec struct {
-	Replicas *int32       `json:"Replicas,omitempty"`
+	Replicas *int32 `json:"Replicas,omitempty"`
+	// 页面位置：高级配置 - 实例控制
 	Template TemplateSpec `json:"Template"`
 	Strategy Strategy     `json:"Strategy,omitempty"`
 }
@@ -406,6 +449,19 @@ type Pagination struct {
 	Limit uint `source:"query,Limit,default=99999"`
 }
 
+// PersistentVolumeClaim ...
+type PersistentVolumeClaim struct {
+	v1.ObjectMeta `json:",inline"`
+	Spec          PersistentVolumeClaimSpec `json:"spec,omitempty"`
+}
+
+// PersistentVolumeClaimSpec ...
+type PersistentVolumeClaimSpec struct {
+	StorageClassName *string `json:"StorageClassName,omitempty"`
+	// 存储方案（使用 storageclass 的 name）
+	Resources ResourceRequirements `json:"Resources,omitempty"`
+}
+
 // PersistentVolumeClaimVolumeSource ...
 type PersistentVolumeClaimVolumeSource struct {
 	ClaimName string `json:"ClaimName"`
@@ -444,21 +500,31 @@ type PodList struct {
 //
 // +nirvana:api=origin:"Spec"
 type PodSpec struct {
-	InitContainers                []Container      `json:"InitContainers,omitempty"`
-	Containers                    []Container      `json:"Containers"`
-	Volumes                       []Volume         `json:"Volumes,omitempty"`
-	TerminationGracePeriodSeconds *int64           `json:"TerminationGracePeriodSeconds,omitempty"`
-	DNSPolicy                     string           `json:"DnsPolicy,omitempty"`
-	Affinity                      *Affinity        `json:"Affinity,omitempty"`
-	Tolerations                   []Toleration     `json:"Tolerations,omitempty"`
-	HostAliases                   []HostAlias      `json:"HostAliases,omitempty"`
-	SecurityContext               *SecurityContext `json:"PodSecurityContext,omitempty"`
+	InitContainers                []Container `json:"InitContainers,omitempty"`
+	Containers                    []Container `json:"Containers"`
+	Volumes                       []Volume    `json:"Volumes,omitempty"`
+	TerminationGracePeriodSeconds *int64      `json:"TerminationGracePeriodSeconds,omitempty"`
+	// 页面位置：高级配置 - 实例控制
+	DNSPolicy       string           `json:"DnsPolicy,omitempty"`
+	Affinity        *Affinity        `json:"Affinity,omitempty"`
+	Tolerations     []Toleration     `json:"Tolerations,omitempty"`
+	HostAliases     []HostAlias      `json:"HostAliases,omitempty"`
+	SecurityContext *SecurityContext `json:"PodSecurityContext,omitempty"`
 }
 
 // PodStatus ...
 //
 // +nirvana:api=origin:"Status"
 type PodStatus struct {
+	State                 State             `json:"State"`
+	Phase                 string            `json:"Phase"`
+	Reason                string            `json:"Reason,omitempty"`
+	Message               string            `json:"Message,omitempty"`
+	HostIP                string            `json:"HostIP,omitempty"`
+	PodIPs                []string          `json:"PodIPs,omitempty"`
+	StartTime             *time.Time        `json:"StartTime,omitempty"`
+	InitContainerStatuses []ContainerStatus `json:"InitContainerStatuses,omitempty"`
+	ContainerStatuses     []ContainerStatus `json:"ContainerStatuses,omitempty"`
 }
 
 // Port represents the port on which the service is exposed
@@ -660,11 +726,16 @@ type SessionAffinity struct {
 	TimeoutSeconds *int32 `json:"TimeoutSeconds,omitempty"`
 }
 
+// State is the state of Pod.
+type State string
+
 // StatefulSet describes a statefulset entry.
 type StatefulSet struct {
 	v1.ObjectMeta `json:",inline"`
-	Spec          StatefulSetSpec `json:"Spec,omitempty"`
-	YAML          string          `json:"Yaml,omitempty"`
+	Network       string            `json:"Network,omitempty"`
+	YAML          string            `json:"Yaml,omitempty"`
+	Spec          StatefulSetSpec   `json:"Spec,omitempty"`
+	Status        StatefulSetStatus `json:"Status,omitempty"`
 }
 
 // StatefulSetDeleteOption has some options for statefulset delete API
@@ -709,8 +780,18 @@ type StatefulSetRestartOption struct {
 //
 // +nirvana:api=origin:"Spec"
 type StatefulSetSpec struct {
-	// TODO: 容器网络
-	Replicas *int32
+	Replicas             *int32                  `json:"Replicas,omitempty"`
+	Template             TemplateSpec            `json:"Template"`
+	VolumeClaimTemplates []PersistentVolumeClaim `json:"VolumeClaimTemplates,omitempty"`
+	ServiceName          string                  `json:"ServiceName"`
+	// the service must be pre-defined
+	UpdateStrategy UpdateStrategy `json:"UpdateStrategy,omitempty"`
+}
+
+// StatefulSetStatus ...
+//
+// +nirvana:api=origin:"Status"
+type StatefulSetStatus struct {
 }
 
 // Strategy 页面位置： 高级配置 - 更新策略
@@ -728,7 +809,7 @@ type TCPSocketAction struct {
 // TemplateSpec ...
 type TemplateSpec struct {
 	Metadata Metadata `json:"Metadata,omitempty"`
-	Spec     PodSpec  `json:"PodSpec,omitempty"`
+	Spec     PodSpec  `json:"Spec,omitempty"`
 }
 
 // Toleration 页面位置：高级配置 - 调度策略 - 节点污染调度
@@ -741,6 +822,11 @@ type Toleration struct {
 // UpdateOption has some options for update API
 type UpdateOption struct {
 	Cluster
+}
+
+// UpdateStrategy 页面位置：高级配置 - 更新策略（目前只有滚动更新，无需配置）
+type UpdateStrategy struct {
+	Type string `json:"Type,omitempty"`
 }
 
 // Volume 页面位置：存储配置

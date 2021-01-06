@@ -21,13 +21,15 @@ type Interface interface {
 	// CreateStatefulSet does not have any description.
 	CreateStatefulSet(ctx context.Context, statefulSetGetOption StatefulSetGetOption, statefulSet *StatefulSet) (statefulSet1 *StatefulSet, err error)
 	// CreateWithYAML does not have any description.
-	CreateWithYAML(ctx context.Context, yamlCreateOption YamlCreateOption, yAML YAML) (yAML1 *YAML, err error)
+	CreateWithYAML(ctx context.Context, yamlCreateOption YamlCreateOption, yAML *YAML) (yAML1 *YAML, err error)
 	// DeleteConfigMap does not have any description.
 	DeleteConfigMap(ctx context.Context, configMapDeleteOption ConfigMapDeleteOption) (err error)
 	// DeleteDeployment does not have any description.
 	DeleteDeployment(ctx context.Context, deploymentDeleteOption DeploymentDeleteOption) (err error)
 	// DeleteHelmApp does not have any description.
 	DeleteHelmApp(ctx context.Context, deleteOption DeleteOption) (err error)
+	// DeletePod does not have any description.
+	DeletePod(ctx context.Context, deleteOption DeleteOption) (err error)
 	// DeleteSecret does not have any description.
 	DeleteSecret(ctx context.Context, secretDeleteOption SecretDeleteOption) (err error)
 	// DeleteService does not have any description.
@@ -56,6 +58,8 @@ type Interface interface {
 	ListHelmApp(ctx context.Context, listOption ListOption) (helmAppList *HelmAppList, err error)
 	// ListHelmAppRevisions does not have any description.
 	ListHelmAppRevisions(ctx context.Context, listOption ListOption) (helmAppRevisionList *HelmAppRevisionList, err error)
+	// ListPodsForDeployment does not have any description.
+	ListPodsForDeployment(ctx context.Context, deploymentListOption DeploymentListOption) (podList *PodList, err error)
 	// ListPodsForWorkload does not have any description.
 	ListPodsForWorkload(ctx context.Context, cluster Cluster, kind string) (podList *PodList, err error)
 	// ListSecrets does not have any description.
@@ -186,7 +190,7 @@ func (c *Client) CreateStatefulSet(ctx context.Context, statefulSetGetOption Sta
 }
 
 // CreateWithYAML does not have any description.
-func (c *Client) CreateWithYAML(ctx context.Context, yamlCreateOption YamlCreateOption, yAML YAML) (yAML1 *YAML, err error) {
+func (c *Client) CreateWithYAML(ctx context.Context, yamlCreateOption YamlCreateOption, yAML *YAML) (yAML1 *YAML, err error) {
 	yAML1 = new(YAML)
 	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=CreateWithYAML").
 		Query("ClusterName", yamlCreateOption.ClusterName).
@@ -222,6 +226,16 @@ func (c *Client) DeleteDeployment(ctx context.Context, deploymentDeleteOption De
 // DeleteHelmApp does not have any description.
 func (c *Client) DeleteHelmApp(ctx context.Context, deleteOption DeleteOption) (err error) {
 	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=DeleteHelmApp").
+		Query("ClusterName", deleteOption.ClusterName).
+		Query("Namespace", deleteOption.Namespace).
+		Query("Name", deleteOption.Name).
+		Do(ctx)
+	return
+}
+
+// DeletePod does not have any description.
+func (c *Client) DeletePod(ctx context.Context, deleteOption DeleteOption) (err error) {
+	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=DeletePod").
 		Query("ClusterName", deleteOption.ClusterName).
 		Query("Namespace", deleteOption.Namespace).
 		Query("Name", deleteOption.Name).
@@ -396,6 +410,21 @@ func (c *Client) ListHelmAppRevisions(ctx context.Context, listOption ListOption
 		Query("Namespace", listOption.Namespace).
 		Query("Name", listOption.Name).
 		TOPRPCData(helmAppRevisionList).
+		Do(ctx)
+	return
+}
+
+// ListPodsForDeployment does not have any description.
+func (c *Client) ListPodsForDeployment(ctx context.Context, deploymentListOption DeploymentListOption) (podList *PodList, err error) {
+	podList = new(PodList)
+	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=ListPodsForDeployment").
+		Query("Start", deploymentListOption.Start).
+		Query("Limit", deploymentListOption.Limit).
+		Query("Query", deploymentListOption.Query).
+		Query("ClusterName", deploymentListOption.ClusterName).
+		Query("Namespace", deploymentListOption.Namespace).
+		Query("Name", deploymentListOption.Name).
+		TOPRPCData(podList).
 		Do(ctx)
 	return
 }
