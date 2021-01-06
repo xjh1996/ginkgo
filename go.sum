@@ -205,6 +205,8 @@ github.com/caicloud/nirvana v0.3.0-rc.4.0.20201230040208-d9bc298813a9 h1:k1t8N/w
 github.com/caicloud/nirvana v0.3.0-rc.4.0.20201230040208-d9bc298813a9/go.mod h1:76giKzQQzg1+Asdx4DE6daM/UVFyLwKC6CGCLDErc+4=
 github.com/caicloud/nubela v0.0.0-20201230021821-a075139c7657 h1:DT/aFllDCLP90Zx5ardEmObUWojNHStApFh68u4nOZE=
 github.com/caicloud/nubela v0.0.0-20201230021821-a075139c7657/go.mod h1:3UgvkQWZRxmZDQ35+Uig/ZAksnl5Bm36Mu/GX7NKFH4=
+github.com/caicloud/nubela v0.0.0-20201230131338-89d6de7a5bc2 h1:7R8UVQnskNIS/iSd2KeUCCKl29Xh6M4zW3hUp9/IayQ=
+github.com/caicloud/nubela v0.0.0-20201230131338-89d6de7a5bc2/go.mod h1:3UgvkQWZRxmZDQ35+Uig/ZAksnl5Bm36Mu/GX7NKFH4=
 github.com/caicloud/pipeline v0.1.0-alpha.1 h1:khPNgM8NXiwosCuwsg+3XkcxWnW2Wi1oQ8avumgdMCc=
 github.com/caicloud/pipeline v0.1.0-alpha.1/go.mod h1:GjOlJrG6okXtQ63IzJPA4u3qVKNXwVWgtTTo1dTfmSw=
 github.com/caicloud/resource v0.0.0-20201228065446-072d17bb1451 h1:IGXywASD5aDJkLLiffhojy8cu25xreymX2tKflqyIyo=

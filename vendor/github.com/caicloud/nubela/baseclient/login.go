@@ -29,7 +29,6 @@ func basicAuth(username, password string) string {
 
 // Do uses the http.Client to send an HTTP request and set basic authentication before sending.
 func (r *requestExecutorWithAuth) Do(req *http.Request) (*http.Response, error) {
-	req.SetBasicAuth(r.username, r.password)
 	req.Header.Add("Authorization", "basic "+basicAuth(r.username, r.password))
 	req.Header.Add("X-Tenant", r.tenant)
 	return r.c.Do(req)

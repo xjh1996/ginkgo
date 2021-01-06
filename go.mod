@@ -9,7 +9,7 @@ require (
 	github.com/caicloud/cargo-server v0.1.0-alpha.2
 	github.com/caicloud/containeros v1.0.0-alpha.2.0.20201229105221-6d983eb5abd9
 	github.com/caicloud/nirvana v0.3.0-rc.4.0.20201230040208-d9bc298813a9
-	github.com/caicloud/nubela v0.0.0-20201230021821-a075139c7657
+	github.com/caicloud/nubela v0.0.0-20201230131338-89d6de7a5bc2
 	github.com/caicloud/pipeline v0.1.0-alpha.1
 	github.com/caicloud/resource v0.0.0-20201228065446-072d17bb1451
 	github.com/google/go-github v17.0.0+incompatible

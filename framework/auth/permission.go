@@ -3,21 +3,20 @@ package auth
 import (
 	"context"
 	"strings"
-	"time"
 
 	authclient "github.com/caicloud/auth/pkg/server/client"
 	v20201010 "github.com/caicloud/auth/pkg/server/client/v20201010"
 	"github.com/caicloud/nubela/expect"
 	"github.com/caicloud/nubela/logger"
 	"github.com/caicloud/zeus/framework/client"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/util/rand"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
+var operation = []string{"create", "get", "list", "update", "delete"}
+
 const (
-	interval = time.Second * 2
-	timeout  = time.Second * 10
+	passwd = "Pwd123456"
 )
 
 type BaseInfo struct {
@@ -26,48 +25,6 @@ type BaseInfo struct {
 	Email     string
 	TenantID  string
 	ClusterID string
-}
-
-func CreateTenantAndWait(authAPI authclient.Interface, name, description string) error {
-	tenantReq := &v20201010.CreateTenantReq{
-		Name:        name,
-		Description: description,
-	}
-	tenant, err := authAPI.V20201010().CreateTenant(context.TODO(), tenantReq)
-	if err != nil {
-		return err
-	}
-	return wait.PollImmediate(interval, timeout, func() (done bool, err error) {
-		tenant, err = GetTenant(authAPI, tenant.Name, tenant.UID)
-		if err != nil {
-			return false, err
-		}
-		if tenant.State == "Active" { // FIXME: this field value need verify.
-			return true, nil
-		} else {
-			logger.Infof("tenant is not ready, retrying...")
-			return false, nil
-		}
-	})
-}
-
-func DeleteTenantAndWait(authAPI authclient.Interface, id string) error {
-	delTenantReq := &v20201010.DeleteTenantReq{UID: id} // XXX: why only support id
-	_, err := authAPI.V20201010().DeleteTenant(context.TODO(), delTenantReq)
-	if err != nil {
-		return err
-	}
-	return wait.PollImmediate(interval, timeout, func() (done bool, err error) {
-		_, err = GetTenant(authAPI, "", id)
-		if err != nil {
-			if apierrors.IsNotFound(err) { // FIXME: this error check may not useful
-				return true, nil
-			} else {
-				return false, err
-			}
-		}
-		return false, nil
-	})
 }
 
 func AddTenantMembers(authAPI authclient.Interface, tenantID, userName string, roleNames []string) error {
@@ -120,14 +77,6 @@ func CreateRoleBinding(authAPI authclient.Interface, roleID string, userIDs []st
 	}
 	_, err := authAPI.V20201010().RoleBindUsers(context.TODO(), roleBindingReq)
 	return err
-}
-
-func GetTenant(authAPI authclient.Interface, name, id string) (*v20201010.Tenant, error) {
-	getTenantReq := &v20201010.GetTenantReq{
-		Name: name, // Name and ID only need supply one
-		ID:   id,
-	}
-	return authAPI.V20201010().GetTenant(context.TODO(), getTenantReq)
 }
 
 func GetUser(authAPI authclient.Interface, name string) (*v20201010.UserResp, error) {
@@ -184,6 +133,28 @@ func CreateBaseInfo(tenantID, clusterID string) *BaseInfo {
 		TenantID:  tenantID,
 		ClusterID: clusterID,
 	}
+}
+
+func DeleteUserAndWait() error {
+	// TODO: 业务组还未提供删除User的API
+	return nil
+}
+
+func DeleteRole(authAPI authclient.Interface, name string) error {
+	delRole := &v20201010.DeleteRoleReq{
+		UID: name,
+	}
+	_, err := authAPI.V20201010().DeleteRole(context.TODO(), delRole)
+	return err
+}
+func PostsetOperation(authAPI authclient.Interface, baseInfo *BaseInfo) error {
+	if err := DeleteRole(authAPI, baseInfo.RoleName); err != nil {
+		return err
+	}
+	if err := DeleteUserAndWait(); err != nil {
+		return err
+	}
+	return nil
 }
 
 func CheckResult(errs []error, expects []bool) {

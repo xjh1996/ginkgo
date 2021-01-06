@@ -52,7 +52,7 @@ github.com/caicloud/nirvana/rest
 github.com/caicloud/nirvana/service
 github.com/caicloud/nirvana/service/executor
 github.com/caicloud/nirvana/service/rest/router
-# github.com/caicloud/nubela v0.0.0-20201230021821-a075139c7657
+# github.com/caicloud/nubela v0.0.0-20201230131338-89d6de7a5bc2
 ## explicit
 github.com/caicloud/nubela/baseclient
 github.com/caicloud/nubela/config

@@ -2,20 +2,10 @@ package auth
 
 import (
 	"context"
-	"time"
 
 	authclient "github.com/caicloud/auth/pkg/server/client"
 	v20201010 "github.com/caicloud/auth/pkg/server/client/v20201010"
 	"k8s.io/apimachinery/pkg/util/wait"
-)
-
-const (
-	defaultRequestCPU = "10m"
-	defaultRequestMem = "10M"
-	defaultLimitCPU   = "100m"
-	defaultLimitMem   = "100M"
-	interval          = time.Second * 2
-	timeout           = time.Second * 10
 )
 
 // Describe resource metadate for a namespace
