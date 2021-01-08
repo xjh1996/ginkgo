@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"encoding/json"
 
 	authclient "github.com/caicloud/auth/pkg/server/client"
 	v20201010 "github.com/caicloud/auth/pkg/server/client/v20201010"
@@ -10,10 +11,14 @@ import (
 
 // Describe resource metadate for a namespace
 type NamespceMetadate struct {
-	LimitCPU   string
-	LimitMem   string
-	RequestCPU string
-	RequestMem string
+	LimitCPU         string
+	LimitMem         string
+	RequestCPU       string
+	RequestMem       string
+	GPU              string
+	StorageClassName string
+	StorageSize      string
+	PVCSize          string
 }
 
 // DefaultNM returns default namespace metadata
@@ -24,6 +29,17 @@ func DefaultNamespaceMeta() *NamespceMetadate {
 		RequestCPU: defaultRequestCPU,
 		RequestMem: defaultRequestMem,
 	}
+}
+
+func GenerateNSQuotaString(quota NamespceMetadate) string {
+	quotaMap := map[string]string{"limits.cpu": quota.LimitCPU, "limits.memory": quota.LimitMem, "requests.cpu": quota.RequestCPU, "requests.memory": quota.RequestMem,
+		"requests.nvidia.com/gpu": quota.GPU, quota.StorageClassName + ".storageclass.storage.k8s.io/requests.storage": quota.StorageSize,
+		quota.StorageClassName + ".storageclass.storage.k8s.io/persistentvolumeclaims": quota.PVCSize}
+	quotaByte, err := json.Marshal(quotaMap)
+	if err != nil {
+		panic(err)
+	}
+	return string(quotaByte)
 }
 
 func CreateNamespaceAndWait(authAPI authclient.Interface, tenantID, name, quota, clusterID string) (*v20201010.Namespace, error) {

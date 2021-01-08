@@ -84,7 +84,18 @@ func GetUser(authAPI authclient.Interface, name string) (*v20201010.UserResp, er
 	return authAPI.V20201010().GetUser(context.TODO(), getUserReq)
 }
 
-func PresetOperation(authAPI authclient.Interface, baseInfo *BaseInfo, permission, resource []string) authclient.Interface {
+func GetNormalUserAuthAPI(authAPI authclient.Interface, baseInfo *BaseInfo, permission, resource []string) authclient.Interface {
+	user := PresetOperation(authAPI, baseInfo, permission, resource)
+	normalUserAuthAPI, err := user.Auth()
+	if err != nil {
+		logger.Failf("get normal user failed, %v", err)
+	}
+	return normalUserAuthAPI
+}
+
+// PresetOperation create a normal user, add user to tenant, create a role with permission and resource, and bind user with role.
+// then return this normal user.
+func PresetOperation(authAPI authclient.Interface, baseInfo *BaseInfo, permission, resource []string) client.User {
 	// 创建普通用户
 	var err error
 	if err = CreateSingleUserAndWait(authAPI, baseInfo.UserName, baseInfo.Email, passwd); err != nil {
@@ -122,7 +133,7 @@ func PresetOperation(authAPI authclient.Interface, baseInfo *BaseInfo, permissio
 	if roles.Items[0].Name != role.Name { // 测试中一个用户只绑定一个角色
 		logger.Failf("bindding role failed, expected %q, binded %q, all roles %q, userName %q", role.Name, roles.Items[0].Name, roles.Items, user.Username)
 	}
-	return normalUserAuthAPI
+	return user
 }
 
 func CreateBaseInfo(tenantID, clusterID string) *BaseInfo {

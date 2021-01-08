@@ -46,14 +46,14 @@ var _ = SIGDescribe("有状态工作负载", func() {
 
 	f := framework.NewDefaultFramework("Statefulset-basic")
 
-	ginkgo.PContext("基础部署", func() {
+	ginkgo.Context("基础部署", func() {
 		ginkgo.It("创建", func() {
 			testCreateStatefulset(f)
 		})
 
 	})
 
-	ginkgo.PContext("服务管理", func() {
+	ginkgo.Context("服务管理", func() {
 		ginkgo.It("修改副本和镜像", func() {
 			testUpdateStatefulset(f)
 		})
