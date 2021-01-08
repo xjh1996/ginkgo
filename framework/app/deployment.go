@@ -1,7 +1,10 @@
 package app
 
 import (
+	"context"
+
 	v1 "github.com/caicloud/api/meta/v1"
+	appclient "github.com/caicloud/app/pkg/server/client"
 	types "github.com/caicloud/app/pkg/server/client/v20201010"
 )
 
@@ -56,31 +59,8 @@ func NewDeployment(name, namespace string, rpNum int32, f DpModifier) *types.Dep
 	return dp
 }
 
-func NewDpGetOption(clusterName, namespace, name string) types.DeploymentGetOption {
-	return types.DeploymentGetOption{
-		Cluster: types.Cluster{
-			ClusterName: clusterName,
-			Namespace:   NS4Auth(clusterName, namespace),
-			Name:        name,
-		},
-	}
-}
-
-func NewDpDeleteOption(clusterName, namespace, name string) types.DeploymentDeleteOption {
-	return types.DeploymentDeleteOption{
-		Cluster: types.Cluster{
-			ClusterName: clusterName,
-			Namespace:   NS4Auth(clusterName, namespace),
-			Name:        name,
-		},
-	}
-}
-
-func NewDpListOption(clusterName, namespace string) types.DeploymentListOption {
-	return types.DeploymentListOption{
-		Cluster: types.Cluster{
-			ClusterName: clusterName,
-			Namespace:   NS4Auth(clusterName, namespace),
-		},
-	}
+func CreateDP(appc appclient.Interface, deployment *types.Deployment, clusterID, namespace, DpName string) (deployment1 *types.Deployment, err error) {
+	cluster := NewClusterOption(clusterID, namespace, DpName)
+	deployment1, err = appc.V20201010().CreateDeployment(context.TODO(), cluster, deployment)
+	return deployment1, err
 }

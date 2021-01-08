@@ -28,26 +28,6 @@ func NewSecret(name, namespace, key, value string) *types.Secret {
 	}
 }
 
-func NewSecretGetOptions(clusterName, namespace, name string) types.SecretGetOption {
-	return types.SecretGetOption{
-		Cluster: types.Cluster{
-			ClusterName: clusterName,
-			Namespace:   NS4Auth(clusterName, namespace),
-			Name:        name,
-		},
-	}
-}
-
-func NewSecretDeleteOptions(clusterName, namespace, name string) types.SecretDeleteOption {
-	return types.SecretDeleteOption{
-		Cluster: types.Cluster{
-			ClusterName: clusterName,
-			Namespace:   NS4Auth(clusterName, namespace),
-			Name:        name,
-		},
-	}
-}
-
 func NewUpdateSecret(name, namespace, key, value string) *types.Secret {
 	return &types.Secret{
 		ObjectMeta: v1.ObjectMeta{
@@ -63,15 +43,6 @@ func NewUpdateSecret(name, namespace, key, value string) *types.Secret {
 				Key:   key,
 				Value: value,
 			},
-		},
-	}
-}
-
-func NewSecretListOptions(clusterName, namespace string) types.SecretListOption {
-	return types.SecretListOption{
-		Cluster: types.Cluster{
-			ClusterName: clusterName,
-			Namespace:   NS4Auth(clusterName, namespace),
 		},
 	}
 }

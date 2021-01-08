@@ -14,15 +14,12 @@ import (
 )
 
 var _ = SIGDescribe("保密字典", func() {
-
 	f := framework.NewDefaultFramework("Secret-basic")
-
 	ginkgo.Context("基础部署", func() {
 		ginkgo.It("创建+查询+更新+删除", func() {
 			testCRUDSecret(f)
 		})
 	})
-
 	ginkgo.Context("管理", func() {
 		ginkgo.It("罗列保密字典数据", func() {
 			testlistSecret(f)
@@ -31,7 +28,6 @@ var _ = SIGDescribe("保密字典", func() {
 })
 
 func testCRUDSecret(f *framework.Framework) {
-
 	// 随机生成配置名称
 	secretName := "auto-" + rand.String(20)
 	oldKey := rand.String(20)
@@ -40,13 +36,13 @@ func testCRUDSecret(f *framework.Framework) {
 	value := rand.String(20)
 	clusterID := f.ClusterID
 
-	a, err := f.APIClient.App()
+	a, err := f.AdminAPIClient.App()
 	expect.NoError(err, "App Client Build Failed")
 	secret := a.V20201010()
 
 	//新建Secret 传入配置名称和NameSpace
 	secretData := app.NewSecret(secretName, namespace, oldKey, oldValue)
-	secretGetOption := app.NewSecretGetOptions(clusterID, namespace, secretName)
+	secretGetOption := app.NewClusterOption(clusterID, namespace, secretName)
 	_, err = secret.CreateSecret(context.TODO(), secretGetOption, secretData)
 	expect.NoError(err, "Create Secret Failed")
 
@@ -73,7 +69,7 @@ func testCRUDSecret(f *framework.Framework) {
 	expect.Equal(secretData.Data, secretKVUpdate.Data, "kv值更新失败")
 
 	//删除secret
-	secretDeleteOption := app.NewSecretDeleteOptions(clusterID, namespace, secretName)
+	secretDeleteOption := app.NewClusterOption(clusterID, namespace, secretName)
 	err = secret.DeleteSecret(context.TODO(), secretDeleteOption)
 	expect.NoError(err, "Del Secret Failed")
 
@@ -91,26 +87,26 @@ func testlistSecret(f *framework.Framework) {
 	num := rand.Intn(20)
 
 	var secretName [20]string
-	a, err := f.APIClient.App()
+	a, err := f.AdminAPIClient.App()
 	expect.NoError(err, "App Client Build Failed")
 	client := a.V20201010()
 
 	//创建 Secret
-	for i := 1; i < num; i++ {
+	for i := 0; i < num; i++ {
 		secretName[i] = rand.String(20)
 		secretNameData := app.NewSecret(secretName[i], namespace, key, value)
-		_, err = client.CreateSecret(context.TODO(), app.NewSecretGetOptions(clusterID, namespace, secretName[i]), secretNameData)
+		_, err = client.CreateSecret(context.TODO(), app.NewClusterOption(clusterID, namespace, secretName[i]), secretNameData)
 		expect.NoError(err, "Create Secret Failed")
 	}
 
-	res, err := client.ListSecrets(context.TODO(), app.NewSecretListOptions(clusterID, namespace))
+	res, err := client.ListSecrets(context.TODO(), app.NewListOption(clusterID, namespace), app.NewPageNation())
 	expect.NoError(err, "List Secret Failed")
 	// 目前分区还是手动定制，因此list只有第一次才正确
 	expect.Equal(res.Total, num, "List Num Right")
 
 	//删除所有创建的 Secret
-	for i := 1; i < num; i++ {
-		err = client.DeleteSecret(context.TODO(), app.NewSecretDeleteOptions(clusterID, namespace, secretName[i]))
+	for i := 0; i < num; i++ {
+		err = client.DeleteSecret(context.TODO(), app.NewClusterOption(clusterID, namespace, secretName[i]))
 		expect.NoError(err, "Del Secret Failed")
 	}
 

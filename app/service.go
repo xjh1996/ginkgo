@@ -33,25 +33,27 @@ func testCRDService(f *framework.Framework) {
 	ServiceName := "svc" + rand.String(20)
 	clusterID := f.ClusterID
 
-	a, err := f.APIClient.App()
+	a, err := f.AdminAPIClient.App()
 	expect.NoError(err, "App Client Build Failed")
 	service := a.V20201010()
 
 	//新建Service 传入名称和NameSpace
 	serviceData := app.NewService(ServiceName, namespace)
-	serviceCreateOption := app.NewServiceGetOptions(clusterID, namespace, ServiceName)
+	serviceCreateOption := app.NewClusterOption(clusterID, namespace, ServiceName)
 	_, err = service.CreateService(context.TODO(), serviceCreateOption, serviceData)
 	expect.NoError(err, "Create Service Failed")
 
-	serviceGetOption := app.NewServiceGetOptions(clusterID, namespace, ServiceName)
+	serviceGetOption := app.NewClusterOption(clusterID, namespace, ServiceName)
 	serviceSpec := app.NewServiceSpec("ClusterIP", "TCP", 80, 0)
 	serviceData, err = service.GetService(context.TODO(), serviceGetOption)
 	expect.NoError(err, "Get NewService Failed")
 
-	expect.Equal(serviceData.Spec.Ports, serviceSpec.Ports, "Information is not applied to the service")
+	expect.Equal(serviceData.Spec.Ports[0].Protocol, serviceSpec.Ports[0].Protocol, "Information is not applied to the service")
+	expect.Equal(serviceData.Spec.Ports[0].Port, serviceSpec.Ports[0].Port, "Information is not applied to the service")
+	expect.Equal(serviceData.Spec.Ports[0].NodePort, serviceSpec.Ports[0].NodePort, "Information is not applied to the service")
 
 	//删除Service
-	serviceDeleteOption := app.NewServiceDeleteOptions(clusterID, namespace, ServiceName)
+	serviceDeleteOption := app.NewClusterOption(clusterID, namespace, ServiceName)
 	err = service.DeleteService(context.TODO(), serviceDeleteOption)
 	expect.NoError(err, "Del Service Failed")
 
@@ -62,7 +64,7 @@ func testCRDService(f *framework.Framework) {
 }
 
 func testUpdateService(f *framework.Framework) {
-	a, err := f.APIClient.App()
+	a, err := f.AdminAPIClient.App()
 	expect.NoError(err, "App Client Build Failed")
 	client := a.V20201010()
 
@@ -85,7 +87,7 @@ func testUpdateService(f *framework.Framework) {
 		}
 	})
 
-	res, err := client.CreateService(context.TODO(), app.NewServiceGetOptions(clusterID, namespace, serviceName), service)
+	res, err := client.CreateService(context.TODO(), app.NewClusterOption(clusterID, namespace, serviceName), service)
 	expect.NoError(err, "Failed to create service")
 	for i, port := range service.Spec.Ports {
 		expect.Equal(res.Spec.Ports[i].Protocol, port.Protocol)
@@ -98,7 +100,7 @@ func testUpdateService(f *framework.Framework) {
 	// 修改协议和端口
 	service.Spec.Ports[1].Protocol = "UDP"
 	service.Spec.Ports[0].Port = int32(rand.IntnRange(1, 65535))
-	resUpdate01, err := client.UpdateService(context.TODO(), app.NewServiceGetOptions(clusterID, namespace, serviceName), service)
+	resUpdate01, err := client.UpdateService(context.TODO(), app.NewClusterOption(clusterID, namespace, serviceName), service)
 	expect.NoError(err, "Failed to update service")
 	for i, port := range service.Spec.Ports {
 		expect.Equal(resUpdate01.Spec.Ports[i].Protocol, port.Protocol, "Failed to update service Protocol:", port.Protocol)
@@ -106,13 +108,13 @@ func testUpdateService(f *framework.Framework) {
 	}
 	// 非法协议
 	service.Spec.Ports[1].Protocol = "HTTP"
-	_, err = client.UpdateService(context.TODO(), app.NewServiceGetOptions(clusterID, namespace, serviceName), service)
+	_, err = client.UpdateService(context.TODO(), app.NewClusterOption(clusterID, namespace, serviceName), service)
 	expect.Error(err, "Unexpect update successfully, invalid Protocol:", service.Spec.Ports[1].Protocol)
 	service.Spec.Ports[1].Protocol = "UDP"
 
 	// 非法端口
 	service.Spec.Ports[1].Port = 65538
-	_, err = client.UpdateService(context.TODO(), app.NewServiceGetOptions(clusterID, namespace, serviceName), service)
+	_, err = client.UpdateService(context.TODO(), app.NewClusterOption(clusterID, namespace, serviceName), service)
 	expect.Error(err, "Unexpect update successfully, invalid Port:", service.Spec.Ports[1].Port)
 	service.Spec.Ports[1].Port = 8080
 
@@ -120,7 +122,7 @@ func testUpdateService(f *framework.Framework) {
 	service.Spec.Type = "NodePort"
 	service.Spec.Ports[0].NodePort = int32(rand.IntnRange(30000, 32767))
 	service.Spec.Ports[1].NodePort = int32(rand.IntnRange(30000, 32767))
-	resUpdate02, err := client.UpdateService(context.TODO(), app.NewServiceGetOptions(clusterID, namespace, serviceName), service)
+	resUpdate02, err := client.UpdateService(context.TODO(), app.NewClusterOption(clusterID, namespace, serviceName), service)
 	expect.NoError(err, "Failed to update service type:", service.Spec)
 	expect.Equal(resUpdate02.Spec.Type, service.Spec.Type)
 	for i, port := range service.Spec.Ports {
@@ -129,10 +131,10 @@ func testUpdateService(f *framework.Framework) {
 
 	// 非法 NodePort 端口
 	service.Spec.Ports[0].NodePort = int32(rand.IntnRange(0, 29999))
-	_, err = client.UpdateService(context.TODO(), app.NewServiceGetOptions(clusterID, namespace, serviceName), service)
+	_, err = client.UpdateService(context.TODO(), app.NewClusterOption(clusterID, namespace, serviceName), service)
 	expect.Error(err, "Unexpect update successfully, invalid NodePort:", service.Spec.Ports[0].NodePort)
 	service.Spec.Ports[0].NodePort = int32(rand.IntnRange(32768, 65536))
-	_, err = client.UpdateService(context.TODO(), app.NewServiceGetOptions(clusterID, namespace, serviceName), service)
+	_, err = client.UpdateService(context.TODO(), app.NewClusterOption(clusterID, namespace, serviceName), service)
 	expect.Error(err, "Unexpect update successfully, invalid NodePort:", service.Spec.Ports[0].NodePort)
 
 	service.Spec.Ports[0].NodePort = int32(rand.IntnRange(30000, 32767))
@@ -143,12 +145,12 @@ func testUpdateService(f *framework.Framework) {
 	service.Spec.SessionAffinity = &types.SessionAffinity{
 		TimeoutSeconds: &timeout,
 	}
-	resUpdate03, err := client.UpdateService(context.TODO(), app.NewServiceGetOptions(clusterID, namespace, serviceName), service)
+	resUpdate03, err := client.UpdateService(context.TODO(), app.NewClusterOption(clusterID, namespace, serviceName), service)
 	expect.NoError(err, "Failed to update service, SessionAffinity:", service.Spec.SessionAffinity)
 	expect.Equal(resUpdate03.Spec.SessionAffinity, service.Spec.SessionAffinity)
 
 	// 删除
-	serviceDeleteOption := app.NewServiceDeleteOptions(clusterID, namespace, serviceName)
+	serviceDeleteOption := app.NewClusterOption(clusterID, namespace, serviceName)
 	err = client.DeleteService(context.TODO(), serviceDeleteOption)
 	expect.NoError(err, "Failed to delete service")
 }

@@ -37,23 +37,9 @@ type ConfigMapData struct {
 	Value string `json:"Value"`
 }
 
-// ConfigMapDeleteOption has some options for configmap delete API
-//
-// +nirvana:api=origin:"DeleteOption"
-type ConfigMapDeleteOption struct {
-	Cluster
-}
-
 // ConfigMapEnvSource ...
 type ConfigMapEnvSource struct {
 	Name string `json:"Name"`
-}
-
-// ConfigMapGetOption has some options for configmap get API
-//
-// +nirvana:api=origin:"GetOption"
-type ConfigMapGetOption struct {
-	Cluster
 }
 
 // ConfigMapList is a list of configmap entries.
@@ -62,15 +48,6 @@ type ConfigMapGetOption struct {
 type ConfigMapList struct {
 	v1.ListMeta `json:",inline"`
 	Items       []ConfigMap `json:"Items,omitempty"`
-}
-
-// ConfigMapListOption has some options for configmap list API
-//
-// +nirvana:api=origin:"ListOption"
-type ConfigMapListOption struct {
-	Pagination
-	Filter
-	Cluster
 }
 
 // ConfigMapReference provides a workload's minimum info
@@ -107,6 +84,15 @@ type Container struct {
 	LivenessProbe *Probe        `json:"LivenessProbe,omitempty"`
 	// 页面位置：容器配置 - 健康检查 - 存活检查
 	ReadinessProbe *Probe `json:"ReadinessProbe,omitempty"`
+	// 页面位置：容器配置 - 健康检查 - 就绪检查
+	Ports []ContainerPort `json:"Ports,omitempty"`
+}
+
+// ContainerPort 页面位置：容器配置 - 容器端口
+type ContainerPort struct {
+	Name          string `json:"Name,omitempty"`
+	ContainerPort int32  `json:"ContainerPort,omitempty"`
+	Protocol      string `json:"Protocol,omitempty"`
 }
 
 // ContainerState ...
@@ -151,37 +137,14 @@ type ContainerStatus struct {
 	Started              *bool          `json:"Started,omitempty"`
 }
 
-// CreateOption has some options for create API
-type CreateOption struct {
-	Cluster
-}
-
-// DeleteOption has some options for delete API
-type DeleteOption struct {
-	Cluster
-}
-
 // Deployment describes a deployment entry.
 type Deployment struct {
-	v1.ObjectMeta `json:",inline"`
-	Network       string           `json:"Network,omitempty"`
-	YAML          string           `json:"Yaml,omitempty"`
-	Spec          DeploymentSpec   `json:"Spec,omitempty"`
-	Status        DeploymentStatus `json:"Status,omitempty"`
-}
-
-// DeploymentDeleteOption has some options for deployment delete API
-//
-// +nirvana:api=origin:"DeleteOption"
-type DeploymentDeleteOption struct {
-	Cluster
-}
-
-// DeploymentGetOption has some options for deployment get API
-//
-// +nirvana:api=origin:"GetOption"
-type DeploymentGetOption struct {
-	Cluster
+	v1.ObjectMeta    `json:",inline"`
+	Network          string           `json:"Network,omitempty"`
+	YAML             string           `json:"Yaml,omitempty"`
+	ApplicationAlias string           `json:"ApplicationAlias,omitempty"`
+	Spec             DeploymentSpec   `json:"Spec,omitempty"`
+	Status           DeploymentStatus `json:"Status,omitempty"`
 }
 
 // DeploymentList is a list of deployment entries.
@@ -190,22 +153,6 @@ type DeploymentGetOption struct {
 type DeploymentList struct {
 	v1.ListMeta `json:",inline"`
 	Items       []Deployment `json:"Items,omitempty"`
-}
-
-// DeploymentListOption has some options for deployment list API
-//
-// +nirvana:api=origin:"ListOption"
-type DeploymentListOption struct {
-	Pagination
-	Filter
-	Cluster
-}
-
-// DeploymentRestartOption has some options for deployment restart API
-//
-// +nirvana:api=origin:"RestartOption"
-type DeploymentRestartOption struct {
-	Cluster
 }
 
 // DeploymentSpec describes the attributes that a user uses to create a deployment
@@ -244,16 +191,6 @@ type EnvVar struct {
 // ExecAction ...
 type ExecAction struct {
 	Command []string `json:"Command"`
-}
-
-// Filter ...
-type Filter struct {
-	Query string `source:"query,Query"`
-}
-
-// GetOption has some options for get API
-type GetOption struct {
-	Cluster
 }
 
 // HTTPGetAction ...
@@ -408,13 +345,6 @@ type Lifecycle struct {
 	PreStop   []string `json:"PreStop,omitempty"`
 }
 
-// ListOption has some options for list API
-type ListOption struct {
-	Pagination
-	Filter
-	Cluster
-}
-
 // Metadata 使用在 PodTemplate 中的元数据
 // 不直接使用 `cpsmetav1.ObjectMeta`，因为包含了太多无用字段
 type Metadata struct {
@@ -445,8 +375,9 @@ type OverviewStatus struct {
 
 // Pagination ...
 type Pagination struct {
-	Start uint `source:"query,Start,default=0"`
-	Limit uint `source:"query,Limit,default=99999"`
+	Start uint   `source:"query,Start,default=0"`
+	Limit uint   `source:"query,Limit,default=99999"`
+	Query string `source:"query,Query"`
 }
 
 // PersistentVolumeClaim ...
@@ -486,6 +417,15 @@ type PodAffinity struct {
 type PodAntiAffinity struct {
 	Type   string `json:"Type"`
 	Labels []KV   `json:"Labels"`
+}
+
+// PodExecOption has some options for pod exec API
+//
+// +nirvana:api=origin:"ExecOption"
+type PodExecOption struct {
+	Pod       string `source:"query,Pod"`
+	Container string `source:"query,Container"`
+	Shell     string `source:"query,Shell"`
 }
 
 // PodList ...
@@ -564,14 +504,6 @@ type ResourceRequirements struct {
 	Requests []KV `json:"Requests"`
 }
 
-// RollbackHelmAppToRevisionOption has some options for RollbackHelmAppToRevision API
-//
-// +nirvana:api=alias:"RollbackHelmAppToRevisionOption"
-type RollbackHelmAppToRevisionOption struct {
-	Cluster
-	Revision int `source:"query,Revision"`
-}
-
 // RollingUpdateDeployment 页面位置： 高级配置 - 更新策略（滚动更新） - 最大不可用 & 最大超量
 type RollingUpdateDeployment struct {
 	MaxUnavailable int `json:"MaxUnavailable,omitempty"`
@@ -599,23 +531,9 @@ type SecretData struct {
 	Value string `json:"Value"`
 }
 
-// SecretDeleteOption has some options for secret delete API
-//
-// +nirvana:api=origin:"DeleteOption"
-type SecretDeleteOption struct {
-	Cluster
-}
-
 // SecretEnvSource ...
 type SecretEnvSource struct {
 	Name string `json:"Name"`
-}
-
-// SecretGetOption has some options for secret get API
-//
-// +nirvana:api=origin:"GetOption"
-type SecretGetOption struct {
-	Cluster
 }
 
 // SecretList is a list of secret entries.
@@ -624,15 +542,6 @@ type SecretGetOption struct {
 type SecretList struct {
 	v1.ListMeta `json:",inline"`
 	Items       []Secret `json:"Items,omitempty"`
-}
-
-// SecretListOption has some options for secret list API
-//
-// +nirvana:api=origin:"ListOption"
-type SecretListOption struct {
-	Pagination
-	Filter
-	Cluster
 }
 
 // SecretReference provides a workload's minimum info
@@ -662,20 +571,6 @@ type Service struct {
 	Workloads     []*ServiceWorkload `json:"Workloads,omitempty"`
 }
 
-// ServiceDeleteOption has some options for service delete API
-//
-// +nirvana:api=origin:"DeleteOption"
-type ServiceDeleteOption struct {
-	Cluster
-}
-
-// ServiceGetOption has some options for service get API
-//
-// +nirvana:api=origin:"GetOption"
-type ServiceGetOption struct {
-	Cluster
-}
-
 // ServiceLabelSelector describes a kv pair.
 //
 // +nirvana:api=origin:"LabelSelector"
@@ -690,15 +585,6 @@ type ServiceLabelSelector struct {
 type ServiceList struct {
 	v1.ListMeta `json:",inline"`
 	Items       []Service `json:"items,omitempty"`
-}
-
-// ServiceListOption has some options for service list API
-//
-// +nirvana:api=origin:"ListOption"
-type ServiceListOption struct {
-	Pagination
-	Filter
-	Cluster
 }
 
 // ServiceSpec describes the attributes that a user creates on a service
@@ -726,30 +612,24 @@ type SessionAffinity struct {
 	TimeoutSeconds *int32 `json:"TimeoutSeconds,omitempty"`
 }
 
+// SessionOption has some options for create a websocket connection
+type SessionOption struct {
+	Server string `source:"query,Server"`
+	// sockjs server field
+	Session string `source:"query,Session"`
+}
+
 // State is the state of Pod.
 type State string
 
 // StatefulSet describes a statefulset entry.
 type StatefulSet struct {
-	v1.ObjectMeta `json:",inline"`
-	Network       string            `json:"Network,omitempty"`
-	YAML          string            `json:"Yaml,omitempty"`
-	Spec          StatefulSetSpec   `json:"Spec,omitempty"`
-	Status        StatefulSetStatus `json:"Status,omitempty"`
-}
-
-// StatefulSetDeleteOption has some options for statefulset delete API
-//
-// +nirvana:api=origin:"DeleteOption"
-type StatefulSetDeleteOption struct {
-	Cluster
-}
-
-// StatefulSetGetOption has some options for statefulset get API
-//
-// +nirvana:api=origin:"GetOption"
-type StatefulSetGetOption struct {
-	Cluster
+	v1.ObjectMeta    `json:",inline"`
+	Network          string            `json:"Network,omitempty"`
+	YAML             string            `json:"Yaml,omitempty"`
+	ApplicationAlias string            `json:"ApplicationAlias,omitempty"`
+	Spec             StatefulSetSpec   `json:"Spec,omitempty"`
+	Status           StatefulSetStatus `json:"Status,omitempty"`
 }
 
 // StatefulSetList is a list of statefulset entries.
@@ -758,22 +638,6 @@ type StatefulSetGetOption struct {
 type StatefulSetList struct {
 	v1.ListMeta `json:",inline"`
 	Items       []StatefulSet `json:"Items,omitempty"`
-}
-
-// StatefulSetListOption has some options for statefulset list API
-//
-// +nirvana:api=origin:"ListOption"
-type StatefulSetListOption struct {
-	Pagination
-	Filter
-	Cluster
-}
-
-// StatefulSetRestartOption has some options for statefulset restart API
-//
-// +nirvana:api=origin:"RestartOption"
-type StatefulSetRestartOption struct {
-	Cluster
 }
 
 // StatefulSetSpec describes the attributes that a user uses to create a statefulset
@@ -812,16 +676,17 @@ type TemplateSpec struct {
 	Spec     PodSpec  `json:"Spec,omitempty"`
 }
 
+// TerminalSession represents a terminal websocket session
+type TerminalSession struct {
+	v1.ObjectMeta `json:",inline"`
+	SessionID     string `json:"SessionID"`
+}
+
 // Toleration 页面位置：高级配置 - 调度策略 - 节点污染调度
 type Toleration struct {
 	Key    string `json:"Key"`
 	Value  string `json:"Value"`
 	Effect string `json:"Effect"`
-}
-
-// UpdateOption has some options for update API
-type UpdateOption struct {
-	Cluster
 }
 
 // UpdateStrategy 页面位置：高级配置 - 更新策略（目前只有滚动更新，无需配置）
@@ -861,14 +726,6 @@ type VolumeSource struct {
 type YAML struct {
 	v1.ObjectMeta `json:",inline"`
 	Spec          YamlSpec `json:"Spec"`
-}
-
-// YamlCreateOption has some options for yaml create API
-//
-// +nirvana:api=origin:"CreateOption"
-type YamlCreateOption struct {
-	Cluster
-	Network string `source:"query,Network"`
 }
 
 // YamlSpec describe yaml content

@@ -24,13 +24,11 @@ var _ = SIGDescribe("配置项", func() {
 			testCRUDConfigMap(f)
 		})
 	})
-
 	ginkgo.Context("管理", func() {
 		ginkgo.It("罗列配置数据", func() {
 			testlistConfigmap(f)
 		})
 	})
-
 })
 
 func testCRUDConfigMap(f *framework.Framework) {
@@ -42,12 +40,12 @@ func testCRUDConfigMap(f *framework.Framework) {
 	value := rand.String(20)
 	clusterID := f.ClusterID
 
-	a, err := f.APIClient.App()
+	a, err := f.AdminAPIClient.App()
 	expect.NoError(err, "App Client Build Failed")
 	configmap := a.V20201010()
 
 	configmapData := app.NewConfigMap(ConfigName, namespace, oldKey, oldValue)
-	configmapGetOption := app.NewConfigGetOptions(clusterID, namespace, ConfigName)
+	configmapGetOption := app.NewClusterOption(clusterID, namespace, ConfigName)
 	_, err = configmap.CreateConfigMap(context.TODO(), configmapGetOption, configmapData)
 	expect.NoError(err, "Create Configmap Failed")
 
@@ -63,7 +61,7 @@ func testCRUDConfigMap(f *framework.Framework) {
 	expect.NoError(err, "Get Configmap Failed")
 	expect.Equal(configmapData.Data, configmapUpdate.Data, "kv值更新失败")
 
-	configmapDeleteOption := app.NewConfigDeleteOptions(clusterID, namespace, ConfigName)
+	configmapDeleteOption := app.NewClusterOption(clusterID, namespace, ConfigName)
 	err = configmap.DeleteConfigMap(context.TODO(), configmapDeleteOption)
 	expect.NoError(err, "Del Configmap Failed")
 
@@ -78,25 +76,24 @@ func testlistConfigmap(f *framework.Framework) {
 	value := rand.String(20)
 
 	var ConfigName [10]string
-	a, err := f.APIClient.App()
+	a, err := f.AdminAPIClient.App()
 	expect.NoError(err, "App Client Build Failed")
 
 	//创建10个Configmap
 	for i := 0; i < 10; i++ {
 		ConfigName[i] = rand.String(20)
 		configNameData := app.NewConfigMap(ConfigName[i], namespace, key, value)
-		configmapGetOption := app.NewConfigGetOptions(clusterID, namespace, ConfigName[i])
+		configmapGetOption := app.NewClusterOption(clusterID, namespace, ConfigName[i])
 		_, err = a.V20201010().CreateConfigMap(context.TODO(), configmapGetOption, configNameData)
 		expect.NoError(err, "Create Configmap Failed")
 	}
 
-	listConfigmap := app.NewListOptions(clusterID, namespace)
-	_, err = a.V20201010().ListConfigMaps(context.TODO(), listConfigmap)
+	_, err = a.V20201010().ListConfigMaps(context.TODO(), app.NewListOption(clusterID, namespace), app.NewPageNation())
 	expect.NoError(err, "List Configmap Failed")
 
 	//删除所有创建的Configmap
 	for i := 0; i < 10; i++ {
-		configmapDeleteOption := app.NewConfigDeleteOptions(clusterID, namespace, ConfigName[i])
+		configmapDeleteOption := app.NewClusterOption(clusterID, namespace, ConfigName[i])
 		err = a.V20201010().DeleteConfigMap(context.TODO(), configmapDeleteOption)
 		expect.NoError(err, "Del Configmap Failed")
 	}

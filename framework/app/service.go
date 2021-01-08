@@ -70,29 +70,3 @@ func NewServiceSpec(specType, protocol string, port, nodePort int32) types.Servi
 	}
 
 }
-
-func NewServiceGetOptions(clusterName, namespace, name string) types.ServiceGetOption {
-	return types.ServiceGetOption{
-		Cluster: types.Cluster{
-			ClusterName: clusterName,
-			Namespace:   NS4Auth(clusterName, namespace),
-			Name:        name,
-		},
-	}
-}
-
-func NewServiceDeleteOptions(clusterName, namespace, name string) types.ServiceDeleteOption {
-	return types.ServiceDeleteOption{
-		Cluster: types.Cluster{
-			ClusterName: clusterName,
-			Namespace:   NS4Auth(clusterName, namespace),
-			Name:        name,
-		},
-	}
-}
-
-// NS4Auth the namespace for auth rpc style
-func NS4Auth(cluster, namespace string) string {
-	NS4Auth := "cluster/" + cluster + "/" + namespace
-	return NS4Auth
-}

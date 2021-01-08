@@ -4,7 +4,7 @@ go 1.15
 
 require (
 	github.com/caicloud/api v0.0.0-20201214034828-9e5d698f165c
-	github.com/caicloud/app v1.0.0-alpha.2.0.20210105064629-c92876f732df
+	github.com/caicloud/app v1.0.0-alpha.2.0.20210107132049-0808a8b54b9c
 	github.com/caicloud/auth v0.0.0-20201230062221-41d054766aef
 	github.com/caicloud/cargo-server v0.1.0-alpha.2
 	github.com/caicloud/containeros v1.0.0-alpha.2.0.20201229105221-6d983eb5abd9
