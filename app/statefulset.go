@@ -47,26 +47,26 @@ var _ = SIGDescribe("有状态工作负载", func() {
 	f := framework.NewDefaultFramework("Statefulset-basic")
 
 	ginkgo.Context("基础部署", func() {
-		ginkgo.It("创建", func() {
+		ginkgo.PIt("创建", func() {
 			testCreateStatefulset(f)
 		})
 
 	})
 
 	ginkgo.Context("服务管理", func() {
-		ginkgo.It("修改副本和镜像", func() {
+		ginkgo.PIt("修改副本和镜像", func() {
 			testUpdateStatefulset(f)
 		})
-		ginkgo.It("停止工作负载", func() {
+		ginkgo.PIt("停止工作负载", func() {
 			testStopStatefulset(f)
 		})
-		ginkgo.It("回滚工作负载", func() {
+		ginkgo.PIt("回滚工作负载", func() {
 			testRollout(f)
 		})
-		ginkgo.It("修改存储挂载路径&读写路径", func() {
+		ginkgo.PIt("修改存储挂载路径&读写路径", func() {
 			testUpdatePvcParameter(f)
 		})
-		ginkgo.It("修改Headless Svc端口", func() {
+		ginkgo.PIt("修改Headless Svc端口", func() {
 			testUpdateHeadlesssvc(f)
 		})
 	})

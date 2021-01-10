@@ -24,6 +24,12 @@ type ConfigBaseInfo struct {
 	Value      string
 }
 
+type SecretBaseInfo struct {
+	SecretName string
+	Key        string
+	Value      string
+}
+
 func NewClusterOption(clusterName, namespace, name string) types.Cluster {
 	return types.Cluster{
 		ClusterName: clusterName,
@@ -51,9 +57,17 @@ func NS4Auth(cluster, namespace string) string {
 
 func CreateConfigInfo() *ConfigBaseInfo {
 	return &ConfigBaseInfo{
-		ConfigName: "config" + rand.String(8),
-		Key:        "key" + rand.String(5),
-		Value:      "value" + rand.String(5),
+		ConfigName: "config-" + rand.String(8),
+		Key:        "key-" + rand.String(5),
+		Value:      "value-" + rand.String(5),
+	}
+}
+
+func CreateSecretInfo() *SecretBaseInfo {
+	return &SecretBaseInfo{
+		SecretName: "secret-" + rand.String(8),
+		Key:        "key-" + rand.String(5),
+		Value:      "value-" + rand.String(5),
 	}
 }
 
