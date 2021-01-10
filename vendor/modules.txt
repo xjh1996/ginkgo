@@ -3,7 +3,7 @@ github.com/beorn7/perks/quantile
 # github.com/caicloud/api v0.0.0-20201229091211-29cd26268bf9
 ## explicit
 github.com/caicloud/api/meta/v1
-# github.com/caicloud/app v1.0.0-alpha.2.0.20210107132049-0808a8b54b9c
+# github.com/caicloud/app v1.0.0-alpha.2.0.20210108140225-4deff64e5f6b
 ## explicit
 github.com/caicloud/app/pkg/server/client
 github.com/caicloud/app/pkg/server/client/v20201010
@@ -47,7 +47,7 @@ github.com/caicloud/cyclone/pkg/workflow/workload/delegation
 ## explicit
 github.com/caicloud/insight/pkg/server/client
 github.com/caicloud/insight/pkg/server/client/v20201010
-# github.com/caicloud/nirvana v0.3.0-rc.4.0.20201230040208-d9bc298813a9
+# github.com/caicloud/nirvana v0.3.0-rc.4.0.20210104080206-e68c9c75a6b6
 ## explicit
 github.com/caicloud/nirvana/definition
 github.com/caicloud/nirvana/errors

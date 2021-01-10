@@ -174,8 +174,8 @@ github.com/caicloud/api v0.0.0-20201214034828-9e5d698f165c h1:FMsNKZ9BKCIVHvU8Om
 github.com/caicloud/api v0.0.0-20201214034828-9e5d698f165c/go.mod h1:hrrDPwUQod1dkw05E26K/pVlXSYndKKMtNEJXD3+Q7Y=
 github.com/caicloud/api v0.0.0-20201229091211-29cd26268bf9 h1:2VwrW6VqQXYheuIGvXa6pO5v0mM7SQG00NuKgYJE0SE=
 github.com/caicloud/api v0.0.0-20201229091211-29cd26268bf9/go.mod h1:hrrDPwUQod1dkw05E26K/pVlXSYndKKMtNEJXD3+Q7Y=
-github.com/caicloud/app v1.0.0-alpha.2.0.20210107132049-0808a8b54b9c h1:Optemphm0k1UdB8EdH5FTLep54CkK59fcuBg+GJAb9A=
-github.com/caicloud/app v1.0.0-alpha.2.0.20210107132049-0808a8b54b9c/go.mod h1:md0LXUuxm37oLXsoxUy2uOaJniKNE5hC7fTHiPydyco=
+github.com/caicloud/app v1.0.0-alpha.2.0.20210108140225-4deff64e5f6b h1:Y7vypQMhUAvNDw4VZN5YIz+OyY5U3M6Cyhv7+mKvYgI=
+github.com/caicloud/app v1.0.0-alpha.2.0.20210108140225-4deff64e5f6b/go.mod h1:21ipAYFchvs4WWNmK2hSFFMRUBj8z8w30xQeYCoqRGQ=
 github.com/caicloud/auth v0.0.0-20201230062221-41d054766aef h1:rk9cWvXonXKUlHkmokR++KNmJ/slUj9E27pS32k0qPc=
 github.com/caicloud/auth v0.0.0-20201230062221-41d054766aef/go.mod h1:z0141y0dQzWoZyzjWe1UK6d8davA0ifiIQ7noWBxsd4=
 github.com/caicloud/cargo-server v0.1.0-alpha.2 h1:iCmiaw4iEf3gfpDtf9Z34ml6yh6JgAOIfNsu3xCZQBk=
@@ -199,7 +199,7 @@ github.com/caicloud/go-common v0.4.0-beta.2/go.mod h1:wtkP8fsGq2bbb2kyoB6OsEHwIR
 github.com/caicloud/go-common v0.4.0-beta.4/go.mod h1:D6dT7e/nC123JU+I4UNjm5RbTE6FFO1hZPlvOrFtMDY=
 github.com/caicloud/go-common v0.4.0-beta.5.0.20201224020810-8b55191f195e/go.mod h1:UixoHxE5UHbJglaRM8lsU7y29TAfNnTT7VCQ9x996BQ=
 github.com/caicloud/go-common v0.4.0-beta.5.0.20201229120009-f6a642719799/go.mod h1:yKn2NI8lXDrwOWOMp6TxUv4TsO87t4nOpXa6f6RC53M=
-github.com/caicloud/go-common v0.4.0-beta.5.0.20210107033905-9eec3e332e88/go.mod h1:8GRHFhXH8UEV/sp+U/OU2z3p7MaE3D/Oyt6t6dB+2mg=
+github.com/caicloud/go-common v0.4.0-beta.5.0.20210108090222-ffec1b406355/go.mod h1:TvLjr4sUxh49IW/5QVqBZAvqVEZLS9Kx6EHZigJo5cU=
 github.com/caicloud/insight v0.0.0-20210108091024-5c6c313a5945 h1:pnS5d0Fechi2NFthxBXRyPr/VQmx4xRKBWC5GsUDY9M=
 github.com/caicloud/insight v0.0.0-20210108091024-5c6c313a5945/go.mod h1:3ytiOOZHqupit+5R1KVye3Nhlm3xUNbyWsBde6Q58/Q=
 github.com/caicloud/mantle v1.0.0-alpha.2/go.mod h1:5xyXQeTkX1vyDDM5t5D+c5xU+EkcfmnQ99871ha8NA8=
@@ -214,6 +214,8 @@ github.com/caicloud/nirvana v0.3.0-rc.4/go.mod h1:76giKzQQzg1+Asdx4DE6daM/UVFyLw
 github.com/caicloud/nirvana v0.3.0-rc.4.0.20201225034230-7fdcb6ab9c4f/go.mod h1:76giKzQQzg1+Asdx4DE6daM/UVFyLwKC6CGCLDErc+4=
 github.com/caicloud/nirvana v0.3.0-rc.4.0.20201230040208-d9bc298813a9 h1:k1t8N/wkBXMXdwqIznlCDDpUSbxxOf+Ya2yQRXuU1hA=
 github.com/caicloud/nirvana v0.3.0-rc.4.0.20201230040208-d9bc298813a9/go.mod h1:76giKzQQzg1+Asdx4DE6daM/UVFyLwKC6CGCLDErc+4=
+github.com/caicloud/nirvana v0.3.0-rc.4.0.20210104080206-e68c9c75a6b6 h1:VDwaGMYbcggsm8zNP093bvdu1HvCd7SnTpZQNlKV30Y=
+github.com/caicloud/nirvana v0.3.0-rc.4.0.20210104080206-e68c9c75a6b6/go.mod h1:76giKzQQzg1+Asdx4DE6daM/UVFyLwKC6CGCLDErc+4=
 github.com/caicloud/nubela v0.0.0-20201230131338-89d6de7a5bc2 h1:7R8UVQnskNIS/iSd2KeUCCKl29Xh6M4zW3hUp9/IayQ=
 github.com/caicloud/nubela v0.0.0-20201230131338-89d6de7a5bc2/go.mod h1:3UgvkQWZRxmZDQ35+Uig/ZAksnl5Bm36Mu/GX7NKFH4=
 github.com/caicloud/pipeline v0.1.0-alpha.1 h1:khPNgM8NXiwosCuwsg+3XkcxWnW2Wi1oQ8avumgdMCc=

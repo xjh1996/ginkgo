@@ -4,12 +4,12 @@ go 1.15
 
 require (
 	github.com/caicloud/api v0.0.0-20201229091211-29cd26268bf9
-	github.com/caicloud/app v1.0.0-alpha.2.0.20210107132049-0808a8b54b9c
+	github.com/caicloud/app v1.0.0-alpha.2.0.20210108140225-4deff64e5f6b
 	github.com/caicloud/auth v0.0.0-20201230062221-41d054766aef
 	github.com/caicloud/cargo-server v0.1.0-alpha.2
 	github.com/caicloud/containeros v1.0.0-alpha.2.0.20210105060630-9ef6c0f89ff0
 	github.com/caicloud/insight v0.0.0-20210108091024-5c6c313a5945
-	github.com/caicloud/nirvana v0.3.0-rc.4.0.20201230040208-d9bc298813a9
+	github.com/caicloud/nirvana v0.3.0-rc.4.0.20210104080206-e68c9c75a6b6
 	github.com/caicloud/nubela v0.0.0-20201230131338-89d6de7a5bc2
 	github.com/caicloud/pipeline v0.1.0-alpha.1
 	github.com/caicloud/resource v0.0.0-20201228065446-072d17bb1451

@@ -56,6 +56,12 @@ type ConfigMapList struct {
 type ConfigMapReference struct {
 	Name string `json:"Name"`
 	// workload name
+	Alias string `json:"Alias"`
+	// workload alias
+	Description string `json:"Description"`
+	// workload description
+	ApplicationAlias string `json:"ApplicationAlias"`
+	// application alias if the workload belongs to one
 	Kind string `json:"Kind"`
 }
 
@@ -550,6 +556,12 @@ type SecretList struct {
 type SecretReference struct {
 	Name string `json:"Name"`
 	// workload name
+	Alias string `json:"Alias"`
+	// workload alias for display
+	Description string `json:"Description"`
+	// workload description
+	ApplicationAlias string `json:"ApplicationAlias"`
+	// application alias if the workload belongs to one
 	Kind string `json:"Kind"`
 }
 

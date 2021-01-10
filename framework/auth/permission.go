@@ -117,15 +117,15 @@ func PresetOperation(authAPI authclient.Interface, baseInfo *BaseInfo, permissio
 		Username: baseInfo.UserName,
 		Password: passwd,
 	}
-	normalUserAuthAPI, err := user.Auth()
-	if err != nil {
-		logger.Failf("get normal user api failed, %v", err)
-	}
-	// check绑定成功
-	roles, err := normalUserAuthAPI.V20201010().ListUserRole(context.TODO())
-	if roles.Items[0].Name != role.Name { // 测试中一个用户只绑定一个角色
-		logger.Failf("bindding role failed, expected %q, binded %q, all roles %q, userName %q", role.Name, roles.Items[0].Name, roles.Items, user.Username)
-	}
+	//normalUserAuthAPI, err := user.Auth()
+	//if err != nil {
+	//	logger.Failf("get normal user api failed, %v", err)
+	//}
+	//// check绑定成功
+	//roles, err := normalUserAuthAPI.V20201010().ListUserRole(context.TODO())
+	//if roles.Items[0].Name != role.Name { // 测试中一个用户只绑定一个角色
+	//	logger.Failf("bindding role failed, expected %q, binded %q, all roles %q, userName %q", role.Name, roles.Items[0].Name, roles.Items, user.Username)
+	//}
 	return user
 }
 

@@ -4,7 +4,7 @@ import (
 	"context"
 
 	v1 "github.com/caicloud/api/meta/v1"
-	appclient "github.com/caicloud/app/pkg/server/client"
+	appClient "github.com/caicloud/app/pkg/server/client"
 	types "github.com/caicloud/app/pkg/server/client/v20201010"
 )
 
@@ -59,8 +59,8 @@ func NewDeployment(name, namespace string, rpNum int32, f DpModifier) *types.Dep
 	return dp
 }
 
-func CreateDP(appc appclient.Interface, deployment *types.Deployment, clusterID, namespace, DpName string) (deployment1 *types.Deployment, err error) {
+func CreateDP(appAPI appClient.Interface, deployment *types.Deployment, clusterID, namespace, DpName string) (deployment1 *types.Deployment, err error) {
 	cluster := NewClusterOption(clusterID, namespace, DpName)
-	deployment1, err = appc.V20201010().CreateDeployment(context.TODO(), cluster, deployment)
+	deployment1, err = appAPI.V20201010().CreateDeployment(context.TODO(), cluster, deployment)
 	return deployment1, err
 }
