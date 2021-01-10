@@ -57,7 +57,7 @@ var _ = SIGDescribe("命名空间权限管理[permission]", func() {
 		ginkgo.It("管理权限", func() {
 			permission = []string{"ManageNamespace"}
 			resource = []string{"trn:cps:::cluster/" + f.ClusterID} // 格式trn:cps:::resourceType/resourceValue,具体Type，Value和开发沟通，或参考https://bytedance.feishu.cn/docs/doccnUdvIc3bCQ724C87idUQWIe#
-			normalUserAuthAPI = auth.GetNormalUserAuthAPI(authAPI, baseInfo, permission, resource)
+			normalUserAuthAPI = getNormalUserAuthAPI(authAPI, baseInfo, permission, resource)
 			errs := crudNamespace(normalUserAuthAPI, baseInfo, nsName, nsQuotaOld, nsQuotaNew)
 			auth.CheckResult(errs, []bool{true, true, true, true, true}) // 顺序create, get, list, update, delete权限
 		})
@@ -79,7 +79,7 @@ var _ = SIGDescribe("命名空间权限管理[permission]", func() {
 		ginkgo.It("新建权限", func() {
 			permission = []string{"CreateNamespace"}
 			resource = []string{"trn:cps:::cluster/" + f.ClusterID} // 格式trn:cps:::resourceType/resourceValue,具体Type，Value和开发沟通，或参考https://bytedance.feishu.cn/docs/doccnUdvIc3bCQ724C87idUQWIe#
-			normalUserAuthAPI = auth.GetNormalUserAuthAPI(authAPI, baseInfo, permission, resource)
+			normalUserAuthAPI = getNormalUserAuthAPI(authAPI, baseInfo, permission, resource)
 			errs := crudNamespace(normalUserAuthAPI, baseInfo, nsName, nsQuotaOld, nsQuotaNew)
 			auth.CheckResult(errs, []bool{true, true, true, false, false}) // 顺序create, get, list, update, delete权限
 		})
@@ -101,7 +101,7 @@ var _ = SIGDescribe("命名空间权限管理[permission]", func() {
 		ginkgo.It("删除权限", func() {
 			permission = []string{"DeleteNamespace"}
 			resource = []string{"trn:cps:::cluster/" + f.ClusterID, "trn:cps:::namespace/cluster/" + f.ClusterID + "/" + nsName} // 格式trn:cps:::resourceType/resourceValue,具体Type，Value和开发沟通，或参考https://bytedance.feishu.cn/docs/doccnUdvIc3bCQ724C87idUQWIe#
-			normalUserAuthAPI = auth.GetNormalUserAuthAPI(authAPI, baseInfo, permission, resource)
+			normalUserAuthAPI = getNormalUserAuthAPI(authAPI, baseInfo, permission, resource)
 			errs := crudNamespace(normalUserAuthAPI, baseInfo, nsName, nsQuotaOld, nsQuotaNew)
 			auth.CheckResult(errs, []bool{false, true, true, false, true}) // 顺序create, get, list, update, delete权限
 		})
@@ -125,7 +125,7 @@ var _ = SIGDescribe("命名空间权限管理[permission]", func() {
 		ginkgo.It("更新权限", func() {
 			permission = []string{"UpdateNamespace"}
 			resource = []string{"trn:cps:::cluster/" + f.ClusterID, "trn:cps:::namespace/cluster/" + f.ClusterID + "/" + nsName} // 格式trn:cps:::resourceType/resourceValue,具体Type，Value和开发沟通，或参考https://bytedance.feishu.cn/docs/doccnUdvIc3bCQ724C87idUQWIe#
-			normalUserAuthAPI = auth.GetNormalUserAuthAPI(authAPI, baseInfo, permission, resource)
+			normalUserAuthAPI = getNormalUserAuthAPI(authAPI, baseInfo, permission, resource)
 			errs := crudNamespace(normalUserAuthAPI, baseInfo, nsName, nsQuotaOld, nsQuotaNew)
 			auth.CheckResult(errs, []bool{false, true, true, true, false}) // 顺序create, get, list, update, delete权限
 		})
@@ -149,7 +149,7 @@ var _ = SIGDescribe("命名空间权限管理[permission]", func() {
 		ginkgo.It("查看权限", func() {
 			permission = []string{"VisitNamespace"}
 			resource = []string{"trn:cps:::cluster/" + f.ClusterID, "trn:cps:::namespace/cluster/" + f.ClusterID + "/" + nsName} // 格式trn:cps:::resourceType/resourceValue,具体Type，Value和开发沟通，或参考https://bytedance.feishu.cn/docs/doccnUdvIc3bCQ724C87idUQWIe#
-			normalUserAuthAPI = auth.GetNormalUserAuthAPI(authAPI, baseInfo, permission, resource)
+			normalUserAuthAPI = getNormalUserAuthAPI(authAPI, baseInfo, permission, resource)
 			errs := crudNamespace(normalUserAuthAPI, baseInfo, nsName, nsQuotaOld, nsQuotaNew)
 			auth.CheckResult(errs, []bool{false, true, true, false, false}) // 顺序create, get, list, update, delete权限
 		})
@@ -172,7 +172,7 @@ var _ = SIGDescribe("命名空间权限管理[permission]", func() {
 		})
 		ginkgo.It("无权限", func() {
 			permission = []string{""}
-			normalUserAuthAPI = auth.GetNormalUserAuthAPI(authAPI, baseInfo, permission, resource)
+			normalUserAuthAPI = getNormalUserAuthAPI(authAPI, baseInfo, permission, resource)
 			errs := crudNamespace(normalUserAuthAPI, baseInfo, nsName, nsQuotaOld, nsQuotaNew)
 			auth.CheckResult(errs, []bool{false, false, false, false, false}) // 顺序create, get, list, update, delete权限
 		})
@@ -198,4 +198,11 @@ func crudNamespace(authAPI authclient.Interface, baseInfo *auth.BaseInfo, nsName
 	err = auth.DeleteNamespace(authAPI, baseInfo.TenantID, baseInfo.ClusterID, nsName)
 	errs = append(errs, err)
 	return errs
+}
+
+func getNormalUserAuthAPI(authAPI authclient.Interface, baseInfo *auth.BaseInfo, permission, resource []string) authclient.Interface {
+	user := auth.PresetOperation(authAPI, baseInfo, permission, resource)
+	normalUserAuthAPI, err := user.Auth()
+	expect.NoError(err)
+	return normalUserAuthAPI
 }

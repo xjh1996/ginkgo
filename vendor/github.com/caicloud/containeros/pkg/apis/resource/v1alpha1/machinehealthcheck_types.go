@@ -19,8 +19,7 @@ const (
 // +genclient
 // +genclient:nonNamespaced
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-// +kubebuilder:resource:scope=Cluster
-// +kubebuilder:resource:shortName="mhc"
+// +kubebuilder:resource:scope=Cluster,shortName="mhc"
 // +kubebuilder:storageversion
 // +kubebuilder:printcolumn:name="Cluster",type="string",JSONPath=".spec.clusterName",description="The cluster id of MachineHealthCheck"
 // +kubebuilder:printcolumn:name="ExpectedMachines",type="integer",JSONPath=".status.expectedMachines",description="Total number of machines counted by this machine health check"

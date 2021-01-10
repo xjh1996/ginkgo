@@ -267,8 +267,9 @@ type ControllerStatus struct {
 
 // PodStatuses represents the current statuses of a list of pods.
 type PodStatuses struct {
-	Replicas int32       `json:"replicas,omitempty"`
-	Statuses []PodStatus `json:"podStatuses,omitempty"`
+	ExpectedReplicas int32       `json:"expectedReplicas,omitempty"`
+	Replicas         int32       `json:"replicas,omitempty"`
+	Statuses         []PodStatus `json:"podStatuses,omitempty"`
 }
 
 // PodStatus represents the current status of pods.

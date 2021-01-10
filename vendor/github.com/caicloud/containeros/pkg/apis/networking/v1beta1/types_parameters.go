@@ -18,8 +18,8 @@ const (
 	IPVSDRParametersKind = "IPVSDRParameters"
 	// GeneralParametersKind is the name of the GeneralParameters internal kind.
 	GeneralParametersKind = "GeneralParameters"
-	// IngressNginxPrametersKind is the name of the IngressNginxPrameters internal kind.
-	IngressNginxPrametersKind = "IngressNginxPrameters"
+	// IngressNginxParametersKind is the name of the IngressNginxParameters internal kind.
+	IngressNginxParametersKind = "IngressNginxParameters"
 )
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

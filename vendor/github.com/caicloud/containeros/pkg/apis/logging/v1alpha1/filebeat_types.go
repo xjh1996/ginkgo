@@ -58,12 +58,41 @@ type FilebeatClusterSetSpec struct {
 	// , which holding the filebeat input configuration; all Secrets will merge into single Kubernetes Secrets
 	// in the same Cluster and namespace as the Filebeat object.
 	// If left empty, nothing whill be selected.
+	//
+	// The referenced secret should contain the following:
+	//
+	// - `filebeat.inputs.yaml`: input configurations for filebeat. Ref: https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-configuration-reloading.html
+	//
+	// Example:
+	// ---
+	// kind: Secret
+	// apiVersion: v1
+	// metadata:
+	//	 name: my-roles
+	// stringData:
+	//   filebeat.inputs.yaml: |-
+	//     - type: log
+	//       paths:
+	//       - /var/log/mysql.log
+	//       scan_frequency: 10s
+	//
+	//     - type: log
+	//       paths:
+	//       - /var/log/apache.log
+	//       scan_frequency: 5s
+	// ---
+	//
 	// +optional
 	InputsSelector *metav1.LabelSelector `json:"inputsSelector,omitempty"`
-	// Settings  is a list of Secrets in the same namespace as the Prometheus
+	// Settings  is a list of Secrets in the same namespace as the FilebeatClusterSet
 	// object, which holding the filebeat configuration; all configuration will merge into single Kubernetes Secret
 	// in the same Cluster and namespace as the Filebeat object.
 	// this Secret shall be auto append to template.spec.secureSettings
+	//
+	// The referenced secret should contain the following:
+	//
+	// - `filebeat.yaml`: configuration for filebeat. Ref: https://www.elastic.co/guide/en/beats/filebeat/current/configuring-howto-filebeat.html
+	//
 	// +optional
 	Settings []ConfigSource `json:"settings,omitempty"`
 	// ElasticsearchEndpointRef contains a reference to an existing Elasticsearch Cluster.
@@ -71,7 +100,8 @@ type FilebeatClusterSetSpec struct {
 	// +optional
 	ElasticsearchEndpointRef *ElasticsearchEndpointRef `json:"elasticsearchEndpointRef,omitempty"`
 	// Template defines the Filebeat resources that will be created across clusters.
-	Template FilebeatTemplate `json:"template"`
+	// +optional
+	Template *FilebeatTemplate `json:"template,omitempty"`
 }
 
 // ElasticsearchEndpointRef is a references to ElasticsearchEndpoint.
@@ -87,7 +117,7 @@ type FilebeatTemplate struct {
 	// +optional
 	Metadata *custom_metav1.EmbeddedObjectMeta `json:"metadata,omitempty"`
 	// Spec describes the specification of the Filebeat resources that will be created.
-	Spec beatv1b1.BeatSpec `json:"spec"`
+	Spec *beatv1b1.BeatSpec `json:"spec,omitempty"`
 }
 
 // FilebeatClusterSetStatus describes the status of a FilebeatClusterSet object.

@@ -5,7 +5,6 @@ Copyright 2020 bytedance authors. All rights reserved.
 package v1alpha1
 
 import (
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/caicloud/containeros/pkg/apis/logging"
@@ -40,7 +39,7 @@ type ElasticsearchEndpoint struct {
 	// Spec defines the desired state of a Elasticsearch cluster.
 	Spec ElasticsearchEndpointSpec `json:"spec"`
 	// Status defines the observed state of a Elasticsearch cluster.
-	Status *ElasticsearchEndpointStatus `json:"status,omitempty"`
+	Status ElasticsearchEndpointStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:validation:Enum=http;https
@@ -59,10 +58,20 @@ const (
 type ElasticsearchEndpointSpec struct {
 	// IndexTemplateSelector selects selects a list of Kubernetes Secrets in the same namespace as the ElasticsearchEndpoint object
 	// , which holding the index template object;
+	//
+	// The referenced secret should contain the following:
+	//
+	// - `template`: index template configuration in JSON format. Ref: https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-put-template.html
+	//
 	// +optional
 	IndexTemplateSelector *metav1.LabelSelector `json:"indexTemplateSelector,omitempty"`
 	// IndexLifecycleManagementSelector selects a list of Kubernetes Secrets in the same namespace as the ElasticsearchEndpoint object
 	// , which holding the index lifecycle management object;
+	//
+	// The referenced secret should contain the following:
+	//
+	// - `ilm`: ilm configuration in JSON format. Ref: https://www.elastic.co/guide/en/elasticsearch/reference/current/overview-index-lifecycle-management.html
+	//
 	// +optional
 	IndexLifecycleManagementSelector *metav1.LabelSelector `json:"indexLifecycleManagementSelector,omitempty"`
 	// Hosts is a list of Elasticsearch nodes to connect to.
@@ -73,6 +82,13 @@ type ElasticsearchEndpointSpec struct {
 	// +optional
 	Path string `json:"path,omitempty"`
 	// AuthConfigRef contains a reference to an existing Kubernetes Secret holding the auth configuration.
+	// The referenced secret should contain the following:
+	//
+	// - `username`: The basic authentication username for connecting to Elasticsearch.
+	// - `password`: The basic authentication password for connecting to Elasticsearch.
+	// - `api_key`: Instead of using a username and password, you can use API keys to secure communication with Elasticsearch. The value must be the ID of the API key and the API key joined by a colon: id:api_key.
+	// - `certificate`: The SSL client authentication in PEM format.
+	// - `key`: The client certificate key in PEM format.
 	// +optional
 	AuthConfigRef *SecretRef `json:"authConfigRef,omitempty"`
 	// Paused can be used to stop the controller from reacting to this ElasitcsearchEndpoint.
@@ -82,17 +98,17 @@ type ElasticsearchEndpointSpec struct {
 
 // ElasticsearchEndpointStatus describes the status of a ElasticsearchEndpoint object.
 type ElasticsearchEndpointStatus struct {
-	ExpectedIndexTemplate            int                              `json:"expectedIndexTemplate"`
-	EnsuredIndexTemplate             int                              `json:"ensuredIndexTemplate"`
-	ExpectedIndexLifecycleManagement int                              `json:"expectedIndexLifecycleManagement"`
-	EnsuredIndexLifecycleManagement  int                              `json:"ensuredIndexLifecycleManagement"`
-	Conditions                       []ElasticsearchEndpointCondition `json:"conditions,omitempty"`
+	ExpectedIndexTemplate            int                `json:"expectedIndexTemplate"`
+	EnsuredIndexTemplate             int                `json:"ensuredIndexTemplate"`
+	ExpectedIndexLifecycleManagement int                `json:"expectedIndexLifecycleManagement"`
+	EnsuredIndexLifecycleManagement  int                `json:"ensuredIndexLifecycleManagement"`
+	Conditions                       []metav1.Condition `json:"conditions,omitempty"`
 }
 
 // +kubebuilder:validation:Enum=IndexTemplatesReady;IndexLifecycleManagementsReady
 
 // ElasticsearchEndpointConditionType is the type of the condition.
-type ElasticsearchEndpointConditionType string
+type ElasticsearchEndpointConditionType = string
 
 const (
 	// ElasticsearchEndpointIndexTemplatesReady indicates whether all Index`s Template are Ready
@@ -100,23 +116,6 @@ const (
 	// ElasticsearchEndpointIndexLifecycleManagementsReady indicates whether all Index Lifecycle Management are Ready
 	ElasticsearchEndpointIndexLifecycleManagementsReady ElasticsearchEndpointConditionType = "IndexLifecycleManagementsReady"
 )
-
-// ElasticsearchEndpointCondition contains details for the current condition of this ElasticsearchEndpoint.
-type ElasticsearchEndpointCondition struct {
-	// Type is the type of the condition.
-	Type ElasticsearchEndpointConditionType `json:"type"`
-	// Status is the status of the condition.
-	Status corev1.ConditionStatus `json:"status"`
-	// Last time we probed the condition.
-	// +optional
-	LastProbeTime metav1.Time `json:"lastProbeTime"`
-	// Last time the condition transitioned from one status to another.
-	// +optional
-	LastTransitionTime metav1.Time `json:"lastTransitionTime"`
-	// Human-readable message indicating details about last transition.
-	// +optional
-	Message string `json:"message"`
-}
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 

@@ -18,8 +18,7 @@ const (
 // +genclient
 // +genclient:nonNamespaced
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-// +kubebuilder:resource:scope=Cluster
-// +kubebuilder:resource:path=machineinfoes
+// +kubebuilder:resource:scope=Cluster,path=machineinfoes
 // +kubebuilder:storageversion
 // +kubebuilder:printcolumn:name="Machine",type="string",JSONPath=".spec.machineName",description="The Name of Machine object"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
@@ -74,6 +73,11 @@ type MachineInfoStatus struct {
 	// +optional
 	GPU []MachineGPUInfo `json:"gpu,omitempty"`
 }
+
+const (
+	// MachineInfoConditionReady defines the machine info sync result
+	MachineInfoConditionReady = "Ready"
+)
 
 // MachineSystemInfo is the information about OS
 type MachineSystemInfo struct {
@@ -175,5 +179,5 @@ type MachineInfoList struct {
 	metav1.ListMeta `json:"metadata"`
 
 	// Items is list of MachineInfos.
-	Items []Machine `json:"items"`
+	Items []MachineInfo `json:"items"`
 }

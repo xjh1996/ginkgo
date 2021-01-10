@@ -4,11 +4,13 @@ import (
 	"context"
 	"strings"
 
+	"github.com/caicloud/zeus/framework/client"
+
 	authclient "github.com/caicloud/auth/pkg/server/client"
 	v20201010 "github.com/caicloud/auth/pkg/server/client/v20201010"
 	"github.com/caicloud/nubela/expect"
 	"github.com/caicloud/nubela/logger"
-	"github.com/caicloud/zeus/framework/client"
+
 	"k8s.io/apimachinery/pkg/util/rand"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
@@ -84,15 +86,6 @@ func GetUser(authAPI authclient.Interface, name string) (*v20201010.UserResp, er
 	return authAPI.V20201010().GetUser(context.TODO(), getUserReq)
 }
 
-func GetNormalUserAuthAPI(authAPI authclient.Interface, baseInfo *BaseInfo, permission, resource []string) authclient.Interface {
-	user := PresetOperation(authAPI, baseInfo, permission, resource)
-	normalUserAuthAPI, err := user.Auth()
-	if err != nil {
-		logger.Failf("get normal user failed, %v", err)
-	}
-	return normalUserAuthAPI
-}
-
 // PresetOperation create a normal user, add user to tenant, create a role with permission and resource, and bind user with role.
 // then return this normal user.
 func PresetOperation(authAPI authclient.Interface, baseInfo *BaseInfo, permission, resource []string) client.User {
@@ -138,9 +131,9 @@ func PresetOperation(authAPI authclient.Interface, baseInfo *BaseInfo, permissio
 
 func CreateBaseInfo(tenantID, clusterID string) *BaseInfo {
 	return &BaseInfo{
-		RoleName:  rand.String(16),
-		UserName:  rand.String(16),
-		Email:     rand.String(6) + "@cai.com",
+		RoleName:  "role-" + rand.String(8),
+		UserName:  "normalUser-" + rand.String(8),
+		Email:     rand.String(6) + "@email.com",
 		TenantID:  tenantID,
 		ClusterID: clusterID,
 	}

@@ -66,7 +66,7 @@ func CreateNamespaceAndWait(authAPI authclient.Interface, tenantID, name, quota,
 			return false, nil
 		}
 	})
-	return ns, nil
+	return ns, err
 }
 
 func DeleteNamespace(authAPI authclient.Interface, tenantID, clusterName, name string) error {
@@ -103,7 +103,7 @@ func UpdateNamespaceAndWait(authAPI authclient.Interface, tenantID, name, quota,
 			return false, nil
 		}
 	})
-	return ns, nil
+	return ns, err
 }
 
 func GetNamespace(authAPI authclient.Interface, tenantID, clusterName, name string) (*v20201010.Namespace, error) {

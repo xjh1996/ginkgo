@@ -19,8 +19,7 @@ const (
 // +genclient
 // +genclient:nonNamespaced
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-// +kubebuilder:resource:scope=Cluster
-// +kubebuilder:resource:shortName="hna"
+// +kubebuilder:resource:scope=Cluster,shortName="hna"
 // +kubebuilder:storageversion
 // +kubebuilder:printcolumn:name="IsEnabled",type="boolean",JSONPath=".spec.isEnabled",description="Enable option"
 // +kubebuilder:printcolumn:name="Min",type="integer",JSONPath=".spec.minReplicas",description="The min replicas count"

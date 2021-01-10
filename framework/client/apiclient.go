@@ -4,6 +4,7 @@ import (
 	appclient "github.com/caicloud/app/pkg/server/client"
 	authclient "github.com/caicloud/auth/pkg/server/client"
 	cargoclient "github.com/caicloud/cargo-server/pkg/server/client"
+	insightclient "github.com/caicloud/insight/pkg/server/client"
 	"github.com/caicloud/nirvana/rest"
 	"github.com/caicloud/nubela/baseclient"
 	pipelineclient "github.com/caicloud/pipeline/pkg/server/client"
@@ -57,9 +58,18 @@ func (u *User) Auth() (authclient.Interface, error) {
 // Resource retrieves the ResourceClient
 func (u *User) Resource() (resourceclient.Interface, error) {
 	return resourceclient.NewClient(&rest.Config{
-		Scheme: config.Context.Scheme,
-		Host:   config.Context.BaseUrl + "/hodor",
-		//Executor: baseclient.NewRequestExecutorWithAuth("hyw-test", "richard", "Pwd123456"),
+		Scheme:   config.Context.Scheme,
+		Host:     config.Context.BaseUrl + "/hodor",
+		Executor: baseclient.NewRequestExecutorWithAuth(u.Tenant, u.Username, u.Password),
+	})
+}
+
+// Insight retrieves the InsightClient
+func (u *User) Insight() (insightclient.Interface, error) {
+	return insightclient.NewClient(&rest.Config{
+		Scheme:   config.Context.Scheme,
+		Host:     config.Context.BaseUrl + "/hodor",
+		Executor: baseclient.NewRequestExecutorWithAuth(u.Tenant, u.Username, u.Password),
 	})
 }
 
