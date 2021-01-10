@@ -2,246 +2,548 @@ package devops
 
 import (
 	"context"
-	cargoclient "github.com/caicloud/cargo-server/pkg/server/client"
-	"os"
 
-	v1 "github.com/caicloud/api/meta/v1"
-	v20201010 "github.com/caicloud/cargo-server/pkg/server/client/v20201010"
 	commonconfig "github.com/caicloud/nubela/config"
 	"github.com/caicloud/nubela/expect"
-	"github.com/caicloud/nubela/logger"
 	"github.com/caicloud/zeus/framework"
-	"github.com/onsi/ginkgo"
+	"github.com/caicloud/zeus/framework/app"
+	"github.com/caicloud/zeus/framework/devops"
 
-	k8v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	appclient "github.com/caicloud/app/pkg/server/client"
+	types "github.com/caicloud/app/pkg/server/client/v20201010"
+	cargoclient "github.com/caicloud/cargo-server/pkg/server/client"
+	v20201010 "github.com/caicloud/cargo-server/pkg/server/client/v20201010"
+
+	"github.com/onsi/ginkgo"
 	"k8s.io/apimachinery/pkg/util/rand"
 )
 
 type cargoPublic struct {
 	Username            string `default:"admin" usage:"user to login"`
 	Password            string `default:"Pwd123456" usage:"password of this user"`
-	CargoDomain         string
-	SystemTenant        string
-	Description         string
-	DefaultRegistryName string
-	Basename            string
-	Path                string
+	CargoDomain         string `usage:"domain for harbor"`
+	Description         string `usage:"description"`
+	DefaultRegistryName string `usage:"name from default Cargo"`
+	Basename            string `usage:"name for all resource"`
+	Path                string `usage:"path for Dockerfile"`
+	ImageRepo           string `usage:"Image Repository for deployment"`
 }
 
 var cargoParam cargoPublic
 var _ = commonconfig.AddOptions(&cargoParam, "cargo.registry")
 
 var _ = SIGDescribe("Cargo Smoketest", func() {
-	//var k8 clientset.Interface
-	//k8 = f.ClientSet.K8S
 	var name string
+	var err error
+	var registry *v20201010.RegistryResp
+	var repoOpt = &v20201010.Pagination{Start: 0, Limit: 10}
+	var cargoc cargoclient.Interface
+	var appc appclient.Interface
+
 	f := framework.NewDefaultFramework("cargo-test")
 
-	ginkgo.Context("验证新建自定义镜像仓库并新建项目", func() {
-		var creReg *v20201010.RegistryResp
-		name = cargoParam.Basename + rand.String(5)
+	ginkgo.BeforeEach(func() {
+		cargoc, err = f.AdminAPIClient.Cargo()
+		expect.NoError(err)
+		appc, err = f.AdminAPIClient.App()
+		expect.NoError(err)
+	})
+
+	ginkgo.Context("验证新建自定义镜像仓库并", func() {
+
 		ginkgo.BeforeEach(func() {
-			// 集成外部仓库
-			cargoc, err := f.APIClient.Cargo()
+			name = cargoParam.Basename + rand.String(5)
+			registry, err = devops.CreateCargoRegistry(cargoc, name, f.AdminAPIClient.Tenant, cargoParam.CargoDomain, cargoParam.Username, cargoParam.Password)
 			expect.NoError(err)
-			creReg = createCargoRegistry(cargoc, name)
 		})
 
 		ginkgo.AfterEach(func() {
 			// 删除集成仓库
-			cargoc, err := f.APIClient.Cargo()
-			expect.NoError(err)
-			err = cargoc.V20201010().DeleteRegistry(context.TODO(), cargoParam.SystemTenant, name)
+			err = cargoc.V20201010().DeleteRegistry(context.TODO(), f.AdminAPIClient.Tenant, registry.Name)
 			expect.NoError(err)
 		})
 
-		ginkgo.It("分别在default仓库和集成仓库中新建私有/公有项目", func() {
+		ginkgo.It("在系统租户下，在default仓库中新建私有/公有项目", func() {
 
 			// 在default仓库创建公有项目组，创建私有项目组
-			cargoc, err := f.APIClient.Cargo()
+			publicProject, err := devops.CreatePublicProject(cargoc, name, f.AdminAPIClient.Tenant, cargoParam.DefaultRegistryName, cargoParam.Description)
 			expect.NoError(err)
-			crePubPro := createPublicProject(cargoc, name, cargoParam.SystemTenant, cargoParam.DefaultRegistryName)
-			crePriPro := createPrivateProject(cargoc, name, cargoParam.SystemTenant, cargoParam.DefaultRegistryName)
+			privateProject, err := devops.CreatePrivateProject(cargoc, name, f.AdminAPIClient.Tenant, cargoParam.DefaultRegistryName, cargoParam.Description)
+			expect.NoError(err)
 
 			// 删除公有项目，私有项目
-			err = cargoc.V20201010().DeleteArtifactPublicProject(context.TODO(), cargoParam.SystemTenant, cargoParam.DefaultRegistryName, crePubPro.Name)
+			err = cargoc.V20201010().DeleteArtifactPublicProject(context.TODO(), f.AdminAPIClient.Tenant, cargoParam.DefaultRegistryName, publicProject.Name)
 			expect.NoError(err)
-			err = cargoc.V20201010().DeleteArtifactProject(context.TODO(), cargoParam.SystemTenant, cargoParam.DefaultRegistryName, crePriPro.Name)
+			err = cargoc.V20201010().DeleteArtifactProject(context.TODO(), f.AdminAPIClient.Tenant, cargoParam.DefaultRegistryName, privateProject.Name)
 			expect.NoError(err)
 
 			// 校验删除成功
-			_, err = cargoc.V20201010().GetArtifactPublicProject(context.TODO(), cargoParam.SystemTenant, cargoParam.DefaultRegistryName, crePubPro.Name)
-			expect.Error(err, "[default]删除公有项目失败")
-			_, err = cargoc.V20201010().GetArtifactProject(context.TODO(), cargoParam.SystemTenant, cargoParam.DefaultRegistryName, crePriPro.Name)
-			expect.Error(err, "[default]删除私有项目失败")
+			_, err = cargoc.V20201010().GetArtifactPublicProject(context.TODO(), f.AdminAPIClient.Tenant, cargoParam.DefaultRegistryName, publicProject.Name)
+			expect.Error(err, "系统租户<default>删除公有项目失败") // FIXME 校验返回码 404
+			_, err = cargoc.V20201010().GetArtifactProject(context.TODO(), f.AdminAPIClient.Tenant, cargoParam.DefaultRegistryName, privateProject.Name)
+			expect.Error(err, "系统租户<default>删除私有项目失败") // FIXME 校验返回码 404
+		})
+
+		ginkgo.It("在系统租户下，在集成仓库中新建私有/公有项目", func() {
 
 			// 在集成仓库创建公有项目组，创建私有项目组
-			cargoc, err = f.APIClient.Cargo()
+			publicProject2, err := devops.CreatePublicProject(cargoc, name, f.AdminAPIClient.Tenant, registry.Name, cargoParam.Description)
 			expect.NoError(err)
-			crePubPro2 := createPublicProject(cargoc, name, cargoParam.SystemTenant, creReg.Name)
-			crePriPro2 := createPrivateProject(cargoc, name, cargoParam.SystemTenant, creReg.Name)
+			privateProject2, err := devops.CreatePrivateProject(cargoc, name, f.AdminAPIClient.Tenant, registry.Name, cargoParam.Description)
+			expect.NoError(err)
 
 			// 删除公有项目，私有项目
-			err = cargoc.V20201010().DeleteArtifactPublicProject(context.TODO(), cargoParam.SystemTenant, creReg.Name, crePubPro2.Name)
+			err = cargoc.V20201010().DeleteArtifactPublicProject(context.TODO(), f.AdminAPIClient.Tenant, registry.Name, publicProject2.Name)
 			expect.NoError(err)
-			err = cargoc.V20201010().DeleteArtifactProject(context.TODO(), cargoParam.SystemTenant, creReg.Name, crePriPro2.Name)
+			err = cargoc.V20201010().DeleteArtifactProject(context.TODO(), f.AdminAPIClient.Tenant, registry.Name, privateProject2.Name)
 			expect.NoError(err)
 
 			// 校验删除成功
-			_, err = cargoc.V20201010().GetArtifactPublicProject(context.TODO(), cargoParam.SystemTenant, creReg.Name, crePubPro2.Name)
-			expect.Error(err, "[集成]删除公有项目失败")
-			_, err = cargoc.V20201010().GetArtifactProject(context.TODO(), cargoParam.SystemTenant, creReg.Name, crePriPro2.Name)
-			expect.Error(err, "[集成]删除私有项目失败")
+			_, err = cargoc.V20201010().GetArtifactPublicProject(context.TODO(), f.AdminAPIClient.Tenant, registry.Name, publicProject2.Name)
+			expect.Error(err, "系统租户<集成>删除公有项目失败") // FIXME 校验返回码 404
+			_, err = cargoc.V20201010().GetArtifactProject(context.TODO(), f.AdminAPIClient.Tenant, registry.Name, privateProject2.Name)
+			expect.Error(err, "系统租户<集成>删除私有项目失败") // FIXME 校验返回码 404
 		})
+
+		ginkgo.It("在普通租户下，在default仓库中新建私有项目", func() {
+
+			// 在default仓库创建私有项目组
+			privateProject, err := devops.CreatePrivateProject(cargoc, name, f.APIClient.Tenant, cargoParam.DefaultRegistryName, cargoParam.Description)
+			expect.NoError(err)
+
+			// 删除私有项目
+			err = cargoc.V20201010().DeleteArtifactProject(context.TODO(), f.APIClient.Tenant, cargoParam.DefaultRegistryName, privateProject.Name)
+			expect.NoError(err)
+
+			// 校验删除成功
+			_, err = cargoc.V20201010().GetArtifactProject(context.TODO(), f.APIClient.Tenant, cargoParam.DefaultRegistryName, privateProject.Name)
+			expect.Error(err, "普通租户<default>删除私有项目失败") // FIXME 校验返回码 404
+		})
+
+		ginkgo.It("在普通租户下，在集成仓库中新建私有项目", func() {
+
+			// 在集成仓库创建私有项目组
+			privateProject2, err := devops.CreatePrivateProject(cargoc, name, f.APIClient.Tenant, registry.Name, cargoParam.Description)
+			expect.NoError(err)
+
+			// 删除私有项目
+			err = cargoc.V20201010().DeleteArtifactProject(context.TODO(), f.APIClient.Tenant, registry.Name, privateProject2.Name)
+			expect.NoError(err)
+
+			// 校验删除成功
+			_, err = cargoc.V20201010().GetArtifactProject(context.TODO(), f.APIClient.Tenant, registry.Name, privateProject2.Name)
+			expect.Error(err, "普通租户<集成>删除私有项目失败") // FIXME 校验返回码 404
+		})
+
 	}) //完成
 
-	ginkgo.Context("上传/下载/构建镜像", func() {
-		var crePriPro *v20201010.Project
-		name = cargoParam.Basename + rand.String(5)
+	ginkgo.Context("验证上传/下载/构建镜像在", func() {
+		var privateProject *v20201010.Project
+		var publicProject *v20201010.PublicProject
+
 		ginkgo.BeforeEach(func() {
-			// 在租户下新建私有项目组
-			cargoc, err := f.APIClient.Cargo()
-			expect.NoError(err)
-			crePriPro = createPrivateProject(cargoc, name, cargoParam.SystemTenant, cargoParam.DefaultRegistryName)
+			name = cargoParam.Basename + rand.String(5)
 		})
 
-		ginkgo.AfterEach(func() {
-			// 删除私有项目组，校验
-			cargoc, err := f.APIClient.Cargo()
-			expect.NoError(err)
-			err = cargoc.V20201010().DeleteArtifactProject(context.TODO(), cargoParam.SystemTenant, cargoParam.DefaultRegistryName, crePriPro.Name)
+		ginkgo.It("系统租户下，default仓库公有项目组中", func() {
+
+			// 在系统租户下<default仓库>新建公有项目组
+			publicProject, err = devops.CreatePublicProject(cargoc, name, f.AdminAPIClient.Tenant, cargoParam.DefaultRegistryName, cargoParam.Description)
 			expect.NoError(err)
 
-			// 校验删除成功
-			_, err = cargoc.V20201010().GetArtifactProject(context.TODO(), cargoParam.SystemTenant, cargoParam.DefaultRegistryName, crePriPro.Name)
-			expect.Error(err, "删除私有项目失败")
+			// 获取公有项目组的信息，校验为空
+			repositoryList, _, err := cargoc.V20201010().ListRepositories(context.TODO(), "", f.AdminAPIClient.Tenant, cargoParam.DefaultRegistryName, publicProject.Name, "", "", repoOpt)
+			expect.NoError(err)
+			expect.Equal(repositoryList.Total, 0, "公有项目组不为空")
+
+			// TODO 上传镜像到该项目组，校验
+
+			// 构建镜像到项目组
+			_, err = devops.ImageBuild(cargoc, cargoParam.Path, name, f.AdminAPIClient.Tenant, cargoParam.DefaultRegistryName, publicProject.Name)
+			expect.NoError(err)
+
+			// TODO 获取项目组的信息，校验有上述上传/构建的镜像
+			// TODO 下载镜像，校验成功
+
+			//删除公有项目组
+			err = cargoc.V20201010().DeleteArtifactPublicProject(context.TODO(), f.AdminAPIClient.Tenant, cargoParam.DefaultRegistryName, publicProject.Name)
+			expect.NoError(err)
+
+			//校验删除成功
+			_, err = cargoc.V20201010().GetArtifactPublicProject(context.TODO(), f.AdminAPIClient.Tenant, cargoParam.DefaultRegistryName, publicProject.Name)
+			expect.Error(err, "系统租户<default仓库>删除公有项目失败") // FIXME 校验返回码 404
 		})
 
-		ginkgo.It("上传一个镜像，下载一个镜像，构建一个镜像", func() {
+		ginkgo.It("系统租户下，default仓库私有项目组中", func() {
+
+			// 在系统租户下<default仓库>新建私有项目组
+			privateProject, err = devops.CreatePrivateProject(cargoc, name, f.AdminAPIClient.Tenant, cargoParam.DefaultRegistryName, cargoParam.Description)
+			expect.NoError(err)
 
 			// 获取私有项目组的信息，校验为空
-			cargoc, err := f.APIClient.Cargo()
+			repositoryList, _, err := cargoc.V20201010().ListRepositories(context.TODO(), "", f.AdminAPIClient.Tenant, cargoParam.DefaultRegistryName, privateProject.Name, "", "", repoOpt)
 			expect.NoError(err)
-			lstRepoOpt := &v20201010.Pagination{
-				Start: 0,
-				Limit: 10,
-			}
-			lstRepo, _, err := cargoc.V20201010().ListRepositories(context.TODO(), "", cargoParam.SystemTenant, cargoParam.DefaultRegistryName, crePriPro.Name, "", "", lstRepoOpt)
-			expect.NoError(err)
-			expect.Equal(lstRepo.Total, 0, "私有项目组不为空")
+			expect.Equal(repositoryList.Total, 0, "私有项目组不为空")
 
-			// TODO 上传镜像到该私有项目组，校验
-			//preUpImage, err := cargoc.V20201010().PrepareImageUpload(context.TODO(), userTenant, registryName, projectName)
-			//expect.NoError(err)
-			//_, err = cargoc.V20201010().UploadImage(context.TODO(), userTenant, preUpImage.Metadata.ID, registryName, projectName, nil)
-			//expect.NoError(err)
-			//_, err = cargoc.V20201010().GetRepository(context.TODO(), userTenant, registryName, projectName, imageRepo)
-			//expect.NoError(err)
+			// TODO 上传镜像到该项目组，校验
 
-			// TODO 构建镜像到该私有项目组
-			dockerfile, err := os.Open(cargoParam.Path)
+			// 构建镜像到项目组
+			_, err = devops.ImageBuild(cargoc, cargoParam.Path, name, f.AdminAPIClient.Tenant, cargoParam.DefaultRegistryName, privateProject.Name)
 			expect.NoError(err)
-			_, err = cargoc.V20201010().BuildImage(context.TODO(), "admin", cargoParam.SystemTenant, cargoParam.DefaultRegistryName, crePriPro.Name, "cntest", dockerfile)
-			expect.NoError(err)
-			// TODO 查看构建记录，成功
-			// TODO 获取私有项目组的信息，校验有上述上传/构建的镜像
+
+			// TODO 获取项目组的信息，校验有上述上传/构建的镜像
 			// TODO 下载镜像，校验成功
-			// check 1： 业务完成查询操作
 
-			// check 2： 检测 k8s 一致性
-			//k8sPartition, err := k8.CoreV1().Namespaces().Get(context.TODO(), nameSpace, metav1.GetOptions{})
-			//framework.ExpectNoError(err)
-			//gomega.Eventually(k8sPartition.Status.Phase, 100).Should(gomega.BeEquivalentTo("Active"), "The status is not Active within 100 seconds")
+			// 删除系统租户<default仓库>私有项目组
+			err = cargoc.V20201010().DeleteArtifactProject(context.TODO(), f.AdminAPIClient.Tenant, cargoParam.DefaultRegistryName, privateProject.Name)
+			expect.NoError(err)
 
-			// check 3： 业务层面检查
+			//校验删除成功
+			_, err = cargoc.V20201010().GetArtifactProject(context.TODO(), f.AdminAPIClient.Tenant, cargoParam.DefaultRegistryName, privateProject.Name)
+			expect.Error(err, "系统租户<default仓库>删除私有项目失败") // FIXME 校验返回码 404
 		})
-	}) //完成
 
+		ginkgo.It("系统租户下，集成仓库公有项目组中", func() {
 
+			// 在系统租户下<集成仓库>新建公有项目组
+			publicProject, err = devops.CreatePublicProject(cargoc, name, f.AdminAPIClient.Tenant, registry.Name, cargoParam.Description)
+			expect.NoError(err)
+
+			// 获取项目组的信息，校验为空
+			repositoryList, _, err := cargoc.V20201010().ListRepositories(context.TODO(), "", f.AdminAPIClient.Tenant, registry.Name, publicProject.Name, "", "", repoOpt)
+			expect.NoError(err)
+			expect.Equal(repositoryList.Total, 0, "公有项目组不为空")
+
+			// TODO 上传镜像到该项目组，校验
+
+			// 构建镜像到项目组
+			_, err = devops.ImageBuild(cargoc, cargoParam.Path, name, f.AdminAPIClient.Tenant, registry.Name, publicProject.Name)
+			expect.NoError(err)
+
+			// TODO 获取项目组的信息，校验有上述上传/构建的镜像
+			// TODO 下载镜像，校验成功
+
+			// 删除系统租户<集成仓库>公有项目组，校验
+			err = cargoc.V20201010().DeleteArtifactPublicProject(context.TODO(), f.AdminAPIClient.Tenant, registry.Name, publicProject.Name)
+			expect.NoError(err)
+
+			//校验删除成功
+			_, err = cargoc.V20201010().GetArtifactPublicProject(context.TODO(), f.AdminAPIClient.Tenant, registry.Name, publicProject.Name)
+			expect.Error(err, "系统租户<集成仓库>删除公有项目失败") // FIXME 校验返回码 404
+		})
+
+		ginkgo.It("系统租户下，集成仓库私有项目组中", func() {
+
+			// 在系统租户下<集成仓库>新建私有项目组
+			privateProject, err = devops.CreatePrivateProject(cargoc, name, f.AdminAPIClient.Tenant, registry.Name, cargoParam.Description)
+			expect.NoError(err)
+
+			// 获取项目组的信息，校验为空
+			repositoryList, _, err := cargoc.V20201010().ListRepositories(context.TODO(), "", f.AdminAPIClient.Tenant, registry.Name, privateProject.Name, "", "", repoOpt)
+			expect.NoError(err)
+			expect.Equal(repositoryList.Total, 0, "私有项目组不为空")
+
+			// TODO 上传镜像到该项目组，校验
+
+			// 构建镜像到项目组
+			_, err = devops.ImageBuild(cargoc, cargoParam.Path, name, f.AdminAPIClient.Tenant, registry.Name, privateProject.Name)
+			expect.NoError(err)
+
+			// TODO 获取项目组的信息，校验有上述上传/构建的镜像
+			// TODO 下载镜像，校验成功
+
+			// 删除系统租户<集成仓库>私有项目组，校验
+			err = cargoc.V20201010().DeleteArtifactProject(context.TODO(), f.AdminAPIClient.Tenant, registry.Name, privateProject.Name)
+			expect.NoError(err)
+
+			// 校验删除成功
+			_, err = cargoc.V20201010().GetArtifactProject(context.TODO(), f.AdminAPIClient.Tenant, registry.Name, privateProject.Name)
+			expect.Error(err, "系统租户<集成仓库>删除私有项目失败") // FIXME 校验返回码 404
+
+		})
+
+		ginkgo.It("普通租户下，default仓库私有项目组中", func() {
+
+			// 在普通租户下<default仓库>新建私有项目组
+			privateProject, err = devops.CreatePrivateProject(cargoc, name, f.APIClient.Tenant, cargoParam.DefaultRegistryName, cargoParam.Description)
+			expect.NoError(err)
+
+			// 获取私有项目组的信息，校验为空
+			repositoryList, _, err := cargoc.V20201010().ListRepositories(context.TODO(), "", f.APIClient.Tenant, cargoParam.DefaultRegistryName, privateProject.Name, "", "", repoOpt)
+			expect.NoError(err)
+			expect.Equal(repositoryList.Total, 0, "私有项目组不为空")
+
+			// TODO 上传镜像到该项目组，校验
+
+			// 构建镜像到项目组
+			_, err = devops.ImageBuild(cargoc, cargoParam.Path, name, f.APIClient.Tenant, cargoParam.DefaultRegistryName, privateProject.Name)
+			expect.NoError(err)
+
+			// TODO 获取项目组的信息，校验有上述上传/构建的镜像
+			// TODO 下载镜像，校验成功
+
+			// 删除普通租户<default仓库>私有项目组，校验
+			err = cargoc.V20201010().DeleteArtifactProject(context.TODO(), f.APIClient.Tenant, cargoParam.DefaultRegistryName, privateProject.Name)
+			expect.NoError(err)
+
+			// 校验删除成功
+			_, err = cargoc.V20201010().GetArtifactProject(context.TODO(), f.APIClient.Tenant, cargoParam.DefaultRegistryName, privateProject.Name)
+			expect.Error(err, "普通租户<default仓库>删除私有项目失败") // FIXME 校验返回码 404
+		})
+
+		ginkgo.It("普通租户下，集成仓库私有项目组中", func() {
+
+			// 在普通租户下<集成仓库>新建私有项目组
+			privateProject, err = devops.CreatePrivateProject(cargoc, name, f.APIClient.Tenant, registry.Name, cargoParam.Description)
+			expect.NoError(err)
+
+			// 获取私有项目组的信息，校验为空
+			repositoryList, _, err := cargoc.V20201010().ListRepositories(context.TODO(), "", f.APIClient.Tenant, registry.Name, privateProject.Name, "", "", repoOpt)
+			expect.NoError(err)
+			expect.Equal(repositoryList.Total, 0, "私有项目组不为空")
+
+			// TODO 上传镜像到该项目组，校验
+
+			// 构建镜像到项目组
+			_, err = devops.ImageBuild(cargoc, cargoParam.Path, name, f.APIClient.Tenant, registry.Name, privateProject.Name)
+			expect.NoError(err)
+
+			// TODO 获取项目组的信息，校验有上述上传/构建的镜像
+			// TODO 下载镜像，校验成功
+
+			// 删除普通租户<集成仓库>私有/公有项目组，校验
+			err = cargoc.V20201010().DeleteArtifactProject(context.TODO(), f.APIClient.Tenant, registry.Name, privateProject.Name)
+			expect.NoError(err)
+
+			// 校验删除成功
+			_, err = cargoc.V20201010().GetArtifactProject(context.TODO(), f.APIClient.Tenant, registry.Name, privateProject.Name)
+			expect.Error(err, "普通租户<集成仓库>删除私有项目失败") // FIXME 校验返回码 404
+		})
+
+	}) // 3.0仅上车镜像构建 // FIXME 之后优化封装重复步骤
+
+	ginkgo.Context("验证镜像仓库同步", func() {
+		var privateProject *v20201010.Project
+		var publicProject *v20201010.PublicProject
+		var trigger = []string{"Manual", "OnPush", "Scheduled"}
+		var startReplicationOpt = &v20201010.TriggerReplicationReq{Action: "Start"}
+
+		ginkgo.BeforeEach(func() {
+			name = cargoParam.Basename + rand.String(5)
+		})
+
+		ginkgo.It("在系统租户新建公有项目同步策略，进行同步", func() {
+
+			// 在系统租户下<default仓库>新建公有项目组
+			publicProject, err = devops.CreatePublicProject(cargoc, name, f.AdminAPIClient.Tenant, cargoParam.DefaultRegistryName, cargoParam.Description)
+			expect.NoError(err)
+
+			// 获取系统租户下<default仓库>公有项目组，校验为空
+			publicRepositoryList, _, err := cargoc.V20201010().ListRepositories(context.TODO(), "", f.AdminAPIClient.Tenant, cargoParam.DefaultRegistryName, publicProject.Name, "", "", repoOpt)
+			expect.NoError(err)
+			expect.Equal(publicRepositoryList.Total, 0, "系统租户<default仓库>公有项目组不为空")
+
+			// 获取系统租户下<集成仓库>的同名公有项目组，校验不存在(同步策略创建后才会创建)
+			publicProjectList, _, err := cargoc.V20201010().ListArtifactPublicProjects(context.TODO(), "", f.AdminAPIClient.Tenant, registry.Name, repoOpt)
+			expect.NoError(err)
+			for _, v := range publicProjectList.Items {
+				expect.NotEqual(publicProject.Name, v.Name, "系统租户下<集成仓库>存在同名公有项目组")
+			}
+
+			// TODO 上传镜像到 系统租户<default仓库>的公有/私有项目组 普通租户<default仓库>的私有项目组，并校验上传成功
+			// 暂时通过构建来实现
+			_, err = devops.ImageBuild(cargoc, cargoParam.Path, name, f.AdminAPIClient.Tenant, cargoParam.DefaultRegistryName, publicProject.Name)
+			expect.NoError(err)
+
+			// 在系统租户下新建公有项目组的同步策略
+			replication, err := devops.CreateReplication(cargoc, name, f.AdminAPIClient.Tenant, publicProject.Name, cargoParam.DefaultRegistryName, registry.Name, trigger[0])
+			expect.NoError(err)
+
+			//校验同步策略创建后，target仓库<集成仓库>中项目组已创建
+			_, err = cargoc.V20201010().GetArtifactPublicProject(context.TODO(), f.AdminAPIClient.Tenant, registry.Name, publicProject.Name)
+			expect.NoError(err)
+
+			//触发同步策略
+			err = cargoc.V20201010().TriggerReplication(context.TODO(), f.AdminAPIClient.Tenant, replication.Name, startReplicationOpt)
+			expect.NoError(err)
+
+			// TODO 查看record成功 (暂时通过校验 target 项目组有没有镜像来确定是否同步成功)
+
+			//查看系统/普通租户集成仓库的目标源内含有项目组和镜像
+			publicRepositoryList, _, err = cargoc.V20201010().ListRepositories(context.TODO(), "", f.AdminAPIClient.Tenant, registry.Name, publicProject.Name, "", "", repoOpt)
+			expect.NoError(err)
+			expect.Equal(publicRepositoryList.Total, 1, "同步失败") //FIXME 准确校验镜像
+
+			//删除同步策略
+			err = cargoc.V20201010().DeleteReplication(context.TODO(), f.AdminAPIClient.Tenant, replication.Name)
+			expect.NoError(err)
+
+			//校验删除成功
+			_, err = cargoc.V20201010().GetReplication(context.TODO(), f.AdminAPIClient.Tenant, replication.Name)
+			expect.Error(err) // FIXME 校验返回码404
+
+			// 删除系统租户<default仓库>公有项目组，校验
+			err = cargoc.V20201010().DeleteArtifactPublicProject(context.TODO(), f.AdminAPIClient.Tenant, cargoParam.DefaultRegistryName, publicProject.Name)
+			expect.NoError(err)
+		})
+
+		ginkgo.It("在系统租户新建私有项目同步策略，进行同步", func() {
+
+			// 在系统租户下<default仓库>新建私有项目组
+			privateProject, err = devops.CreatePrivateProject(cargoc, name, f.AdminAPIClient.Tenant, cargoParam.DefaultRegistryName, cargoParam.Description)
+			expect.NoError(err)
+
+			// 获取系统租户下<default仓库>私有项目组，校验为空
+			privateRepositoryList, _, err := cargoc.V20201010().ListRepositories(context.TODO(), "", f.AdminAPIClient.Tenant, cargoParam.DefaultRegistryName, privateProject.Name, "", "", repoOpt)
+			expect.NoError(err)
+			expect.Equal(privateRepositoryList.Total, 0, "系统租户<default仓库>私有项目组不为空")
+
+			// 获取系统租户下<集成仓库>的同名私有项目组，校验不存在(同步策略创建后才会创建)
+			privateProjectList, _, err := cargoc.V20201010().ListArtifactProjects(context.TODO(), "", f.AdminAPIClient.Tenant, "admin", registry.Name, false, "", repoOpt)
+			expect.NoError(err)
+			for _, v := range privateProjectList.Items {
+				expect.NotEqual(privateProject.Name, v.Name, "系统租户下<集成仓库>存在同名私有项目组")
+			}
+
+			// TODO 上传镜像到 系统租户<default仓库>的公有/私有项目组 普通租户<default仓库>的私有项目组，并校验上传成功
+			// 暂时通过构建来实现
+			_, err = devops.ImageBuild(cargoc, cargoParam.Path, name, f.AdminAPIClient.Tenant, cargoParam.DefaultRegistryName, privateProject.Name)
+			expect.NoError(err)
+
+			// 在系统租户下新建私有项目组的同步策略
+			replication, err := devops.CreateReplication(cargoc, name, f.AdminAPIClient.Tenant, privateProject.Name, cargoParam.DefaultRegistryName, registry.Name, trigger[0])
+			expect.NoError(err)
+
+			//校验同步策略创建后，target仓库<集成仓库>中项目组已创建
+			_, err = cargoc.V20201010().GetArtifactProject(context.TODO(), f.AdminAPIClient.Tenant, registry.Name, privateProject.Name)
+			expect.NoError(err)
+
+			// 触发同步策略
+			err = cargoc.V20201010().TriggerReplication(context.TODO(), f.AdminAPIClient.Tenant, replication.Name, startReplicationOpt)
+			expect.NoError(err)
+
+			// TODO 查看record成功 (暂时通过校验 target 项目组有没有镜像来确定是否同步成功)
+
+			//查看系统/普通租户集成仓库的目标源内含有项目组和镜像
+			privateRepositoryList, _, err = cargoc.V20201010().ListRepositories(context.TODO(), "", f.AdminAPIClient.Tenant, registry.Name, privateProject.Name, "", "", repoOpt)
+			expect.NoError(err)
+			expect.Equal(privateRepositoryList.Total, 1, "同步失败") //FIXME 准确校验镜像
+
+			//删除同步策略
+			err = cargoc.V20201010().DeleteReplication(context.TODO(), f.AdminAPIClient.Tenant, replication.Name)
+			expect.NoError(err)
+
+			//校验删除成功
+			_, err = cargoc.V20201010().GetReplication(context.TODO(), f.AdminAPIClient.Tenant, replication.Name)
+			expect.Error(err) // FIXME 校验返回码404
+
+			// 删除系统租户<default仓库>私有/公有项目组，校验
+			err = cargoc.V20201010().DeleteArtifactProject(context.TODO(), f.AdminAPIClient.Tenant, cargoParam.DefaultRegistryName, privateProject.Name)
+			expect.NoError(err)
+		})
+
+		ginkgo.It("在普通租户新建私有项目同步策略，进行同步", func() {
+
+			// 在普通租户下<default仓库>新建私有项目组
+			privateProject, err = devops.CreatePrivateProject(cargoc, name, f.APIClient.Tenant, cargoParam.DefaultRegistryName, cargoParam.Description)
+			expect.NoError(err)
+
+			// 获取普通租户下<default仓库>私有项目组，校验为空
+			privateRepositoryList, _, err := cargoc.V20201010().ListRepositories(context.TODO(), "", f.APIClient.Tenant, cargoParam.DefaultRegistryName, privateProject.Name, "", "", repoOpt)
+			expect.NoError(err)
+			expect.Equal(privateRepositoryList.Total, 0, "普通租户<default仓库>私有项目组不为空")
+
+			// 获取普通租户下<集成仓库>的同名私有项目组，校验不存在(同步策略创建后才会创建)
+			privateProjectList, _, err := cargoc.V20201010().ListArtifactProjects(context.TODO(), "", f.APIClient.Tenant, "admin", registry.Name, false, "", repoOpt)
+			expect.NoError(err)
+			for _, v := range privateProjectList.Items {
+				expect.NotEqual(privateProject.Name, v.Name, "普通租户下<集成仓库>存在同名私有项目组")
+			}
+
+			// TODO 上传镜像到 系统租户<default仓库>的公有/私有项目组 普通租户<default仓库>的私有项目组，并校验上传成功
+			// 暂时通过构建来实现
+			_, err = devops.ImageBuild(cargoc, cargoParam.Path, name, f.AdminAPIClient.Tenant, cargoParam.DefaultRegistryName, privateProject.Name)
+			expect.NoError(err)
+
+			//在普通租户下新建私有项目组的同步策略
+			replication, err := devops.CreateReplication(cargoc, name, f.APIClient.Tenant, privateProject.Name, cargoParam.DefaultRegistryName, registry.Name, trigger[0])
+			expect.NoError(err)
+
+			//校验同步策略创建后，target仓库<集成仓库>中项目组已创建
+			_, err = cargoc.V20201010().GetArtifactProject(context.TODO(), f.APIClient.Tenant, registry.Name, privateProject.Name)
+			expect.NoError(err)
+
+			// 触发同步策略
+			err = cargoc.V20201010().TriggerReplication(context.TODO(), f.APIClient.Tenant, replication.Name, startReplicationOpt)
+			expect.NoError(err)
+
+			// TODO 查看record成功 (暂时通过校验 target 项目组有没有镜像来确定是否同步成功)
+
+			// TODO 查看系统/普通租户集成仓库的目标源内含有项目组和镜像
+			privateRepositoryList, _, err = cargoc.V20201010().ListRepositories(context.TODO(), "", f.APIClient.Tenant, registry.Name, privateProject.Name, "", "", repoOpt)
+			expect.NoError(err)
+			expect.Equal(privateRepositoryList.Total, 1, "普通租户<default仓库>私有项目组不为空")
+
+			//删除同步策略
+			err = cargoc.V20201010().DeleteReplication(context.TODO(), f.APIClient.Tenant, replication.Name)
+			expect.NoError(err)
+
+			//校验删除成功
+			_, err = cargoc.V20201010().GetReplication(context.TODO(), f.APIClient.Tenant, replication.Name)
+			expect.Error(err) // FIXME 校验返回码404
+
+			// 删除普通租户<default仓库>私有项目组，校验
+			err = cargoc.V20201010().DeleteArtifactProject(context.TODO(), f.APIClient.Tenant, cargoParam.DefaultRegistryName, privateProject.Name)
+			expect.NoError(err)
+		})
+
+	}) // 3.0不上镜像上传/复制，所以通过构建来新增镜像 // FIXME 之后优化封装重复步骤
+
+	ginkgo.Context("镜像扫描", func() {
+
+		ginkgo.BeforeEach(func() {
+			name = cargoParam.Basename + rand.String(5)
+		})
+
+		ginkgo.It("在default仓库，扫描公有项目library中的一个repo", func() {
+
+			// TODO 上传镜像到该私有项目组
+
+			// 扫描default仓库下library项目组的镜像
+			publicRepositoryList, _, err := cargoc.V20201010().ListRepositories(context.TODO(), "", f.AdminAPIClient.Tenant, cargoParam.DefaultRegistryName, "library", "", "", repoOpt)
+			expect.NoError(err)
+			tagList, err := cargoc.V20201010().ListArtifactPublicTags(context.TODO(), f.AdminAPIClient.Tenant, cargoParam.DefaultRegistryName, "library", publicRepositoryList.Items[0].Name, "", "", repoOpt)
+			expect.NoError(err)
+			err = cargoc.V20201010().ScanPublicImage(context.TODO(), f.AdminAPIClient.Tenant, cargoParam.DefaultRegistryName, "library", publicRepositoryList.Items[0].Name, tagList.Items[0].Name, tagList.Items[0].Spec.ArtifactDigest)
+			expect.NoError(err)
+
+		})
+
+	}) // 3.0不上镜像上传/复制，所以先实现扫描公有项目
+
+	ginkgo.Context("验证镜像部署负载", func() {
+
+		ginkgo.BeforeEach(func() {
+			name = cargoParam.Basename + rand.String(5)
+		})
+
+		ginkgo.It("在普通租户私有项目组，上传一个镜像到私有项目组，使用该镜像部署服务", func() {
+
+			privateProject, err := devops.CreatePrivateProject(cargoc, name, f.APIClient.Tenant, cargoParam.DefaultRegistryName, cargoParam.Description)
+			expect.NoError(err)
+			// TODO 上传镜像到该私有项目组
+			// TODO 使用该镜像新建无状态服务，校验
+
+			// 构建镜像到项目组
+			_, err = devops.ImageBuild(cargoc, cargoParam.Path, name, f.APIClient.Tenant, cargoParam.DefaultRegistryName, privateProject.Name)
+			expect.NoError(err)
+
+			deployment := app.NewDeployment(name, "app", int32(1), func(deployment1 *types.Deployment) {
+				deployment1.Spec.Template.Spec.Containers[0].Image = cargoParam.ImageRepo
+			})
+
+			_, err = app.CreateDP(appc, deployment, f.ClusterID, "app", name)
+			expect.NoError(err)
+		})
+	})
 })
-
-
-//获取 pod 状态
-func podStatusPhase(f *framework.Framework, x string, y string) k8v1.PodPhase {
-	var k8 = f.ClientSet.K8S
-	res, err := k8.CoreV1().Pods(x).List(context.TODO(), metav1.ListOptions{LabelSelector: y})
-	expect.NoError(err)
-	return res.Items[0].Status.Phase
-}
-
-//获取无状态服务所使用的镜像
-func depContainerImage(f *framework.Framework, x string, y string) string {
-	var k8 = f.ClientSet.K8S
-	res, err := k8.AppsV1().Deployments(x).Get(context.TODO(), y, metav1.GetOptions{})
-	expect.NoError(err)
-	return res.Spec.Template.Spec.Containers[0].Image
-}
-
-//集成外部仓库
-func createCargoRegistry(cargoc cargoclient.Interface, name string) (creReg *v20201010.RegistryResp) {
-	creRegOpt := &v20201010.CreateRegistryReq{
-		ObjectMeta: &v1.ObjectMeta{
-			Alias: name,
-		},
-		Spec: &v20201010.RegistrySpec{
-			Host:     "https://" + cargoParam.CargoDomain,
-			Domain:   cargoParam.CargoDomain,
-			Username: cargoParam.Username,
-			Password: cargoParam.Password,
-		},
-	}
-	creReg, err := cargoc.V20201010().CreateRegistry(context.TODO(), cargoParam.SystemTenant, "admin", creRegOpt)
-	expect.NoError(err)
-	expect.Equal(creReg.Alias, name, "create Registry failed")
-	return creReg
-}
-
-//创建公有项目组
-func createPublicProject(cargoc cargoclient.Interface, name, tenant, registry string) (crePubPro *v20201010.PublicProject) {
-	crePubProOpt := &v20201010.CreatePublicProjectReq{
-		ObjectMeta: &v1.ObjectMeta{
-			Name:        name,
-			Description: cargoParam.Description,
-		},
-		Spec: &v20201010.ProjectSpec{
-			Registry: registry,
-		},
-	}
-	crePubPro, err := cargoc.V20201010().CreateArtifactPublicProject(context.TODO(), tenant, registry, crePubProOpt)
-	expect.NoError(err)
-	expect.Equal(crePubPro.Status.Synced, true, "[default]Synced not match")
-	expect.Equal(crePubPro.Name, name, "[default]public projectname not match")
-	expect.Equal(crePubPro.Description, cargoParam.Description, "[default]public project description not match")
-	expect.Equal(crePubPro.Spec.Registry, registry, "[default]public project based registry not match")
-
-	// 校验创建成功
-	_, err = cargoc.V20201010().GetArtifactPublicProject(context.TODO(), tenant, registry, name)
-	expect.NoError(err)
-	return crePubPro
-}
-
-//创建私有项目组
-func createPrivateProject(cargoc cargoclient.Interface, name, tenant, registry string) (crePriPro *v20201010.Project) {
-	crePriProOpt := &v20201010.CreateProjectReq{
-		ObjectMeta: &v1.ObjectMeta{
-			Name:        name,
-			Description: cargoParam.Description,
-		},
-		Spec: &v20201010.ProjectSpec{
-			Registry: registry,
-		},
-	}
-	crePriPro, err := cargoc.V20201010().CreateArtifactProject(context.TODO(), tenant, registry, crePriProOpt)
-	expect.NoError(err)
-	logger.Infof("%v", crePriPro.Status)
-	expect.Equal(crePriPro.Status.Synced, true, "[default]Synced not match")
-	expect.Equal(crePriPro.Name, tenant+"_"+name, "[default]private projectname not match")
-	expect.Equal(crePriPro.Description, cargoParam.Description, "[default]private project description not match")
-	expect.Equal(crePriPro.Spec.Registry, registry, "[default]private project based registry not match")
-
-	// 校验创建成功
-	_, err = cargoc.V20201010().GetArtifactProject(context.TODO(), cargoParam.SystemTenant, registry, name)
-	expect.NoError(err)
-	return crePriPro
-}

@@ -176,7 +176,7 @@ type Integration struct {
 // IntegrationList represents a list of Integration
 type IntegrationList struct {
 	v12.ListMeta `json:",inline"`
-	Items        []Integration `json:"Items"`
+	Items        []Integration `json:"Items,omitempty"`
 }
 
 // IntegrationSource contains various external systems.
@@ -247,7 +247,7 @@ type JobTemplate struct {
 // JobTemplateList represents a list of JobTemplate
 type JobTemplateList struct {
 	v12.ListMeta `json:",inline"`
-	Items        []JobTemplate `json:"Items"`
+	Items        []JobTemplate `json:"Items,omitempty"`
 }
 
 // JobTemplateSpec is the job spec
@@ -274,7 +274,7 @@ type Language struct {
 // LanguageList represents a list of Language
 type LanguageList struct {
 	v12.ListMeta `json:",inline"`
-	Items        []Language `json:"Items"`
+	Items        []Language `json:"Items,omitempty"`
 }
 
 // Notification represents notifications for workflowrun results.
@@ -340,11 +340,11 @@ type PaginationParams struct {
 	Limit  uint64 `source:"query,Limit,default=99999"`
 	Filter string `source:"query,Filter"`
 	// Sort will sorts the results by metadata.creationTimestamp
-	Sort bool `source:"query,Sort"`
+	Sort bool `source:"query,Sort,default=false"`
 	// Ascending will sort the results by ascending order, otherwise by descending order
-	Ascending bool `source:"query,Ascending"`
+	Ascending bool `source:"query,Ascending,default=false"`
 	// Detail determines whether to return details of list items.
-	Detail bool `source:"query,Detail"`
+	Detail bool `source:"query,Detail,default=false"`
 }
 
 // PersistentVolumeClaim describes information about pvc belongs to a tenant
@@ -369,13 +369,13 @@ type Pipeline struct {
 // PipelineList represents a list of Pipeline
 type PipelineList struct {
 	v12.ListMeta `json:",inline"`
-	Items        []Pipeline `json:"Items"`
+	Items        []Pipeline `json:"Items,omitempty"`
 }
 
 // PipelineSpec contains the pipeline spec information
 type PipelineSpec struct {
 	// Code contains info about code that the pipeline will use
-	Code Code `json:"Code,omitempty"`
+	Code Code `json:"Code"`
 	// CacheDependency controls whether to cache pipeline dependencies
 	CacheDependency bool `json:"CacheDependency"`
 	// Stages manages a set of stages
@@ -384,7 +384,9 @@ type PipelineSpec struct {
 	// Supports time trigger and SCM event trigger.
 	Trigger *Trigger `json:"Trigger,omitempty"`
 	// Notification represents the notification config of pipeline results.
-	Notification `json:"Notification,omitempty"`
+	Notification `json:"Notification"`
+	// CustomQuota indicates whether user overrides the workspace quota
+	CustomQuota bool `json:"CustomQuota"`
 	// Quota represents the default quota used to run workflow
 	Quota []ResourceValue `json:"Quota,omitempty"`
 	// Owner represents the owner of pipeline, is the creator when pipeline created.
@@ -410,17 +412,18 @@ type PipelineStatus struct {
 // Pod ...
 type Pod struct {
 	v12.ObjectMeta `json:",inline"`
-	Spec           PodSpec `json:"Spec"`
+	Status         PodStatus `json:"Status"`
 }
 
 // PodList represents a list of Pod
 type PodList struct {
 	v12.ListMeta `json:",inline"`
-	Items        []Pod `json:"Items"`
+	Items        []Pod `json:"Items,omitempty"`
 }
 
-// PodSpec ...
-type PodSpec struct {
+// PodStatus ...
+type PodStatus struct {
+	Phase v1.PodPhase `json:"Phase"`
 }
 
 // PodWorkload describes pod type workload, a complete pod spec is included.
@@ -448,7 +451,7 @@ type PullRequest struct {
 // PullRequestList represents a list of PullRequest
 type PullRequestList struct {
 	v12.ListMeta `json:",inline"`
-	Items        []PullRequest `json:"Items"`
+	Items        []PullRequest `json:"Items,omitempty"`
 }
 
 // QualityGate ...
@@ -474,7 +477,7 @@ type QualityGateActions struct {
 // QualityGateList represents a list of QualityGate
 type QualityGateList struct {
 	v12.ListMeta `json:",inline"`
-	Items        []QualityGate `json:"Items"`
+	Items        []QualityGate `json:"Items,omitempty"`
 }
 
 // RecentCountParams describes how many recent all/success/failed counts of records to return, used in pipeline request.
@@ -482,7 +485,7 @@ type RecentCountParams struct {
 	All     int  `source:"query,RecentCount,default=0"`
 	Success int  `source:"query,RecentSuccessCount,default=0"`
 	Failed  int  `source:"query,RecentFailedCount,default=0"`
-	Sort    bool `source:"query,Sort"`
+	Sort    bool `source:"query,Sort,default=false"`
 }
 
 // Record contains pipeline record configuration
@@ -498,7 +501,7 @@ type Record struct {
 // RecordList represents a list of Record
 type RecordList struct {
 	v12.ListMeta `json:",inline"`
-	Items        []Record `json:"Items"`
+	Items        []Record `json:"Items,omitempty"`
 }
 
 // RecordSpec contains the pipeline record spec information
@@ -548,7 +551,7 @@ type Repository struct {
 // RepositoryList represents a list of Repository
 type RepositoryList struct {
 	v12.ListMeta `json:",inline"`
-	Items        []Repository `json:"Items"`
+	Items        []Repository `json:"Items,omitempty"`
 }
 
 // Request holds information about a request.
@@ -715,7 +718,7 @@ type StageArtifact struct {
 // StageArtifactList represents a list of StageArtifact
 type StageArtifactList struct {
 	v12.ListMeta `json:",inline"`
-	Items        []StageArtifact `json:"Items"`
+	Items        []StageArtifact `json:"Items,omitempty"`
 }
 
 // StageEvent describes pod warning events for a stage
@@ -808,7 +811,7 @@ type StatusPhase string
 // StringList represents a list of String
 type StringList struct {
 	v12.ListMeta `json:",inline"`
-	Items        []string `json:"Items"`
+	Items        []string `json:"Items,omitempty"`
 }
 
 // Target holds information about the target of a event.
@@ -822,7 +825,7 @@ type Target struct {
 
 // TemplateType represents the type of the template
 type TemplateType struct {
-	Type string `yaml:"type,omitempty" json:"Type,omitempty" description:"type of the template"`
+	Type string `json:"Type,omitempty" description:"type of the template"`
 }
 
 // Trigger represents the auto trigger policy for pipelines.
@@ -851,7 +854,7 @@ type Workspace struct {
 // WorkspaceList represents a list of Workspace
 type WorkspaceList struct {
 	v12.ListMeta `json:",inline"`
-	Items        []Workspace `json:"Items"`
+	Items        []Workspace `json:"Items,omitempty"`
 }
 
 // WorkspaceSpec contains the workspace spec information

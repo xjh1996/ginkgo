@@ -12,6 +12,12 @@ type Interface interface {
 	// BuildImage description:
 	// build image
 	BuildImage(ctx context.Context, xUser string, xTenant string, registry string, project string, xTag string, ioReader io.Reader) (imageBuildRecordResp *ImageBuildRecordResp, err error)
+	// CheckCargoAccount description:
+	// check user cargo account
+	CheckCargoAccount(ctx context.Context) (err error)
+	// CheckCargoPermissions description:
+	// check cargo permissions
+	CheckCargoPermissions(ctx context.Context, permReq PermReq) (permResp *PermResp, err error)
 	// CreateArtifactCleanPolicy description:
 	// create artifact clean policy
 	CreateArtifactCleanPolicy(ctx context.Context, xTenant string, registry string, project string, imageCleanPolicy *ImageCleanPolicy) (cleanPolicyResp *CleanPolicyResp, err error)
@@ -87,6 +93,9 @@ type Interface interface {
 	// GetCargoPartitionStats description:
 	// get partition stats
 	GetCargoPartitionStats(ctx context.Context, xTenant string) (partitionsInfo *PartitionsInfo, err error)
+	// GetCargoServerConfig description:
+	// get system config
+	GetCargoServerConfig(ctx context.Context) (systemConfigResp *SystemConfigResp, err error)
 	// GetImageBuildLog description:
 	// get image build record log
 	GetImageBuildLog(ctx context.Context, registry string, project string, buildRecord string) (imageBuildLogResp *ImageBuildLogResp, err error)
@@ -117,9 +126,6 @@ type Interface interface {
 	// GetRepository description:
 	// get repository
 	GetRepository(ctx context.Context, xTenant string, registry string, project string, repository string) (repository1 *Repository, err error)
-	// GetSystemConfig description:
-	// get system config
-	GetSystemConfig(ctx context.Context) (systemConfigResp *SystemConfigResp, err error)
 	// ListArtifactCleanPolicies description:
 	// list artifact clean policies
 	ListArtifactCleanPolicies(ctx context.Context, xTenant string, registry string, project string) (cleanPolicyListResp *CleanPolicyListResp, err error)
@@ -182,10 +188,10 @@ type Interface interface {
 	PrepareImageUpload(ctx context.Context, xTenant string, registry string, project string) (imageUploadRecord *ImageUploadRecord, err error)
 	// ScanImage description:
 	// scan image
-	ScanImage(ctx context.Context, xTenant string, registry string, project string, repository string, tag string) (err error)
+	ScanImage(ctx context.Context, xTenant string, registry string, project string, repository string, tag string, artifactDigest string) (err error)
 	// ScanPublicImage description:
 	// scan public image
-	ScanPublicImage(ctx context.Context, xTenant string, registry string, project string, repository string, tag string) (err error)
+	ScanPublicImage(ctx context.Context, xTenant string, registry string, project string, repository string, tag string, artifactDigest string) (err error)
 	// TriggerArtifactCleanPolicy description:
 	// trigger artifact clean policy
 	TriggerArtifactCleanPolicy(ctx context.Context, xTenant string, registry string, project string, policy string) (err error)
@@ -262,6 +268,25 @@ func (c *Client) BuildImage(ctx context.Context, xUser string, xTenant string, r
 		Header("X-Tag", xTag).
 		Body("application/octet-stream", ioReader).
 		TOPRPCData(imageBuildRecordResp).
+		Do(ctx)
+	return
+}
+
+// CheckCargoAccount description:
+// check user cargo account
+func (c *Client) CheckCargoAccount(ctx context.Context) (err error) {
+	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=CheckCargoAccount").
+		Do(ctx)
+	return
+}
+
+// CheckCargoPermissions description:
+// check cargo permissions
+func (c *Client) CheckCargoPermissions(ctx context.Context, permReq PermReq) (permResp *PermResp, err error) {
+	permResp = new(PermResp)
+	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=CheckCargoPermissions").
+		Body("application/json", permReq).
+		Data(permResp).
 		Do(ctx)
 	return
 }
@@ -587,6 +612,16 @@ func (c *Client) GetCargoPartitionStats(ctx context.Context, xTenant string) (pa
 	return
 }
 
+// GetCargoServerConfig description:
+// get system config
+func (c *Client) GetCargoServerConfig(ctx context.Context) (systemConfigResp *SystemConfigResp, err error) {
+	systemConfigResp = new(SystemConfigResp)
+	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=GetCargoServerConfig").
+		TOPRPCData(systemConfigResp).
+		Do(ctx)
+	return
+}
+
 // GetImageBuildLog description:
 // get image build record log
 func (c *Client) GetImageBuildLog(ctx context.Context, registry string, project string, buildRecord string) (imageBuildLogResp *ImageBuildLogResp, err error) {
@@ -714,16 +749,6 @@ func (c *Client) GetRepository(ctx context.Context, xTenant string, registry str
 		Query("Project", project).
 		Query("Repository", repository).
 		TOPRPCData(repository1).
-		Do(ctx)
-	return
-}
-
-// GetSystemConfig description:
-// get system config
-func (c *Client) GetSystemConfig(ctx context.Context) (systemConfigResp *SystemConfigResp, err error) {
-	systemConfigResp = new(SystemConfigResp)
-	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=GetSystemConfig").
-		TOPRPCData(systemConfigResp).
 		Do(ctx)
 	return
 }
@@ -1054,26 +1079,28 @@ func (c *Client) PrepareImageUpload(ctx context.Context, xTenant string, registr
 
 // ScanImage description:
 // scan image
-func (c *Client) ScanImage(ctx context.Context, xTenant string, registry string, project string, repository string, tag string) (err error) {
+func (c *Client) ScanImage(ctx context.Context, xTenant string, registry string, project string, repository string, tag string, artifactDigest string) (err error) {
 	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=ScanImage").
 		Header("X-Tenant", xTenant).
 		Query("Registry", registry).
 		Query("Project", project).
 		Query("Repository", repository).
 		Query("Tag", tag).
+		Query("ArtifactDigest", artifactDigest).
 		Do(ctx)
 	return
 }
 
 // ScanPublicImage description:
 // scan public image
-func (c *Client) ScanPublicImage(ctx context.Context, xTenant string, registry string, project string, repository string, tag string) (err error) {
+func (c *Client) ScanPublicImage(ctx context.Context, xTenant string, registry string, project string, repository string, tag string, artifactDigest string) (err error) {
 	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=ScanPublicImage").
 		Header("X-Tenant", xTenant).
 		Query("Registry", registry).
 		Query("Project", project).
 		Query("Repository", repository).
 		Query("Tag", tag).
+		Query("ArtifactDigest", artifactDigest).
 		Do(ctx)
 	return
 }

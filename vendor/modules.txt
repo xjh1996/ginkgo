@@ -1,3 +1,9 @@
+# github.com/Masterminds/semver v1.5.0
+## explicit
+# github.com/PaesslerAG/gval v0.1.2
+## explicit
+# github.com/PaesslerAG/jsonpath v0.1.1-0.20190315161158-532dc46710cd
+## explicit
 # github.com/beorn7/perks v1.0.1
 github.com/beorn7/perks/quantile
 # github.com/caicloud/api v0.0.0-20201229091211-29cd26268bf9
@@ -7,11 +13,11 @@ github.com/caicloud/api/meta/v1
 ## explicit
 github.com/caicloud/app/pkg/server/client
 github.com/caicloud/app/pkg/server/client/v20201010
-# github.com/caicloud/auth v0.0.0-20201230062221-41d054766aef
+# github.com/caicloud/auth v0.0.0-20210110092411-b005ead674bf
 ## explicit
 github.com/caicloud/auth/pkg/server/client
 github.com/caicloud/auth/pkg/server/client/v20201010
-# github.com/caicloud/cargo-server v0.1.0-alpha.2
+# github.com/caicloud/cargo-server v0.1.0-alpha.2.0.20210104023405-99860532508a
 ## explicit
 github.com/caicloud/cargo-server/pkg/server/client
 github.com/caicloud/cargo-server/pkg/server/client/v20201010
@@ -38,9 +44,8 @@ github.com/caicloud/containeros/pkg/client/clientset/typed/monitoring/v1alpha1
 github.com/caicloud/containeros/pkg/client/clientset/typed/networking/v1beta1
 github.com/caicloud/containeros/pkg/client/clientset/typed/resource/v1alpha1
 github.com/caicloud/containeros/pkg/utils/crd
-# github.com/caicloud/cyclone v1.2.0-alpha
+# github.com/caicloud/cyclone v1.2.0-alpha.2.0.20201217111133-46853ba5a38a
 github.com/caicloud/cyclone/pkg/apis/cyclone/v1alpha1
-github.com/caicloud/cyclone/pkg/server/apis/v1alpha1
 github.com/caicloud/cyclone/pkg/util/http
 github.com/caicloud/cyclone/pkg/workflow/workload/delegation
 # github.com/caicloud/insight v0.0.0-20210108091024-5c6c313a5945
@@ -64,7 +69,7 @@ github.com/caicloud/nubela/expect
 github.com/caicloud/nubela/image
 github.com/caicloud/nubela/logger
 github.com/caicloud/nubela/reporter
-# github.com/caicloud/pipeline v0.1.0-alpha.1
+# github.com/caicloud/pipeline v0.1.0-alpha.2.0.20210110094047-06a3d2b6296b
 ## explicit
 github.com/caicloud/pipeline/pkg/server/client
 github.com/caicloud/pipeline/pkg/server/client/v20201010
@@ -76,6 +81,13 @@ github.com/caicloud/resource/pkg/server/client/v20201010
 github.com/cespare/xxhash/v2
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
+# github.com/docker/distribution v2.7.1+incompatible
+github.com/docker/distribution/context
+github.com/docker/distribution/registry/auth
+github.com/docker/distribution/registry/auth/token
+github.com/docker/distribution/uuid
+# github.com/docker/libtrust v0.0.0-20160708172513-aabc10ec26b7
+github.com/docker/libtrust
 # github.com/elastic/cloud-on-k8s v0.0.0-20200811130517-b53162318c20
 github.com/elastic/cloud-on-k8s/pkg/apis/beat/v1beta1
 github.com/elastic/cloud-on-k8s/pkg/apis/common/v1
@@ -94,6 +106,8 @@ github.com/go-logr/logr
 # github.com/gogo/protobuf v1.3.1
 github.com/gogo/protobuf/proto
 github.com/gogo/protobuf/sortkeys
+# github.com/goharbor/harbor/src v0.0.0-20201214090224-fff1bbe8d95c
+## explicit
 # github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e
 github.com/golang/groupcache/lru
 # github.com/golang/protobuf v1.4.3
@@ -121,6 +135,8 @@ github.com/google/uuid
 github.com/googleapis/gnostic/compiler
 github.com/googleapis/gnostic/extensions
 github.com/googleapis/gnostic/openapiv2
+# github.com/gorilla/mux v1.8.0
+github.com/gorilla/mux
 # github.com/hashicorp/errwrap v1.0.0
 github.com/hashicorp/errwrap
 # github.com/hashicorp/go-cleanhttp v0.5.1
@@ -143,6 +159,8 @@ github.com/hashicorp/hcl/hcl/token
 github.com/hashicorp/hcl/json/parser
 github.com/hashicorp/hcl/json/scanner
 github.com/hashicorp/hcl/json/token
+# github.com/huandu/xstrings v1.3.2
+## explicit
 # github.com/imdario/mergo v0.3.11
 github.com/imdario/mergo
 # github.com/json-iterator/go v1.1.10

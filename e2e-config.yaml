@@ -45,13 +45,11 @@ elastic-address:
 cargo.registry.username: admin
 cargo.registry.password: Pwd123456
 cargo.registry.basename: cntest
-cargo.registry.systemTenant: system-tenant
 cargo.registry.cargoDomain: cntest.cargo.io
-cargo.registry.userTenant: 
-cargo.registry.imageRepo: 
+cargo.registry.imageRepo: cps-auth.cargo.io/release/nginx:1.15.5-alpine
 cargo.registry.defaultRegistryName: default
 cargo.registry.description: 自动化创建
-cargo.registry.path: 
+cargo.registry.path: /Users/chenneng/Desktop/autotest/scm_code/zeus/devops/cntest.tar.gz
 
 #Pipeline Test Case Config
 pipeline.svn.server: http://172.19.30.61/svn/

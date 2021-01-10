@@ -32,7 +32,7 @@ func (u *User) App() (appclient.Interface, error) {
 func (u *User) Pipeline() (pipelineclient.Interface, error) {
 	return pipelineclient.NewClient(&rest.Config{
 		Scheme:   config.Context.Scheme,
-		Host:     config.Context.BaseUrl,
+		Host:     config.Context.BaseUrl + "/hodor",
 		Executor: baseclient.NewRequestExecutorWithAuth(u.Tenant, u.Username, u.Password),
 	})
 }
@@ -41,7 +41,7 @@ func (u *User) Pipeline() (pipelineclient.Interface, error) {
 func (u *User) Cargo() (cargoclient.Interface, error) {
 	return cargoclient.NewClient(&rest.Config{
 		Scheme:   config.Context.Scheme,
-		Host:     config.Context.BaseUrl,
+		Host:     config.Context.BaseUrl + "/hodor",
 		Executor: baseclient.NewRequestExecutorWithAuth(u.Tenant, u.Username, u.Password),
 	})
 }

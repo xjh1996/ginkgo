@@ -3,7 +3,6 @@ package v20201010
 import (
 	"context"
 	v1alpha1 "github.com/caicloud/cyclone/pkg/apis/cyclone/v1alpha1"
-	v1alpha11 "github.com/caicloud/cyclone/pkg/server/apis/v1alpha1"
 	delegation "github.com/caicloud/cyclone/pkg/workflow/workload/delegation"
 
 	rest "github.com/caicloud/nirvana/rest"
@@ -76,16 +75,16 @@ type Interface interface {
 	GetPipelineRecordContainerLogStream(ctx context.Context, workspace string, pipeline string, record string, xTenant string, stage string, tenant string) (err error)
 	// GetPipelineRecordLogs description:
 	// Get record logs of the pipeline
-	GetPipelineRecordLogs(ctx context.Context, workspace string, pipeline string, record string, xTenant string, stage string, container string, download bool) (err error)
+	GetPipelineRecordLogs(ctx context.Context, workspace string, pipeline string, record string, xTenant string, stage string, download bool) (err error)
 	// GetWorkspace description:
 	// Get workspace for the tenant
 	GetWorkspace(ctx context.Context, xTenant string, workspace string, countUsingCacheRecord bool) (workspace1 *Workspace, err error)
 	// GetWorkspacePipeline description:
 	// Get pipeline of the workspace for the tenant
-	GetWorkspacePipeline(ctx context.Context, xTenant string, workspace string, pipeline string, recentCount RecentCountParams) (pipeline1 *Pipeline, err error)
+	GetWorkspacePipeline(ctx context.Context, xTenant string, workspace string, pipeline string, recentCountParams RecentCountParams) (pipeline1 *Pipeline, err error)
 	// GetWorkspacePipelineStats description:
 	// get statistics of the pipeline
-	GetWorkspacePipelineStats(ctx context.Context, workspace string, pipeline string) (statistic *Statistic, err error)
+	GetWorkspacePipelineStats(ctx context.Context, xTenant string, workspace string, pipeline string, startTime string, endTime string) (statistic *Statistic, err error)
 	// GetWorkspaceStats description:
 	// get statistics of the workspace
 	GetWorkspaceStats(ctx context.Context, xTenant string, workspace string, startTime string, endTime string) (statistic *Statistic, err error)
@@ -100,13 +99,13 @@ type Interface interface {
 	ListIntegrations(ctx context.Context, xTenant string, includePublic bool, paginationParams PaginationParams) (integrationList *IntegrationList, err error)
 	// ListJobTemplates description:
 	// List job templates for the tenant
-	ListJobTemplates(ctx context.Context, xTenant string, sort bool, start int, limit int) (jobTemplateList *JobTemplateList, err error)
+	ListJobTemplates(ctx context.Context, xTenant string, paginationParams PaginationParams) (jobTemplateList *JobTemplateList, err error)
 	// ListPipelineRecordArtifacts description:
 	// List artifacts
 	ListPipelineRecordArtifacts(ctx context.Context, workspace string, pipeline string, record string, xTenant string) (stageArtifactList *StageArtifactList, err error)
 	// ListPipelineRecords description:
 	// List records of the pipeline
-	ListPipelineRecords(ctx context.Context, xTenant string, workspace string, pipeline string) (recordList *RecordList, err error)
+	ListPipelineRecords(ctx context.Context, xTenant string, workspace string, pipeline string, paginationParams PaginationParams) (recordList *RecordList, err error)
 	// ListPipelineTemplates description:
 	// List pipeline templates
 	ListPipelineTemplates(ctx context.Context) (pipelineList *PipelineList, err error)
@@ -118,7 +117,7 @@ type Interface interface {
 	ListSonarQubeQualityGates(ctx context.Context, xTenant string, integration string) (qualityGateList *QualityGateList, err error)
 	// ListWorkingPods description:
 	// list working pods
-	ListWorkingPods(ctx context.Context, xTenant string, paginationParams *PaginationParams) (podList *PodList, err error)
+	ListWorkingPods(ctx context.Context, xTenant string, paginationParams PaginationParams) (podList *PodList, err error)
 	// ListWorkspaceBranches description:
 	// List SCM branches for specified SCM repo accessible by workspace for the tenant
 	ListWorkspaceBranches(ctx context.Context, xTenant string, workspace string, repo string) (stringList *StringList, err error)
@@ -127,7 +126,7 @@ type Interface interface {
 	ListWorkspaceDockerfiles(ctx context.Context, xTenant string, workspace string, repo string) (stringList *StringList, err error)
 	// ListWorkspacePipelines description:
 	// List pipelines of the workspaces for the tenant
-	ListWorkspacePipelines(ctx context.Context, xTenant string, workspace string, recentCount RecentCountParams) (pipelineList *PipelineList, err error)
+	ListWorkspacePipelines(ctx context.Context, xTenant string, workspace string, recentCountParams RecentCountParams) (pipelineList *PipelineList, err error)
 	// ListWorkspacePullRequests description:
 	// List SCM pull requests for specified SCM repo accessible by workspace for the tenant
 	ListWorkspacePullRequests(ctx context.Context, xTenant string, workspace string, repo string, state string) (pullRequestList *PullRequestList, err error)
@@ -154,7 +153,7 @@ type Interface interface {
 	StopPipelineRecord(ctx context.Context, xTenant string, workspace string, pipeline string, record string) (err error)
 	// TriggerCleanCacheTask description:
 	// Trigger a task to clean up dependency cache
-	TriggerCleanCacheTask(ctx context.Context, xTenant string, workspace string) (v1alpha11AccelerationCacheCleanupStatus *v1alpha11.AccelerationCacheCleanupStatus, err error)
+	TriggerCleanCacheTask(ctx context.Context, xTenant string, workspace string) (accelerationCacheCleanupStatus *AccelerationCacheCleanupStatus, err error)
 	// UpdateCICDConfig description:
 	// Update the configuration for tenant
 	UpdateCICDConfig(ctx context.Context, xTenant string, setting *Setting) (setting1 *Setting, err error)
@@ -166,7 +165,7 @@ type Interface interface {
 	UpdateJobTemplate(ctx context.Context, xTenant string, jobTemplate string, jobTemplate1 *JobTemplate) (jobTemplate2 *JobTemplate, err error)
 	// UpdatePipelineApprovalStatus description:
 	// Update approval status
-	UpdatePipelineApprovalStatus(ctx context.Context, tenant string, workspace string, pipeline string, record string, stage string, operation string) (string string, err error)
+	UpdatePipelineApprovalStatus(ctx context.Context, tenant string, record string, stage string, operation string) (string string, err error)
 	// UpdateWorkspace does not have any description.
 	UpdateWorkspace(ctx context.Context, xTenant string, workspace string, workspace1 *Workspace) (workspace2 *Workspace, err error)
 	// UpdateWorkspaceBasicConfig description:
@@ -464,14 +463,13 @@ func (c *Client) GetPipelineRecordContainerLogStream(ctx context.Context, worksp
 
 // GetPipelineRecordLogs description:
 // Get record logs of the pipeline
-func (c *Client) GetPipelineRecordLogs(ctx context.Context, workspace string, pipeline string, record string, xTenant string, stage string, container string, download bool) (err error) {
+func (c *Client) GetPipelineRecordLogs(ctx context.Context, workspace string, pipeline string, record string, xTenant string, stage string, download bool) (err error) {
 	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=GetPipelineRecordLogs").
 		Query("Workspace", workspace).
 		Query("Pipeline", pipeline).
 		Query("Record", record).
 		Header("X-Tenant", xTenant).
 		Query("Stage", stage).
-		Query("Container", container).
 		Query("Download", download).
 		Do(ctx)
 	return
@@ -492,16 +490,16 @@ func (c *Client) GetWorkspace(ctx context.Context, xTenant string, workspace str
 
 // GetWorkspacePipeline description:
 // Get pipeline of the workspace for the tenant
-func (c *Client) GetWorkspacePipeline(ctx context.Context, xTenant string, workspace string, pipeline string, recentCount RecentCountParams) (pipeline1 *Pipeline, err error) {
+func (c *Client) GetWorkspacePipeline(ctx context.Context, xTenant string, workspace string, pipeline string, recentCountParams RecentCountParams) (pipeline1 *Pipeline, err error) {
 	pipeline1 = new(Pipeline)
 	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=GetWorkspacePipeline").
 		Header("X-Tenant", xTenant).
 		Query("Workspace", workspace).
 		Query("Pipeline", pipeline).
-		Query("RecentCount", recentCount.All).
-		Query("RecentSuccessCount", recentCount.Success).
-		Query("RecentFailedCount", recentCount.Failed).
-		Query("Sort", recentCount.Sort).
+		Query("RecentCount", recentCountParams.All).
+		Query("RecentSuccessCount", recentCountParams.Success).
+		Query("RecentFailedCount", recentCountParams.Failed).
+		Query("Sort", recentCountParams.Sort).
 		TOPRPCData(pipeline1).
 		Do(ctx)
 	return
@@ -509,11 +507,14 @@ func (c *Client) GetWorkspacePipeline(ctx context.Context, xTenant string, works
 
 // GetWorkspacePipelineStats description:
 // get statistics of the pipeline
-func (c *Client) GetWorkspacePipelineStats(ctx context.Context, workspace string, pipeline string) (statistic *Statistic, err error) {
+func (c *Client) GetWorkspacePipelineStats(ctx context.Context, xTenant string, workspace string, pipeline string, startTime string, endTime string) (statistic *Statistic, err error) {
 	statistic = new(Statistic)
 	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=GetWorkspacePipelineStats").
+		Header("X-Tenant", xTenant).
 		Query("Workspace", workspace).
 		Query("Pipeline", pipeline).
+		Query("StartTime", startTime).
+		Query("EndTime", endTime).
 		TOPRPCData(statistic).
 		Do(ctx)
 	return
@@ -579,13 +580,16 @@ func (c *Client) ListIntegrations(ctx context.Context, xTenant string, includePu
 
 // ListJobTemplates description:
 // List job templates for the tenant
-func (c *Client) ListJobTemplates(ctx context.Context, xTenant string, sort bool, start int, limit int) (jobTemplateList *JobTemplateList, err error) {
+func (c *Client) ListJobTemplates(ctx context.Context, xTenant string, paginationParams PaginationParams) (jobTemplateList *JobTemplateList, err error) {
 	jobTemplateList = new(JobTemplateList)
 	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=ListJobTemplates").
 		Header("X-Tenant", xTenant).
-		Query("Sort", sort).
-		Query("Start", start).
-		Query("Limit", limit).
+		Query("Start", paginationParams.Start).
+		Query("Limit", paginationParams.Limit).
+		Query("Filter", paginationParams.Filter).
+		Query("Sort", paginationParams.Sort).
+		Query("Ascending", paginationParams.Ascending).
+		Query("Detail", paginationParams.Detail).
 		TOPRPCData(jobTemplateList).
 		Do(ctx)
 	return
@@ -607,12 +611,18 @@ func (c *Client) ListPipelineRecordArtifacts(ctx context.Context, workspace stri
 
 // ListPipelineRecords description:
 // List records of the pipeline
-func (c *Client) ListPipelineRecords(ctx context.Context, xTenant string, workspace string, pipeline string) (recordList *RecordList, err error) {
+func (c *Client) ListPipelineRecords(ctx context.Context, xTenant string, workspace string, pipeline string, paginationParams PaginationParams) (recordList *RecordList, err error) {
 	recordList = new(RecordList)
 	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=ListPipelineRecords").
 		Header("X-Tenant", xTenant).
 		Query("Workspace", workspace).
 		Query("Pipeline", pipeline).
+		Query("Start", paginationParams.Start).
+		Query("Limit", paginationParams.Limit).
+		Query("Filter", paginationParams.Filter).
+		Query("Sort", paginationParams.Sort).
+		Query("Ascending", paginationParams.Ascending).
+		Query("Detail", paginationParams.Detail).
 		TOPRPCData(recordList).
 		Do(ctx)
 	return
@@ -654,7 +664,7 @@ func (c *Client) ListSonarQubeQualityGates(ctx context.Context, xTenant string, 
 
 // ListWorkingPods description:
 // list working pods
-func (c *Client) ListWorkingPods(ctx context.Context, xTenant string, paginationParams *PaginationParams) (podList *PodList, err error) {
+func (c *Client) ListWorkingPods(ctx context.Context, xTenant string, paginationParams PaginationParams) (podList *PodList, err error) {
 	podList = new(PodList)
 	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=ListWorkingPods").
 		Header("X-Tenant", xTenant).
@@ -697,15 +707,15 @@ func (c *Client) ListWorkspaceDockerfiles(ctx context.Context, xTenant string, w
 
 // ListWorkspacePipelines description:
 // List pipelines of the workspaces for the tenant
-func (c *Client) ListWorkspacePipelines(ctx context.Context, xTenant string, workspace string, recentCount RecentCountParams) (pipelineList *PipelineList, err error) {
+func (c *Client) ListWorkspacePipelines(ctx context.Context, xTenant string, workspace string, recentCountParams RecentCountParams) (pipelineList *PipelineList, err error) {
 	pipelineList = new(PipelineList)
 	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=ListWorkspacePipelines").
 		Header("X-Tenant", xTenant).
 		Query("Workspace", workspace).
-		Query("RecentCount", recentCount.All).
-		Query("RecentSuccessCount", recentCount.Success).
-		Query("RecentFailedCount", recentCount.Failed).
-		Query("Sort", recentCount.Sort).
+		Query("RecentCount", recentCountParams.All).
+		Query("RecentSuccessCount", recentCountParams.Success).
+		Query("RecentFailedCount", recentCountParams.Failed).
+		Query("Sort", recentCountParams.Sort).
 		TOPRPCData(pipelineList).
 		Do(ctx)
 	return
@@ -808,12 +818,12 @@ func (c *Client) StopPipelineRecord(ctx context.Context, xTenant string, workspa
 
 // TriggerCleanCacheTask description:
 // Trigger a task to clean up dependency cache
-func (c *Client) TriggerCleanCacheTask(ctx context.Context, xTenant string, workspace string) (v1alpha11AccelerationCacheCleanupStatus *v1alpha11.AccelerationCacheCleanupStatus, err error) {
-	v1alpha11AccelerationCacheCleanupStatus = new(v1alpha11.AccelerationCacheCleanupStatus)
+func (c *Client) TriggerCleanCacheTask(ctx context.Context, xTenant string, workspace string) (accelerationCacheCleanupStatus *AccelerationCacheCleanupStatus, err error) {
+	accelerationCacheCleanupStatus = new(AccelerationCacheCleanupStatus)
 	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=TriggerCleanCacheTask").
 		Header("X-Tenant", xTenant).
 		Query("Workspace", workspace).
-		TOPRPCData(v1alpha11AccelerationCacheCleanupStatus).
+		TOPRPCData(accelerationCacheCleanupStatus).
 		Do(ctx)
 	return
 }
@@ -859,11 +869,9 @@ func (c *Client) UpdateJobTemplate(ctx context.Context, xTenant string, jobTempl
 
 // UpdatePipelineApprovalStatus description:
 // Update approval status
-func (c *Client) UpdatePipelineApprovalStatus(ctx context.Context, tenant string, workspace string, pipeline string, record string, stage string, operation string) (string string, err error) {
+func (c *Client) UpdatePipelineApprovalStatus(ctx context.Context, tenant string, record string, stage string, operation string) (string string, err error) {
 	err = c.rest.Request("POST", 200, "/?Version=2020-10-10&Action=UpdatePipelineApprovalStatus").
 		Query("Tenant", tenant).
-		Query("Workspace", workspace).
-		Query("Pipeline", pipeline).
 		Query("Record", record).
 		Query("Stage", stage).
 		Query("Operation", operation).

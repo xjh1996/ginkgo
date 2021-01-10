@@ -3,17 +3,22 @@ module github.com/caicloud/zeus
 go 1.15
 
 require (
+	github.com/Masterminds/semver v1.5.0 // indirect
+	github.com/PaesslerAG/gval v0.1.2 // indirect
+	github.com/PaesslerAG/jsonpath v0.1.1-0.20190315161158-532dc46710cd // indirect
 	github.com/caicloud/api v0.0.0-20201229091211-29cd26268bf9
 	github.com/caicloud/app v1.0.0-alpha.2.0.20210108140225-4deff64e5f6b
-	github.com/caicloud/auth v0.0.0-20201230062221-41d054766aef
-	github.com/caicloud/cargo-server v0.1.0-alpha.2
+	github.com/caicloud/auth v0.0.0-20210110092411-b005ead674bf
+	github.com/caicloud/cargo-server v0.1.0-alpha.2.0.20210104023405-99860532508a
 	github.com/caicloud/containeros v1.0.0-alpha.2.0.20210105060630-9ef6c0f89ff0
 	github.com/caicloud/insight v0.0.0-20210108091024-5c6c313a5945
 	github.com/caicloud/nirvana v0.3.0-rc.4.0.20210104080206-e68c9c75a6b6
 	github.com/caicloud/nubela v0.0.0-20201230131338-89d6de7a5bc2
-	github.com/caicloud/pipeline v0.1.0-alpha.1
+	github.com/caicloud/pipeline v0.1.0-alpha.2.0.20210110094047-06a3d2b6296b
 	github.com/caicloud/resource v0.0.0-20201228065446-072d17bb1451
+	github.com/goharbor/harbor/src v0.0.0-20201214090224-fff1bbe8d95c // indirect
 	github.com/google/go-github v17.0.0+incompatible
+	github.com/huandu/xstrings v1.3.2 // indirect
 	github.com/onsi/ginkgo v1.14.2
 	github.com/onsi/gomega v1.10.4
 	github.com/xanzy/go-gitlab v0.28.0

@@ -2,6 +2,7 @@ package v20201010
 
 import (
 	v1 "github.com/caicloud/api/meta/v1"
+	token "github.com/docker/distribution/registry/auth/token"
 	time "time"
 )
 
@@ -206,6 +207,7 @@ type ImageBuildRecordSpec struct {
 // ImageBuildRecordStatus ...
 type ImageBuildRecordStatus struct {
 	LastUpdateTime time.Time `json:"LastUpdateTime"`
+	Status         string    `json:"Status"`
 }
 
 // ImageCleanDryRunResp ...
@@ -299,6 +301,18 @@ type Pagination struct {
 // PartitionsInfo ...
 type PartitionsInfo struct {
 	Tenants map[string]*TenantPartitions `json:"tenants"`
+}
+
+// PermReq ...
+type PermReq struct {
+	Registry string                   `json:"Registry"`
+	Username string                   `json:"Username"`
+	Accesses []*token.ResourceActions `json:"Accesses"`
+}
+
+// PermResp ...
+type PermResp struct {
+	Accesses []*token.ResourceActions `json:"Accesses"`
 }
 
 // Project ...
