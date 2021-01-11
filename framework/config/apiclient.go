@@ -1,4 +1,4 @@
-package client
+package config
 
 import (
 	appclient "github.com/caicloud/app/pkg/server/client"
@@ -9,7 +9,6 @@ import (
 	"github.com/caicloud/nubela/baseclient"
 	pipelineclient "github.com/caicloud/pipeline/pkg/server/client"
 	resourceclient "github.com/caicloud/resource/pkg/server/client"
-	"github.com/caicloud/zeus/framework/config"
 )
 
 // User is used to login.
@@ -22,8 +21,8 @@ type User struct {
 // App retrieves the appClient
 func (u *User) App() (appclient.Interface, error) {
 	return appclient.NewClient(&rest.Config{
-		Scheme:   config.Context.Scheme,
-		Host:     config.Context.BaseUrl + "/hodor",
+		Scheme:   Context.Scheme,
+		Host:     Context.BaseUrl + "/hodor",
 		Executor: baseclient.NewRequestExecutorWithAuth(u.Tenant, u.Username, u.Password),
 	})
 }
@@ -31,8 +30,8 @@ func (u *User) App() (appclient.Interface, error) {
 // Pipeline retrieves the pipelineClient
 func (u *User) Pipeline() (pipelineclient.Interface, error) {
 	return pipelineclient.NewClient(&rest.Config{
-		Scheme:   config.Context.Scheme,
-		Host:     config.Context.BaseUrl + "/hodor",
+		Scheme:   Context.Scheme,
+		Host:     Context.BaseUrl,
 		Executor: baseclient.NewRequestExecutorWithAuth(u.Tenant, u.Username, u.Password),
 	})
 }
@@ -40,8 +39,8 @@ func (u *User) Pipeline() (pipelineclient.Interface, error) {
 // Cargo retrieves the cargoClient
 func (u *User) Cargo() (cargoclient.Interface, error) {
 	return cargoclient.NewClient(&rest.Config{
-		Scheme:   config.Context.Scheme,
-		Host:     config.Context.BaseUrl + "/hodor",
+		Scheme:   Context.Scheme,
+		Host:     Context.BaseUrl,
 		Executor: baseclient.NewRequestExecutorWithAuth(u.Tenant, u.Username, u.Password),
 	})
 }
@@ -49,8 +48,8 @@ func (u *User) Cargo() (cargoclient.Interface, error) {
 // Auth retrieves the authClient
 func (u *User) Auth() (authclient.Interface, error) {
 	return authclient.NewClient(&rest.Config{
-		Scheme:   config.Context.Scheme,
-		Host:     config.Context.BaseUrl + "/hodor",
+		Scheme:   Context.Scheme,
+		Host:     Context.BaseUrl + "/hodor",
 		Executor: baseclient.NewRequestExecutorWithAuth(u.Tenant, u.Username, u.Password),
 	})
 }
@@ -58,8 +57,8 @@ func (u *User) Auth() (authclient.Interface, error) {
 // Resource retrieves the ResourceClient
 func (u *User) Resource() (resourceclient.Interface, error) {
 	return resourceclient.NewClient(&rest.Config{
-		Scheme:   config.Context.Scheme,
-		Host:     config.Context.BaseUrl + "/hodor",
+		Scheme:   Context.Scheme,
+		Host:     Context.BaseUrl + "/hodor",
 		Executor: baseclient.NewRequestExecutorWithAuth(u.Tenant, u.Username, u.Password),
 	})
 }
@@ -67,8 +66,8 @@ func (u *User) Resource() (resourceclient.Interface, error) {
 // Insight retrieves the InsightClient
 func (u *User) Insight() (insightclient.Interface, error) {
 	return insightclient.NewClient(&rest.Config{
-		Scheme:   config.Context.Scheme,
-		Host:     config.Context.BaseUrl + "/hodor",
+		Scheme:   Context.Scheme,
+		Host:     Context.BaseUrl + "/hodor",
 		Executor: baseclient.NewRequestExecutorWithAuth(u.Tenant, u.Username, u.Password),
 	})
 }

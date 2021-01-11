@@ -51,7 +51,7 @@ func RegisterFlags(flags *flag.FlagSet) {
 	flags.StringVar(&resourceInfo.StorageRawInfo.RawInfo, "storage-info", "", "Storage info that used to be integrated.")
 
 	flags.BoolVar(&resourceInfo.CargoRawInfo.Enabled, "cargo-enable", false, "If set true, must input existed cargo-host or cargo-info.")
-	flags.StringVar(&resourceInfo.CargoRawInfo.Host, "cargo-host", "", "Host of the existed Cargo in the cluster.")
+	flags.StringVar(&resourceInfo.CargoRawInfo.Domain, "cargo-host", "", "Host of the existed Cargo in the cluster.")
 
 	flags.BoolVar(&resourceInfo.CICDRawInfo.Enabled, "cicd-enable", false, "If set true, the namespace of CICD will be created.")
 

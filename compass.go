@@ -8,7 +8,6 @@ import (
 
 	"github.com/caicloud/nubela/logger"
 	e2ereporter "github.com/caicloud/nubela/reporter"
-	"github.com/caicloud/zeus/framework/client"
 	e2econfig "github.com/caicloud/zeus/framework/config"
 	"github.com/onsi/ginkgo"
 	"github.com/onsi/ginkgo/config"
@@ -82,12 +81,12 @@ func setupSuite() {
 	// Run only on Ginkgo node 1
 	klog.Infof("Running setupSuite actions on node 1")
 
-	err := client.LoadClientsetFromConfig(e2econfig.Context.KubeConfig, e2econfig.Context.ControlClusterConfig, e2econfig.Context.UserClusterConfigs)
+	err := e2econfig.LoadClientsetFromConfig(e2econfig.Context.KubeConfig, e2econfig.Context.ControlClusterConfig, e2econfig.Context.UserClusterConfigs)
 	if err != nil {
 		logger.Failf("Error loading Clientset: %v", err)
 	}
 
-	dc := client.BaseClient.K8S.DiscoveryClient
+	dc := e2econfig.BaseClient.K8S.DiscoveryClient
 
 	serverVersion, serverErr := dc.ServerVersion()
 	if serverErr != nil {

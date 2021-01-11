@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	"github.com/caicloud/zeus/framework/client"
+	"github.com/caicloud/zeus/framework/config"
 
 	authclient "github.com/caicloud/auth/pkg/server/client"
 	v20201010 "github.com/caicloud/auth/pkg/server/client/v20201010"
@@ -88,7 +88,7 @@ func GetUser(authAPI authclient.Interface, name string) (*v20201010.UserResp, er
 
 // PresetOperation create a normal user, add user to tenant, create a role with permission and resource, and bind user with role.
 // then return this normal user.
-func PresetOperation(authAPI authclient.Interface, baseInfo *BaseInfo, permission, resource []string) client.User {
+func PresetOperation(authAPI authclient.Interface, baseInfo *BaseInfo, permission, resource []string) config.User {
 	// 创建普通用户
 	var err error
 	if err = CreateSingleUserAndWait(authAPI, baseInfo.UserName, baseInfo.Email, passwd); err != nil {
@@ -112,7 +112,7 @@ func PresetOperation(authAPI authclient.Interface, baseInfo *BaseInfo, permissio
 		logger.Failf("create role binding failed, %v", err)
 	}
 	// 获取普通用户API
-	user := client.User{
+	user := config.User{
 		Tenant:   baseInfo.TenantID,
 		Username: baseInfo.UserName,
 		Password: passwd,

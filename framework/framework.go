@@ -8,7 +8,6 @@ import (
 	"github.com/caicloud/nubela/expect"
 	"github.com/caicloud/nubela/logger"
 	"github.com/caicloud/zeus/framework/auth"
-	"github.com/caicloud/zeus/framework/client"
 	e2econfig "github.com/caicloud/zeus/framework/config"
 	"github.com/caicloud/zeus/framework/util"
 	"github.com/onsi/ginkgo"
@@ -26,14 +25,14 @@ type Framework struct {
 	UniqueName string
 
 	// Set the Clientset for kubernetes
-	skipK8sClientsetCreation bool                     // Whether to skip creationg a k8s clientset
-	ClientSet                *client.BaseClientType   // return backend clientset
-	ControlClusterClientSet  *client.BaseClientType   // control cluster clientset
-	UserClusterClientSet     []*client.BaseClientType // user cluster clientset
+	skipK8sClientsetCreation bool                        // Whether to skip creationg a k8s clientset
+	ClientSet                *e2econfig.BaseClientType   // return backend clientset
+	ControlClusterClientSet  *e2econfig.BaseClientType   // control cluster clientset
+	UserClusterClientSet     []*e2econfig.BaseClientType // user cluster clientset
 
 	// cluster info
-	APIClient      client.User
-	AdminAPIClient client.User
+	APIClient      e2econfig.User
+	AdminAPIClient e2econfig.User
 	ClusterID      string
 	PresetResource e2econfig.PresetCompassResource
 
@@ -66,11 +65,11 @@ func NewFramework(baseName string, skipK8sClientsetCreation, skipNamespaceCreati
 func (f *Framework) BeforeEach() {
 	f.ClusterID = e2econfig.Context.ClusterID
 	f.PresetResource = e2econfig.Context.PresetCompassResource
-	f.APIClient = client.NewAPIClient(f.PresetResource.Auth.TenantID, f.PresetResource.Auth.User, f.PresetResource.Auth.Password)
-	f.AdminAPIClient = client.NewAPIClient(f.PresetResource.Auth.AdminTenantID, f.PresetResource.Auth.AdminUser, f.PresetResource.Auth.Password)
-	f.ClientSet = client.BaseClient
-	f.ControlClusterClientSet = client.ControlClient
-	f.UserClusterClientSet = client.UserClients
+	f.APIClient = e2econfig.NewAPIClient(f.PresetResource.Auth.TenantID, f.PresetResource.Auth.User, f.PresetResource.Auth.Password)
+	f.AdminAPIClient = e2econfig.NewAPIClient(f.PresetResource.Auth.AdminTenantID, f.PresetResource.Auth.AdminUser, f.PresetResource.Auth.Password)
+	f.ClientSet = e2econfig.BaseClient
+	f.ControlClusterClientSet = e2econfig.ControlClient
+	f.UserClusterClientSet = e2econfig.UserClients
 
 	if !f.skipNamespaceCreation {
 		ginkgo.By(fmt.Sprintf("Building a namespace, basename %s", f.BaseName))

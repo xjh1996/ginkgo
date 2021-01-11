@@ -5,8 +5,9 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/caicloud/zeus/framework/config"
+
 	"github.com/caicloud/zeus/framework/auth"
-	"github.com/caicloud/zeus/framework/client"
 	v1 "k8s.io/api/core/v1"
 )
 
@@ -16,7 +17,7 @@ const (
 )
 
 // CreateTestingNS should be used by every test, note that we append a common prefix to the provided test name.
-func CreateTestingNS(baseName, clusterID, tenantID string, metadate *auth.NamespceMetadate, user client.User) (*v1.Namespace, error) {
+func CreateTestingNS(baseName, clusterID, tenantID string, metadate *auth.NamespceMetadate, user config.User) (*v1.Namespace, error) {
 
 	// one namespace of a random name was created.
 	//name := fmt.Sprintf("%v-%v", baseName, RandomSuffix())

@@ -29,7 +29,7 @@ storage-info:
 # cargo
 # If set true, must input a available cargo-host service or cargo-info.
 cargo-enable: false
-cargo-host:
+cargo-domain:
 
 # cicd
 # If set true, the namespace of CICD will be created. If there is no existing cyclone

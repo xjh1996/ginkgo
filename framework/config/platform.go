@@ -19,12 +19,16 @@ type PresetCompassResource struct {
 func SetupCompassPreset(raw PresetResourceRaw) error {
 	var err error
 	p := PresetCompassResource{}
-
 	p.Auth, err = preset.Auth(raw.AuthRawInfo, &http.Client{})
 	if err != nil {
 		return err
 	}
 	logger.Infof("Preset Auth: tenant(%v) user(%v)", p.Auth.TenantID, p.Auth.User)
+
+	user := p.Auth.AdminTenantID
+	passwd := p.Auth.AdminPassword
+	tenant := p.Auth.AdminTenantID
+	adminClient := NewAPIClient(tenant, user, passwd)
 
 	p.Storage, err = preset.Storage(raw.StorageRawInfo, &http.Client{})
 	if err != nil {
@@ -33,7 +37,11 @@ func SetupCompassPreset(raw PresetResourceRaw) error {
 		logger.Infof("Preset Storage: storageclass(%v)", p.Storage.StorageClass)
 	}
 
-	p.Cargo, err = preset.Cargo(raw.CargoRawInfo, &http.Client{})
+	cargoAPI, err := adminClient.Cargo()
+	if err != nil {
+		logger.Warningf("%v", err)
+	}
+	p.Cargo, err = preset.Cargo(raw.CargoRawInfo, p.Auth.AdminTenantID, cargoAPI)
 	if err != nil {
 		logger.Warningf("%v", err)
 	} else {
