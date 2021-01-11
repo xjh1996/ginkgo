@@ -5,7 +5,7 @@ import (
 
 	"github.com/caicloud/zeus/framework"
 	"github.com/caicloud/zeus/framework/auth"
-	"github.com/caicloud/zeus/framework/client"
+	client "github.com/caicloud/zeus/framework/config"
 
 	authclient "github.com/caicloud/auth/pkg/server/client"
 	"github.com/caicloud/nubela/expect"
