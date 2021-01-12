@@ -30,35 +30,49 @@ var _ = SIGDescribe("服务", func() {
 func testCRDService(f *framework.Framework) {
 
 	// 随机生成配置名称
-	ServiceName := "svc" + rand.String(20)
+	ServiceName := "svc-" + rand.String(20)
 	clusterID := f.ClusterID
 
 	a, err := f.AdminAPIClient.App()
 	expect.NoError(err, "App Client Build Failed")
-	service := a.V20201010()
+	client := a.V20201010()
 
 	//新建Service 传入名称和NameSpace
-	serviceData := app.NewService(ServiceName, namespace)
-	serviceCreateOption := app.NewClusterOption(clusterID, namespace, ServiceName)
-	_, err = service.CreateService(context.TODO(), serviceCreateOption, serviceData)
+	service := app.NewService(ServiceName, namespace, func(service *types.Service) {})
+	clusterOption := app.NewClusterOption(clusterID, namespace, ServiceName)
+	res, err := client.CreateService(context.TODO(), clusterOption, service)
 	expect.NoError(err, "Create Service Failed")
 
-	serviceGetOption := app.NewClusterOption(clusterID, namespace, ServiceName)
-	serviceSpec := app.NewServiceSpec("ClusterIP", "TCP", 80, 0)
-	serviceData, err = service.GetService(context.TODO(), serviceGetOption)
-	expect.NoError(err, "Get NewService Failed")
+	//serviceGetOption := app.NewClusterOption(clusterID, namespace, ServiceName)
+	service1 := app.NewService(ServiceName, namespace, func(service *types.Service) {
+		service.Spec.ClusterIP = res.Spec.ClusterIP
+		service.Spec.Ports = []types.Port{
+			{
+				Name:     "udp-53",
+				Protocol: "UDP",
+				Port:     53,
+			},
+			{
+				Name:     "tcp-8080",
+				Protocol: "TCP",
+				Port:     8080,
+			},
+		}
+	})
 
-	expect.Equal(serviceData.Spec.Ports[0].Protocol, serviceSpec.Ports[0].Protocol, "Information is not applied to the service")
-	expect.Equal(serviceData.Spec.Ports[0].Port, serviceSpec.Ports[0].Port, "Information is not applied to the service")
-	expect.Equal(serviceData.Spec.Ports[0].NodePort, serviceSpec.Ports[0].NodePort, "Information is not applied to the service")
+	serviceData, err := client.UpdateService(context.TODO(), clusterOption, service1)
+	expect.NoError(err, "Update NewService Failed")
+
+	expect.Equal(serviceData.Spec.Ports[0].Protocol, service1.Spec.Ports[0].Protocol, "Protocol Information is not applied to the service")
+	expect.Equal(serviceData.Spec.Ports[0].Port, service1.Spec.Ports[0].Port, "Port Information is not applied to the service")
+	expect.Equal(serviceData.Spec.Ports[0].NodePort, service1.Spec.Ports[0].NodePort, "NodePort Information is not applied to the service")
 
 	//删除Service
-	serviceDeleteOption := app.NewClusterOption(clusterID, namespace, ServiceName)
-	err = service.DeleteService(context.TODO(), serviceDeleteOption)
+	err = client.DeleteService(context.TODO(), clusterOption)
 	expect.NoError(err, "Del Service Failed")
 
 	//验证删除成功
-	_, err = service.GetService(context.TODO(), serviceGetOption)
+	_, err = client.GetService(context.TODO(), clusterOption)
 	expect.Error(err, "Del Service Failed")
 
 }
@@ -71,7 +85,7 @@ func testUpdateService(f *framework.Framework) {
 	serviceName := "svc-" + rand.String(20)
 	clusterID := f.ClusterID
 
-	service := app.FakeService(serviceName, namespace, func(service *types.Service) {
+	service := app.NewService(serviceName, namespace, func(service *types.Service) {
 		// todo 数据和代码分离, 表单驱动
 		service.Spec.Ports = []types.Port{
 			{
