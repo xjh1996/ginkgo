@@ -59,8 +59,29 @@ func NewDeployment(name, namespace string, rpNum int32, f DpModifier) *types.Dep
 	return dp
 }
 
-func CreateDP(appAPI appClient.Interface, deployment *types.Deployment, clusterID, namespace, DpName string) (deployment1 *types.Deployment, err error) {
+func CreateDeployment(appAPI appClient.Interface, deployment *types.Deployment, clusterID, namespace, DpName string) (deployment1 *types.Deployment, err error) {
 	cluster := NewClusterOption(clusterID, namespace, DpName)
 	deployment1, err = appAPI.V20201010().CreateDeployment(context.TODO(), cluster, deployment)
 	return deployment1, err
+}
+
+func UpdateDeployment(appAPI appClient.Interface, deployment *types.Deployment, clusterID, namespace, DpName string) (deployment1 *types.Deployment, err error) {
+	cluster := NewClusterOption(clusterID, namespace, DpName)
+	deployment1, err = appAPI.V20201010().UpdateDeployment(context.TODO(), cluster, deployment)
+	return deployment1, err
+}
+
+func GetDeployment(appAPI appClient.Interface, deploymentName, namespace, clusterID string) (*types.Deployment, error) {
+	clusterOption := NewClusterOption(clusterID, namespace, deploymentName)
+	return appAPI.V20201010().GetDeployment(context.TODO(), clusterOption)
+}
+
+func ListDeployment(appAPI appClient.Interface, namespace, clusterID string) (*types.DeploymentList, error) {
+	clusterOption := NewListOption(clusterID, namespace)
+	return appAPI.V20201010().ListDeployments(context.TODO(), clusterOption, NewPageNation())
+}
+
+func DeleteDeployment(appAPI appClient.Interface, ServiceName, namespace, clusterID string) error {
+	clusterOption := NewClusterOption(clusterID, namespace, ServiceName)
+	return appAPI.V20201010().DeleteDeployment(context.TODO(), clusterOption)
 }

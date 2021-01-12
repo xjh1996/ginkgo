@@ -542,7 +542,7 @@ var _ = SIGDescribe("Cargo Smoketest", func() {
 				deployment1.Spec.Template.Spec.Containers[0].Image = cargoParam.ImageRepo
 			})
 
-			_, err = app.CreateDP(appc, deployment, f.ClusterID, "app", name)
+			_, err = app.CreateDeployment(appc, deployment, f.ClusterID, "app", name)
 			expect.NoError(err)
 		})
 	})

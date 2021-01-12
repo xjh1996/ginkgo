@@ -38,7 +38,7 @@ func testCRDDeployment(f *framework.Framework) {
 	client := a.V20201010()
 
 	deployment := app.NewDeployment(dpName, namespace, rpNum, func(deployment *types.Deployment) {})
-	_, err = app.CreateDP(a, deployment, clusterID, namespace, dpName)
+	_, err = app.CreateDeployment(a, deployment, clusterID, namespace, dpName)
 	expect.NoError(err, "Create Deployment Failed")
 
 	k8sDeployment, err := k8sctl.AppsV1().Deployments(namespace).Get(context.TODO(), dpName, metav1.GetOptions{})
@@ -68,7 +68,7 @@ func testListDeployment(f *framework.Framework) {
 	for i := 0; i < num; i++ {
 		dpName[i] = "dp-" + rand.String(20)
 		deployment := app.NewDeployment(dpName[i], namespace, 1, func(deployment *types.Deployment) {})
-		_, err = app.CreateDP(a, deployment, clusterID, namespace, dpName[i])
+		_, err = app.CreateDeployment(a, deployment, clusterID, namespace, dpName[i])
 		expect.NoError(err, "Create Deployment Failed")
 	}
 
