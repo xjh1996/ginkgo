@@ -207,7 +207,6 @@ type ImageBuildRecordSpec struct {
 // ImageBuildRecordStatus ...
 type ImageBuildRecordStatus struct {
 	LastUpdateTime time.Time `json:"LastUpdateTime"`
-	Status         string    `json:"Status"`
 }
 
 // ImageCleanDryRunResp ...

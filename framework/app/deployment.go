@@ -85,3 +85,9 @@ func DeleteDeployment(appAPI appClient.Interface, ServiceName, namespace, cluste
 	clusterOption := NewClusterOption(clusterID, namespace, ServiceName)
 	return appAPI.V20201010().DeleteDeployment(context.TODO(), clusterOption)
 }
+
+func CreateApplication(appAPI appClient.Interface, app *types.HelmApp, clusterID, namespace, appName string) (app1 *types.HelmApp, err error) {
+	cluster := NewClusterOption(clusterID, namespace, appName)
+	app1, err = appAPI.V20201010().CreateHelmApp(context.TODO(), cluster, app)
+	return app1, err
+}

@@ -16,6 +16,7 @@ require (
 	github.com/caicloud/nubela v0.0.0-20201230131338-89d6de7a5bc2
 	github.com/caicloud/pipeline v0.1.0-alpha.2.0.20210110094047-06a3d2b6296b
 	github.com/caicloud/resource v0.0.0-20201228065446-072d17bb1451
+	github.com/ghodss/yaml v1.0.0
 	github.com/goharbor/harbor/src v0.0.0-20201214090224-fff1bbe8d95c // indirect
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/huandu/xstrings v1.3.2 // indirect

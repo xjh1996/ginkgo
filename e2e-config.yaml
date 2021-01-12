@@ -1,10 +1,10 @@
 # Path to the kubeconfig file that connects to k8s apiserver.
-kube-config: "~/.kube/config"
+kube-config: "~/.kube/config.39.3"
 control-cluster-config: # 控制集群config文件
 users-cluster-config:   # 用户集群config文件
 
 # The address of a test cluster, it always like 192.168.129.30:6060.
-baseurl: 127.0.0.1:6060
+baseurl: 172.19.39.3:6060/
 shceme: http
 # The ID of test cluster.
 cluster: kubernetes-stack
